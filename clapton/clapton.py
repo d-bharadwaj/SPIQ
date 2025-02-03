@@ -25,9 +25,9 @@ def loss_func(
                 circuit.assign(x)
 
         vqe_pcirc.assign(x) 
+        vqe_pcirc.snapshot()
+        vqe_pcirc.snapshot_noiseless()
 
-        # vqe_pcirc.snapshot()
-        # vqe_pcirc.snapshot_noiseless()
         energy = get_energy(
                     vqe_pcirc, 
                     paulis, 

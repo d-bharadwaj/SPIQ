@@ -46,6 +46,7 @@ def get_expectations(
         get_noiseless: bool = False, 
         shots: int = int(1e4),
     ):
+    
     if get_noiseless:   
         return get_expectations_tableau(base_pcirc, paulis)
     if base_pcirc.has_errors():

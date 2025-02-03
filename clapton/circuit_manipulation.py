@@ -1,11 +1,27 @@
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit import QuantumCircuit
-from qiskit.circuit import ParameterExpression
-import numpy as np
-import stim
 
 from clapton.clifford import ParametrizedCliffordCircuit
 
+from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import ParameterExpression,ParameterVector
+import numpy as np
+
+# Function to build the QAOA circuit
+def multi_angle_qaoa_circuit(gamma_params, beta_params, num_qubits, G):
+    qc = QuantumCircuit(num_qubits)
+    qc.h(range(num_qubits))
+
+    for idx, (i, j) in enumerate(G.edge_list()):
+        gamma = gamma_params[idx]  # Get the gamma parameter
+        qc.cx(i, j)
+        qc.rz(-2 * gamma, j)
+        qc.cx(i, j)
+
+    for idx, i in enumerate(G.node_indexes()):
+        beta = beta_params[idx]  # Get the beta parameter
+        qc.rx(2 * beta, i)
+    
+    return qc
 
 def transform_to_allowed_gates(circuit, **kwargs):
     """
@@ -90,7 +106,8 @@ def transform_to_allowed_gates(circuit, **kwargs):
                 dag.substitute_node(node, qc_loc_instr, inplace=True)
     return dag_to_circuit(dag).decompose()
 
-def qiskit_to_stim(circuit): # TODO: need to change this to accomodate .fix
+
+def qiskit_to_stim(circuit):
     """
     Transform Qiskit QuantumCircuit into stim circuit.
     circuit (QuantumCircuit): Clifford-only circuit.
@@ -100,25 +117,6 @@ def qiskit_to_stim(circuit): # TODO: need to change this to accomodate .fix
     """
     assert isinstance(circuit, QuantumCircuit), f"Circuit is not a Qiskit QuantumCircuit."
     allowed_gates = ["X", "Y", "Z", "H", "CX", "S", "S_DAG", "SQRT_X", "SQRT_X_DAG"]
-
-
-    # stim_circ = stim.Circuit()
-    # # make sure right number of qubits in stim circ
-    # for i in range(circuit.num_qubits):
-    #     stim_circ.append("I", [i])
-    # for instruction in circuit:
-    #     gate_lbl = instruction.operation.name.upper()
-    #     if gate_lbl == "BARRIER":
-    #         continue
-    #     elif gate_lbl == "SDG":
-    #         gate_lbl = "S_DAG"
-    #     elif gate_lbl == "SX":
-    #         gate_lbl = "SQRT_X"
-    #     elif gate_lbl == "SXDG":
-    #         gate_lbl = "SQRT_X_DAG"
-    #     assert gate_lbl in allowed_gates, f"Invalid gate {gate_lbl}."
-    #     qubit_idc = [qb.index for qb in instruction.qubits]
-    #     stim_circ.append(gate_lbl, qubit_idc)
 
     stim_circ = ParametrizedCliffordCircuit()
     # make sure right number of qubits in stim circ
@@ -166,3 +164,38 @@ def qiskit_to_stim(circuit): # TODO: need to change this to accomodate .fix
         # stim_circ.append(gate_lbl, qubit_idc)
 
     return stim_circ
+
+
+def modify_circuit(circuit: QuantumCircuit) -> QuantumCircuit:
+    # Step 1: Transpile the circuit to use Clifford + Rz gates
+    transpiled_circuit = transpile(circuit, basis_gates=['rz', 's', 'sx', 'cx', 'h'])
+
+    # Step 2: Create a new circuit to store the modified version
+    modified_circuit = QuantumCircuit(transpiled_circuit.num_qubits)
+
+    # Step 3: Iterate through the gates in the transpiled circuit
+    for instr in transpiled_circuit.data:
+        gate = instr[0]
+        qubits = instr[1]
+
+        # Handle the specified Rz modifications
+        if gate.name == 'rz':
+            angle = gate.params[0]
+            if angle == -np.pi or angle == np.pi:
+                # Replace "rz(-pi)" or "rz(pi)" with "z"
+                modified_circuit.z(*qubits)
+            elif angle == -np.pi / 2 or angle == 3 * np.pi / 2:
+                # Replace "rz(-pi/2)" or "rz(3*pi/2)" with "s" followed by "z"
+                modified_circuit.s(*qubits)
+                modified_circuit.z(*qubits)
+            elif angle == -3 * np.pi / 2 or angle == np.pi / 2:
+                # Replace "rz(-3*pi/2)" or "rz(pi/2)" with "s"
+                modified_circuit.s(*qubits)
+            else:
+                # Add the Rz gate if it does not match any modification
+                modified_circuit.append(gate, qubits)
+        else:
+            # Add the gate to the modified circuit if it's not an Rz gate
+            modified_circuit.append(gate, qubits)
+
+    return modified_circuit
