@@ -7,20 +7,21 @@ from qiskit.circuit import ParameterExpression,ParameterVector
 import numpy as np
 
 # Function to build the QAOA circuit
-def multi_angle_qaoa_circuit(gamma_params, beta_params, num_qubits, G):
+def multi_angle_qaoa_circuit(gamma_params, beta_params, num_qubits, G , reps):
     qc = QuantumCircuit(num_qubits)
     qc.h(range(num_qubits))
 
-    for idx, (i, j) in enumerate(G.edge_list()):
-        gamma = gamma_params[idx]  # Get the gamma parameter
-        qc.cx(i, j)
-        qc.rz(-2 * gamma, j)
-        qc.cx(i, j)
+    for rep in range(reps):
+        for idx, (i, j) in enumerate(G.edge_list()):
+            gamma = gamma_params[rep * len(G.edge_list()) + idx]  # Get the gamma parameter
+            qc.cx(i, j)
+            qc.rz(-2 * gamma, j)
+            qc.cx(i, j)
 
-    for idx, i in enumerate(G.node_indexes()):
-        beta = beta_params[idx]  # Get the beta parameter
-        qc.rx(2 * beta, i)
-    
+        for idx, i in enumerate(G.node_indexes()):
+            beta = beta_params[rep * len(G.node_indexes()) + idx]  # Get the beta parameter
+            qc.rx(2 * beta, i)
+
     return qc
 
 def transform_to_allowed_gates(circuit, **kwargs):
@@ -199,3 +200,20 @@ def modify_circuit(circuit: QuantumCircuit) -> QuantumCircuit:
             modified_circuit.append(gate, qubits)
 
     return modified_circuit
+
+def create_cost_hamiltonian_stim(G):
+    coeffs = []
+    paulis = []
+
+    for i, j, w in G.edges(data='weight'):
+        weight = w if w is not None else 1
+        # Store the weight (coefficient) in coeffs
+        coeffs.append(weight)
+        
+        # Create the Pauli term in string format for ZZ on qubits i and j
+        pauli_term = ['I'] * G.number_of_nodes()  # Initialize as identity on all qubits
+        pauli_term[i] = 'Z'  # Z on the first qubit of the edge
+        pauli_term[j] = 'Z'  # Z on the second qubit of the edge
+        paulis.append(''.join(pauli_term))  # Join into a single string
+    print (coeffs, paulis)
+    return coeffs, paulis
