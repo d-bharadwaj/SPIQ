@@ -160,6 +160,8 @@ def qiskit_to_stim(circuit):
                 stim_circ.RZ(qb).fix(gate_index) #NOTE: need to check
                 gate_lbl = ["I", "S", "Z", "S_DAG"][gate_index]
 
+            # This needs to be changed
+
         assert gate_lbl in allowed_gates, f"Invalid gate {gate_lbl}."
         # qubit_idc = [qb._index for qb in instruction.qubits]
         # stim_circ.append(gate_lbl, qubit_idc)

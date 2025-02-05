@@ -207,7 +207,7 @@ class ParametrizedCliffordCircuit:
             # only check variable gates
             if not gate.is_fixed():
                 # since there is a non-fixed gate, param_map should not be None and contain this index
-                circ_param_idx = inv_param_map(param_idx)
+                circ_param_idx = inv_param_map(param_idx) 
                 k = params[circ_param_idx]
                 gate.assign(k)
                 param_idx += 1
