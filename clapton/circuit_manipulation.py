@@ -105,7 +105,7 @@ def transform_to_allowed_gates(circuit, **kwargs):
                 qc_loc.x(0)
                 qc_loc_instr = qc_loc.to_instruction()
                 dag.substitute_node(node, qc_loc_instr, inplace=True)
-    return dag_to_circuit(dag).decompose()
+    return dag_to_circuit(dag)#.decompose()
 
 
 def qiskit_to_stim(circuit):
@@ -149,7 +149,7 @@ def qiskit_to_stim(circuit):
             qb = instruction.qubits[0]._index
             stim_circ.RX(qb).fix(3)
             gate_lbl = "SQRT_X_DAG"
-        elif gate_lbl == "U1":
+        elif gate_lbl == "RZ":
             qb = instruction.qubits[0]._index
             if isinstance(instruction.operation.params[0],ParameterExpression):
                 stim_circ.RZ(qb) #keep it not fixed
@@ -159,8 +159,6 @@ def qiskit_to_stim(circuit):
                 gate_index = int((angle % (2 * np.pi)) // (np.pi / 2))
                 stim_circ.RZ(qb).fix(gate_index) #NOTE: need to check
                 gate_lbl = ["I", "S", "Z", "S_DAG"][gate_index]
-
-            # This needs to be changed
 
         assert gate_lbl in allowed_gates, f"Invalid gate {gate_lbl}."
         # qubit_idc = [qb._index for qb in instruction.qubits]
