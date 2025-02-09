@@ -6,7 +6,6 @@ from clapton.evaluation import transform_paulis, get_energy, weighted_relative_p
 from clapton.utils import n_to_dits
 from clapton.mp_helpers import SignalHandler
 
-
 ### Clapton
 def loss_func(
         x: list[int], 
@@ -318,6 +317,9 @@ def claptonize(
                 break
     
     sig_handler.restore_handlers()
+    
+    print(f"Ideal Energy: {energy_ideal} ")
+    
     if return_n_rounds:
         return list(x_best), energy_noisy, energy_ideal, r_idx
     else:

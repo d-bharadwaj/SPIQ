@@ -20,6 +20,14 @@ sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit
 
+# Get arguments from command line
+n_qubits = int(sys.argv[1])  # First argument: No. of qubits
+n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
+
+# Print to verify
+print(f"Input file: {n_qubits}")
+print(f"Tag: {n_reps}")
+
 def generate_random_graph(num_vertices, edge_prob=0.5, weighted=False, save_path=None):
     G = rx.PyGraph()
     G.add_nodes_from(range(num_vertices))
@@ -31,7 +39,7 @@ def generate_random_graph(num_vertices, edge_prob=0.5, weighted=False, save_path
             G.add_edge(i, j, weight)
     return G
 
-n = 50
+n = n_qubits
 G = generate_random_graph(num_vertices=n)
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
@@ -57,7 +65,7 @@ print("Cost Function Hamiltonian:", cost_hamiltonian)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
 
 
-reps = 50
+reps = n_reps
 gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
 beta_params = [Parameter(f'beta_{i}_{r}') for r in range(reps) for i in G.node_indexes()]
 circuit = multi_angle_qaoa_circuit(gamma_params,beta_params,n,G ,reps)
