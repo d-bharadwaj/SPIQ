@@ -317,9 +317,7 @@ def claptonize(
                 break
     
     sig_handler.restore_handlers()
-    
-    print(f"Ideal Energy: {energy_ideal} ")
-    
+        
     if return_n_rounds:
         return list(x_best), energy_noisy, energy_ideal, r_idx
     else:

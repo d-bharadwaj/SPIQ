@@ -96,6 +96,7 @@ def get_energy(
     ):
     expectations = get_expectations(pcirc, paulis, get_noiseless, **expectations_kwargs)
     energy = np.inner(expectations, coeffs)
+    print(f"This is the CAFQA current energy: {energy}")    
     return energy
 
 
