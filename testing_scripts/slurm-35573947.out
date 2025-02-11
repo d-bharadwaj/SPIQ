@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_qaoa.py", line 1, in <module>
-    import rustworkx as rx
-ModuleNotFoundError: No module named 'rustworkx'
-job finished!

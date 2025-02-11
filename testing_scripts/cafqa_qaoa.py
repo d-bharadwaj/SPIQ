@@ -1,19 +1,13 @@
 import rustworkx as rx
-from rustworkx.visualization import mpl_draw as draw_graph
 import numpy as np
 import random
 
-from qiskit import transpile
 from qiskit.circuit import Parameter,ParameterExpression
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_aer import AerSimulator
 from qiskit.quantum_info import SparsePauliOp
-from qiskit.circuit.library import QAOAAnsatz
-from qiskit_ibm_runtime import Session, EstimatorV2 as Estimator
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit_ibm_runtime.fake_provider import FakeManilaV2,FakeNairobiV2,FakeMelbourneV2,FakeGuadalupeV2
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from qiskit.converters import circuit_to_dag
 
 import sys
 sys.path.append("../")
@@ -62,7 +56,6 @@ max_cut_paulis = build_max_cut_paulis(G)
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 print("Cost Function Hamiltonian:", cost_hamiltonian)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
-
 
 reps = n_reps
 gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
@@ -118,9 +111,9 @@ def cafqa_params_energy(circuit, hamiltonian, parameters):
     results = job.result()[0]
     return results.data.evs
 
-random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, np.random.random(len(ks_best))) for _ in range(100)]
+random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, np.random.random(len(ks_best))) for _ in range(1000)]
 min_energy = min(random_energies)
-print(f"Minimum Energy found with Random initialization over 100 runs: {min_energy}")
+print(f"Minimum Energy found with Random initialization over 1000 runs: {min_energy}")
 
 # Solve with classical Eigensolver for comparison
 eigensolver = NumPyMinimumEigensolver()
