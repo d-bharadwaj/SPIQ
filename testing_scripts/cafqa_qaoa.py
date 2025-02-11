@@ -40,7 +40,7 @@ def generate_random_graph(num_vertices, edge_prob=0.5, weighted=False, save_path
     return G
 
 n = n_qubits
-G = generate_random_graph(num_vertices=n)
+G = generate_random_graph(num_vertices=n, weighted= True)
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """Convert the graph to Pauli list.
@@ -100,7 +100,7 @@ ks_best, _, energy_best = claptonize(
     n_starts=4,         # number of random genetic algorithm starts in parallel
     n_rounds=1,         # number of budget rounds, if None it will terminate itself
     callback=print,     # callback for internal parameter (#iteration, energies, ks) processing
-    budget=20           # budget per genetic algorithm instance
+    budget=500           # budget per genetic algorithm instance
 )
 
 
