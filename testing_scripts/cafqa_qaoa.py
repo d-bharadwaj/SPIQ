@@ -28,13 +28,12 @@ n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
 print(f"Input file: {n_qubits}")
 print(f"Tag: {n_reps}")
 
-def generate_random_graph(num_vertices, edge_prob=0.5, weighted=False, save_path=None):
+def generate_random_graph(num_vertices, weighted=False, save_path=None):
     G = rx.PyGraph()
     G.add_nodes_from(range(num_vertices))
     
     for i in range(num_vertices):
         for j in range(i + 1, num_vertices):
-            # if random.random() < edge_prob:
             weight = random.randint(1, 10) if weighted else 1
             G.add_edge(i, j, weight)
     return G
@@ -119,9 +118,9 @@ def cafqa_params_energy(circuit, hamiltonian, parameters):
     results = job.result()[0]
     return results.data.evs
 
-random_params = np.random.random(len(ks_best))
-energy = cafqa_params_energy(pcirc, cost_hamiltonian, random_params)
-print(f"Minimum Energy found with Random initalization: {energy}")
+random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, np.random.random(len(ks_best))) for _ in range(100)]
+min_energy = min(random_energies)
+print(f"Minimum Energy found with Random initialization over 100 runs: {min_energy}")
 
 # Solve with classical Eigensolver for comparison
 eigensolver = NumPyMinimumEigensolver()
