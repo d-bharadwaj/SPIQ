@@ -1,7 +1,7 @@
 import rustworkx as rx
 import random
 
-def generate_k_regular_graph(num_vertices, k):
+def generate_k_regular_graph(num_vertices, k, weighted=False):
     if k >= num_vertices or (num_vertices * k) % 2 != 0:
         raise ValueError("Invalid parameters: k must be < n and n*k must be even")
 
@@ -25,7 +25,8 @@ def generate_k_regular_graph(num_vertices, k):
                     break
             else:
                 edges.add((u, v))
-                graph.add_edge(u, v, None)
+                weight = random.randint(1, 10) if weighted else 1
+                graph.add_edge(u, v, weight)
                 continue
             break  # Restart from scratch
 
