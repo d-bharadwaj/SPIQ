@@ -15,6 +15,8 @@ import sys
 sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit
+from graphs_gen import generate_random_complete_graph,generate_k_regular_graph
+
 
 # Get arguments from command line
 n_qubits = int(sys.argv[1])  # First argument: No. of qubits
@@ -24,18 +26,11 @@ n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
 print(f"Input file: {n_qubits}")
 print(f"Tag: {n_reps}")
 
-def generate_random_graph(num_vertices, weighted=False, save_path=None):
-    G = rx.PyGraph()
-    G.add_nodes_from(range(num_vertices))
-    
-    for i in range(num_vertices):
-        for j in range(i + 1, num_vertices):
-            weight = random.randint(1, 10) if weighted else 1
-            G.add_edge(i, j, weight)
-    return G
-
 n = n_qubits
-G = generate_random_graph(num_vertices=n, weighted= True)
+k = 3 # for 3-regular graphs
+# G = generate_random_complete_graph(num_vertices=n, weighted=True)
+G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """Convert the graph to Pauli list.
@@ -56,7 +51,6 @@ def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
 max_cut_paulis = build_max_cut_paulis(G)
 
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
-print("Cost Function Hamiltonian:", cost_hamiltonian)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
 
 reps = n_reps

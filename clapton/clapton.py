@@ -396,6 +396,20 @@ def genetic_algorithm(
                     fitness_batch_size=population_size,
                     random_seed=0,
                     )
+    
+    print(f"GA parameters used for this experiment:\n"
+          f"  num_generations={num_generations}\n"
+          f"  num_parents_mating={num_parents_mating}\n"
+          f"  population_size={population_size}\n"
+          f"  num_genes={num_genes}\n"
+          f"  parent_selection_type={parent_selection_type}\n"
+          f"  keep_parents={keep_parents}\n"
+          f"  crossover_type={crossover_type}\n"
+          f"  mutation_type={mutation_type}\n"
+          f"  crossover_probability={crossover_probability}\n"
+          f"  mutation_probability={mutation_probability}\n"
+          f"  keep_elitism={keep_elitism}")
+
     if initial_population is not None:
         initial_population = np.asarray(initial_population)
         assert len(initial_population.shape) == 2

@@ -1,0 +1,13 @@
+Running with Qubits: 15
+Reps: 1
+Input file: 15
+Tag: 1
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_qaoa.py", line 32, in <module>
+    G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/graphs_gen.py", line 6, in generate_k_regular_graph
+    raise ValueError("Invalid parameters: k must be < n and n*k must be even")
+ValueError: Invalid parameters: k must be < n and n*k must be even
+srun: error: nid005433: task 0: Exited with exit code 1
+srun: Terminating StepId=35787840.0
+job finished!
