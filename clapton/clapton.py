@@ -361,7 +361,7 @@ def genetic_algorithm(
     num_generations = budget
     num_genes = num_params
     if keep_elitism is None:
-        keep_elitism = population_size // 10
+        keep_elitism = population_size // 20
     if num_parents_mating is None:
         num_parents_mating = 2 * population_size // 10
     best_count = int(population_size * return_best_pop_frac)

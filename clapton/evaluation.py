@@ -96,7 +96,7 @@ def get_energy(
     ):
     expectations = get_expectations(pcirc, paulis, get_noiseless, **expectations_kwargs)
     energy = np.inner(expectations, coeffs)
-    print("This is the energy of current sol. :", energy)
+    # print("This is the energy of current sol. :", energy)
     return energy
 
 

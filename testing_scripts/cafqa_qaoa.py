@@ -17,20 +17,15 @@ from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit
 from graphs_gen import generate_random_complete_graph,generate_k_regular_graph
 
-
 # Get arguments from command line
 n_qubits = int(sys.argv[1])  # First argument: No. of qubits
 n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
-
-# Print to verify
-print(f"Input file: {n_qubits}")
-print(f"Tag: {n_reps}")
+n_gens = int(sys.argv[3])         # Third Arugment : No. of Generations in GA.
 
 n = n_qubits
 k = 3 # for 3-regular graphs
-# G = generate_random_complete_graph(num_vertices=n, weighted=True)
+# G = generate_random_complete_graph(num_vertices=n, weighted=True , seed=0)
 G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
-
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """Convert the graph to Pauli list.
@@ -86,9 +81,9 @@ ks_best, _, energy_best = claptonize(
     stim_circ,
     n_proc=4,           # total number of processes in parallel
     n_starts=4,         # number of random genetic algorithm starts in parallel
-    n_rounds=1,         # number of budget rounds, if None it will terminate itself
+    n_rounds=1,          # number of budget rounds, if None it will terminate itself
     callback=print,     # callback for internal parameter (#iteration, energies, ks) processing
-    budget=500           # budget per genetic algorithm instance
+    budget=n_gens//2          # budget per genetic algorithm instance
 )
 
 
