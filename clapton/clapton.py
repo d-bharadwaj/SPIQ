@@ -209,10 +209,13 @@ def claptonize(
         trans_pcirc: ParametrizedCliffordCircuit | None = None,
         n_proc: int = 10,
         n_starts: int = 10,
-        n_rounds: int | None =None,
+        n_rounds: int | None = None,
         n_retry_rounds: int = 0,
         return_n_rounds: bool = False,
         mix_best_pop_frac: float = 0.2,
+        mutation_probability :tuple[float, float] = None,
+        crossover_type : str =  None,
+        keep_elitism : int = None,
         **optimizer_and_loss_kwargs
     ):
     sig_handler = SignalHandler()
@@ -232,6 +235,10 @@ def claptonize(
     optimizer_and_loss_kwargs["n_proc"] = n_proc
     optimizer_and_loss_kwargs["return_best_pop_frac"] = mix_best_pop_frac
     optimizer_and_loss_kwargs["out_data"] = out_data
+
+    optimizer_and_loss_kwargs["mutation_probability"] = mutation_probability
+    optimizer_and_loss_kwargs["crossover_type"] = crossover_type
+    optimizer_and_loss_kwargs["keep_elitism"] = keep_elitism
     
     r_idx = 0
     r_idx_last_change = 0
@@ -347,7 +354,7 @@ def genetic_algorithm(
         crossover_type: str = "single_point",
         crossover_probability: float = 0.9,
         mutation_type: str = "adaptive",
-        mutation_probability: tuple[float, float] =(0.25, 0.01), #(0.25, 0.05)  
+        mutation_probability: tuple[float, float] =(0.25, 0.01), #(0.25, 0.05) 
         **loss_kwargs
     ):
     print(f"started GA at id {master_id} with {n_proc} procs\n")
@@ -361,7 +368,7 @@ def genetic_algorithm(
     num_generations = budget
     num_genes = num_params
     if keep_elitism is None:
-        keep_elitism = population_size // 20
+        keep_elitism = population_size // 10
     if num_parents_mating is None:
         num_parents_mating = 2 * population_size // 10
     best_count = int(population_size * return_best_pop_frac)
