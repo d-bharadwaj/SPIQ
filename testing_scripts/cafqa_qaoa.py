@@ -20,12 +20,16 @@ from graphs_gen import generate_random_complete_graph,generate_k_regular_graph
 # Get arguments from command line
 n_qubits = int(sys.argv[1])  # First argument: No. of qubits
 n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
+
 n_gens = int(sys.argv[3])         # Third Arugment : No. of Generations in GA.
+mutation_prob = tuple(map(float, sys.argv[4].split()))
+elitism = int(sys.argv[5])
+crossover_type = str(sys.argv[6]) 
 
 n = n_qubits
-k = 3 # for 3-regular graphs
-# G = generate_random_complete_graph(num_vertices=n, weighted=True , seed=0)
-G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+# k = 3 # for 3-regular graphs
+G = generate_random_complete_graph(num_vertices=n, weighted=True)
+# G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """Convert the graph to Pauli list.
@@ -83,14 +87,11 @@ ks_best, _, energy_best = claptonize(
     n_starts=4,         # number of random genetic algorithm starts in parallel
     n_rounds=1,          # number of budget rounds, if None it will terminate itself
     callback=print,     # callback for internal parameter (#iteration, energies, ks) processing
-    budget=n_gens//2          # budget per genetic algorithm instance
+    budget=n_gens//2,         # budget per genetic algorithm instance
+    mutation_probability = mutation_prob,
+    keep_elitism = elitism,
+    crossover_type = crossover_type
 )
-
-
-print(f"{n} Qubits and {reps} reps")
-print(f"Minimum Energy found with CAFQA initalization: {energy_best}")
-
-# Random Initalization 
 
 def cafqa_params_energy(circuit, hamiltonian, parameters):
     estimator = Estimator(mode=AerSimulator(method='statevector'))
@@ -102,11 +103,24 @@ def cafqa_params_energy(circuit, hamiltonian, parameters):
     results = job.result()[0]
     return results.data.evs
 
-random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, np.random.random(len(ks_best))) for _ in range(1000)]
+print(f"{n} Qubits and {reps} reps")
+
+#CAFQA Initialization
+print(f"Minimum Energy found with CAFQA initalization: {energy_best}")
+
+# Random Initalization 
+random_angles = np.random.random(len(ks_best))
+random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(1000)]
 min_energy = min(random_energies)
 print(f"Minimum Energy found with Random initialization over 1000 runs: {min_energy}")
 
-# Solve with classical Eigensolver for comparison
+#Minimum Energy found with Angle Rounding
+rounded_angles = np.random.choice(np.arange(-np.pi, np.pi + np.pi/8, np.pi/8), len(ks_best))
+rounded_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, rounded_angles) for _ in range(1000)]
+min_rounded_energy = min(rounded_energies)
+print(f"Minimum Energy found with Angle Rounding over 1000 runs: {min_rounded_energy}")
+
+# Exact Ground state Energy
 eigensolver = NumPyMinimumEigensolver()
 exact_solution = eigensolver.compute_minimum_eigenvalue(cost_hamiltonian).eigenvalue.real
 print("Exact Energy from Eigensolver:", exact_solution)
