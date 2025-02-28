@@ -2,7 +2,7 @@ import rustworkx as rx
 import random
 
 def generate_k_regular_graph(num_vertices, k, weighted=False):
-    random.seed(0)
+    # random.seed(0)
 
     if k >= num_vertices or (num_vertices * k) % 2 != 0:
         raise ValueError("Invalid parameters: k must be < n and n*k must be even")
@@ -38,7 +38,7 @@ def generate_k_regular_graph(num_vertices, k, weighted=False):
 def generate_random_complete_graph(num_vertices, edge_prob=0.5, weighted=False, save_path=None):
     G = rx.PyGraph()
     G.add_nodes_from(range(num_vertices))
-    random.seed(0)
+    # random.seed(0)
     
     for i in range(num_vertices):
         for j in range(i + 1, num_vertices):
