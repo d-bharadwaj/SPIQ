@@ -24,10 +24,11 @@ n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
 n_gens = int(sys.argv[3])         # Third Arugment : No. of Generations in GA.
 mutation_prob = tuple(map(float, sys.argv[4].split()))
 elitism = int(sys.argv[5])
-crossover_type = str(sys.argv[6]) 
+crossover_type = str(sys.argv[6])
+seed =  int(sys.argv[7])
 
 n = n_qubits
-# k = 3 # for 3-regular graphs
+k = 3 # for 3-regular graphs
 G = generate_random_complete_graph(num_vertices=n, weighted=True)
 # G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
 
@@ -51,6 +52,8 @@ max_cut_paulis = build_max_cut_paulis(G)
 
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
+reversed_paulis = [p[::-1] for p in paulis]
+
 
 reps = n_reps
 gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
@@ -80,7 +83,7 @@ stim_circ.define_parameter_map(param_map)
 # CAFQA Process
 
 ks_best, _, energy_best = claptonize(
-    paulis,
+    reversed_paulis,
     coeffs,
     stim_circ,
     n_proc=4,           # total number of processes in parallel
@@ -124,3 +127,13 @@ print(f"Minimum Energy found with Angle Rounding over 1000 runs: {min_rounded_en
 eigensolver = NumPyMinimumEigensolver()
 exact_solution = eigensolver.compute_minimum_eigenvalue(cost_hamiltonian).eigenvalue.real
 print("Exact Energy from Eigensolver:", exact_solution)
+
+# Save energies to a numpy dictionary
+energies = {
+    "CAFQA_initialization": energy_best,
+    "Random_initialization": min_energy,
+    "Angle_rounding": min_rounded_energy,
+    "Exact_solution": exact_solution
+}
+
+np.save(f"../np_data/15_qbs/energies_{seed}", energies)
