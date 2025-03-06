@@ -1,4 +1,3 @@
-
 from clapton.clifford import ParametrizedCliffordCircuit
 
 from qiskit.converters import circuit_to_dag, dag_to_circuit
@@ -217,3 +216,15 @@ def create_cost_hamiltonian_stim(G):
         paulis.append(''.join(pauli_term))  # Join into a single string
     print (coeffs, paulis)
     return coeffs, paulis
+
+def generate_qiskit_param_map(circuit):
+    dag = circuit_to_dag(circuit)
+    param_list = [list(node.op.params[0].parameters)[0].name for node in dag.op_nodes() if node.op.params and isinstance(node.op.params[0], ParameterExpression)]
+    qiskit_param_map = {k: v for v, k in enumerate(param_list)}
+
+    # Ensure the sorted names are correct
+    ordered_params = [param.name for param in circuit.parameters]
+    assert sorted(qiskit_param_map.keys()) == ordered_params
+
+    param_map = {i: qiskit_param_map[param] for i, param in enumerate(ordered_params)}
+    return param_map

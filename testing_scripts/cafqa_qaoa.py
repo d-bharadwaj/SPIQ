@@ -4,23 +4,21 @@ import random
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
-from qiskit.circuit import Parameter,ParameterExpression
+from qiskit.circuit import Parameter
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_aer import AerSimulator
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from qiskit.converters import circuit_to_dag
 
 import sys
 sys.path.append("../")
 from clapton.clapton import claptonize
-from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit
-from graphs_gen import generate_random_complete_graph,generate_k_regular_graph
+from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
+from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis
 
 # Get arguments from command line
 n_qubits = int(sys.argv[1])  # First argument: No. of qubits
-n_reps = int(sys.argv[2])         # Second argument: Reps in ansatz
-
+reps = int(sys.argv[2])         # Second argument: Reps in ansatz
 n_gens = int(sys.argv[3])         # Third Arugment : No. of Generations in GA.
 mutation_prob = tuple(map(float, sys.argv[4].split()))
 elitism = int(sys.argv[5])
@@ -29,33 +27,15 @@ seed =  int(sys.argv[7])
 
 n = n_qubits
 k = 3 # for 3-regular graphs
+
 G = generate_random_complete_graph(num_vertices=n, weighted=True)
 # G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
 
-def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
-    """Convert the graph to Pauli list.
-
-    This function does the inverse of `build_max_cut_graph`
-    """
-    pauli_list = []
-    for edge in list(graph.edge_list()):
-        paulis = ["I"] * len(graph)
-        paulis[edge[0]], paulis[edge[1]] = "Z", "Z"
-
-        weight = graph.get_edge_data(edge[0], edge[1])
-
-        pauli_list.append(("".join(paulis)[::-1], weight))
-
-    return pauli_list
-
 max_cut_paulis = build_max_cut_paulis(G)
-
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
 reversed_paulis = [p[::-1] for p in paulis] #to respect stim ordering for hamiltonian
 
-
-reps = n_reps
 gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
 beta_params = [Parameter(f'beta_{i}_{r}') for r in range(reps) for i in G.node_indexes()]
 circuit = multi_angle_qaoa_circuit(gamma_params,beta_params,n,G ,reps)
@@ -65,18 +45,7 @@ modified_circ = modify_circuit(circuit)
 pcirc = transform_to_allowed_gates(modified_circ)
 stim_circ = qiskit_to_stim(pcirc)
 
-def qiskit_params_map(circ):
-    dag = circuit_to_dag(circ)
-    param_list = [list(node.op.params[0].parameters)[0].name for node in dag.op_nodes() if node.op.params and isinstance(node.op.params[0], ParameterExpression)]
-    return {k: v for v, k in enumerate(param_list)}
-
-qiskit_param_map = qiskit_params_map(pcirc)
-
-# Ensure the sorted names are correct
-ordered_params = [param.name for param in pcirc.parameters]
-assert sorted(qiskit_param_map.keys()) == ordered_params
-
-param_map = {qiskit_param_map[param]: i for i, param in enumerate(ordered_params)}
+param_map = generate_qiskit_param_map(pcirc)
 
 stim_circ.define_parameter_map(param_map)
 
@@ -96,7 +65,7 @@ ks_best, _, energy_best = claptonize(
     crossover_type = crossover_type
 )
 
-def cafqa_params_energy(circuit, hamiltonian, parameters):
+def evaluate_energy(circuit, hamiltonian, parameters):
     estimator = Estimator(mode=AerSimulator(method='statevector'))
     isa_hamiltonian = hamiltonian.apply_layout(circuit.layout)
 
@@ -113,15 +82,15 @@ print(f"Minimum Energy found with CAFQA initalization: {energy_best}")
 
 # Random Initalization 
 random_angles = np.random.random(len(ks_best))
-random_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(1000)]
+random_energies = [evaluate_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(1000)]
 min_energy = min(random_energies)
-print(f"Minimum Energy found with Random initialization over 1000 runs: {min_energy}")
+print(f"Minimum Energy found with Random initialization over 100 runs: {min_energy}")
 
 #Minimum Energy found with Angle Rounding
 rounded_angles = np.random.choice(np.arange(-np.pi, np.pi + np.pi/8, np.pi/8), len(ks_best))
-rounded_energies = [cafqa_params_energy(pcirc, cost_hamiltonian, rounded_angles) for _ in range(1000)]
+rounded_energies = [evaluate_energy(pcirc, cost_hamiltonian, rounded_angles) for _ in range(1000)]
 min_rounded_energy = min(rounded_energies)
-print(f"Minimum Energy found with Angle Rounding over 1000 runs: {min_rounded_energy}")
+print(f"Minimum Energy found with Angle Rounding over 100 runs: {min_rounded_energy}")
 
 # Exact Ground state Energy
 eigensolver = NumPyMinimumEigensolver()

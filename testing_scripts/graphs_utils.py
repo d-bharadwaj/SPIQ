@@ -48,3 +48,19 @@ def generate_random_complete_graph(num_vertices, edge_prob=0.5, weighted=False, 
             weight = random.randint(1, 10) if weighted else 1
             G.add_edge(i, j, weight)
     return G
+
+def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
+    """Convert the graph to Pauli list.
+
+    This function does the inverse of `build_max_cut_graph`
+    """
+    pauli_list = []
+    for edge in list(graph.edge_list()):
+        paulis = ["I"] * len(graph)
+        paulis[edge[0]], paulis[edge[1]] = "Z", "Z"
+
+        weight = graph.get_edge_data(edge[0], edge[1])
+
+        pauli_list.append(("".join(paulis)[::-1], weight))
+
+    return pauli_list
