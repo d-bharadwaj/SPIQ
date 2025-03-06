@@ -52,7 +52,7 @@ max_cut_paulis = build_max_cut_paulis(G)
 
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
-reversed_paulis = [p[::-1] for p in paulis]
+reversed_paulis = [p[::-1] for p in paulis] #to respect stim ordering for hamiltonian
 
 
 reps = n_reps
