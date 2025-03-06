@@ -1,0 +1,15 @@
+Running GA Job with Parameters:
+  Number of Qubits     : 15
+  Ansatz Reps          : 1
+  Generations          : 1000
+  Mutation Probability : 0.25 0.01 
+  Elitism              : 5
+  Crossover Type       : single_point
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_qaoa.py", line 33, in <module>
+    G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/graphs_gen.py", line 8, in generate_k_regular_graph
+    raise ValueError("Invalid parameters: k must be < n and n*k must be even")
+ValueError: Invalid parameters: k must be < n and n*k must be even
+srun: error: nid006782: task 0: Exited with exit code 1
+srun: Terminating StepId=36415827.0
