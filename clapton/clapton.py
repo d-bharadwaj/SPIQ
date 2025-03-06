@@ -213,9 +213,9 @@ def claptonize(
         n_retry_rounds: int = 0,
         return_n_rounds: bool = False,
         mix_best_pop_frac: float = 0.2,
-        mutation_probability :tuple[float, float] = None,
-        crossover_type : str =  None,
-        keep_elitism : int = None,
+        mutation_probability :tuple[float, float] = (0.25,0.01),
+        crossover_type : str =  "single_point",
+        keep_elitism : int = 5,
         **optimizer_and_loss_kwargs
     ):
     sig_handler = SignalHandler()
