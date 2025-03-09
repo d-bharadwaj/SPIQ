@@ -1,5 +1,6 @@
 import rustworkx as rx
 import random
+from sage.all import Graph
 
 def generate_k_regular_graph(num_vertices, k, weighted=False, seed=False):
     if seed:
@@ -48,6 +49,16 @@ def generate_random_complete_graph(num_vertices, edge_prob=0.5, weighted=False, 
             weight = random.randint(1, 10) if weighted else 1
             G.add_edge(i, j, weight)
     return G
+
+def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
+    #Convert rustworkx graph into SageMath Graph.
+    sage_graph = Graph()
+    for u, v, weight in graph.weighted_edge_list():
+        sage_graph.add_edge(u, v, weight)
+
+    # Compute the Max-Cut
+    return sage_graph.max_cut(use_edge_labels=True)
+
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """Convert the graph to Pauli list.

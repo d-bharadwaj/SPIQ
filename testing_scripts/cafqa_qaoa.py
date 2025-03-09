@@ -1,35 +1,42 @@
 import rustworkx as rx
 import numpy as np
-import random
 import warnings
 warnings.simplefilter("ignore", UserWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from qiskit.circuit import Parameter
 from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit_aer import AerSimulator
 from qiskit.quantum_info import SparsePauliOp
+from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from scipy.optimize import minimize
 
 import sys
 sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
-from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis
+from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis, compute_optimal_max_cut
+from testing_scripts.energy_utils import evaluate_energy
+from maxcut_processing import evaluate_maxcut
+import os
 
 # Get arguments from command line
-n_qubits = int(sys.argv[1])  # First argument: No. of qubits
-reps = int(sys.argv[2])         # Second argument: Reps in ansatz
-n_gens = int(sys.argv[3])         # Third Arugment : No. of Generations in GA.
+n_qubits = int(sys.argv[1])  
+reps = int(sys.argv[2])     
+n_gens = int(sys.argv[3])        
 mutation_prob = tuple(map(float, sys.argv[4].split()))
 elitism = int(sys.argv[5])
 crossover_type = str(sys.argv[6])
 seed =  int(sys.argv[7])
 
 n = n_qubits
-k = 3 # for 3-regular graphs
+k = 3 # for k-regular graphs
 
-G = generate_random_complete_graph(num_vertices=n, weighted=True)
-# G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+# G = generate_random_complete_graph(num_vertices=n, weighted=True)
+G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+
+# Evaluate Optimal Maxcut
+optimal_max_cut_val = compute_optimal_max_cut(G)
 
 max_cut_paulis = build_max_cut_paulis(G)
 cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
@@ -65,16 +72,6 @@ ks_best, _, energy_best = claptonize(
     crossover_type = crossover_type
 )
 
-def evaluate_energy(circuit, hamiltonian, parameters):
-    estimator = Estimator(mode=AerSimulator(method='statevector'))
-    isa_hamiltonian = hamiltonian.apply_layout(circuit.layout)
-
-    pub = (circuit, isa_hamiltonian, parameters)
-    job = estimator.run([pub])
-
-    results = job.result()[0]
-    return results.data.evs
-
 print(f"{n} Qubits and {reps} reps")
 
 #CAFQA Initialization
@@ -82,13 +79,13 @@ print(f"Minimum Energy found with CAFQA initalization: {energy_best}")
 
 # Random Initalization 
 random_angles = np.random.random(len(ks_best))
-random_energies = [evaluate_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(1000)]
+random_energies = [evaluate_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(100)]
 min_energy = min(random_energies)
 print(f"Minimum Energy found with Random initialization over 100 runs: {min_energy}")
 
 #Minimum Energy found with Angle Rounding
 rounded_angles = np.random.choice(np.arange(-np.pi, np.pi + np.pi/8, np.pi/8), len(ks_best))
-rounded_energies = [evaluate_energy(pcirc, cost_hamiltonian, rounded_angles) for _ in range(1000)]
+rounded_energies = [evaluate_energy(pcirc, cost_hamiltonian, rounded_angles) for _ in range(100)]
 min_rounded_energy = min(rounded_energies)
 print(f"Minimum Energy found with Angle Rounding over 100 runs: {min_rounded_energy}")
 
@@ -97,12 +94,35 @@ eigensolver = NumPyMinimumEigensolver()
 exact_solution = eigensolver.compute_minimum_eigenvalue(cost_hamiltonian).eigenvalue.real
 print("Exact Energy from Eigensolver:", exact_solution)
 
-# Save energies to a numpy dictionary
-energies = {
-    "CAFQA_initialization": energy_best,
-    "Random_initialization": min_energy,
-    "Angle_rounding": min_rounded_energy,
-    "Exact_solution": exact_solution
+#QAOA Optimization 
+ordered_params = [param.name for param in pcirc.parameters]
+angle_multipliers = [-np.pi/4 if 'gamma' in param else np.pi/4 for param in ordered_params]
+cafqa_params = [param * (multiplier) for param,multiplier in zip(ks_best,angle_multipliers)] #This has to be in the order we come across the gates.
+
+# Evaluate Maxcut 
+print(f"Optimal Max Cut Value : {optimal_max_cut_val}")
+max_iters = 1
+random_max_cut_val,random_obj_values = evaluate_maxcut(G,pcirc, random_angles, cost_hamiltonian,max_iters)
+cafqa_max_cut_val,cafqa_obj_values = evaluate_maxcut(G,pcirc, cafqa_params, cost_hamiltonian,max_iters)
+random_approx_ratio = random_max_cut_val / optimal_max_cut_val
+cafqa_approx_ratio = cafqa_max_cut_val / optimal_max_cut_val
+
+print(f"Max Cut value with Random initialization after 1 iteration: {random_max_cut_val}")
+print(f"Max Cut value with CAFQA initialization after 1 iteration: {cafqa_max_cut_val}")
+
+print(f"Random Approx. Ratio: {random_approx_ratio}")
+print(f"CAFQA Approx. Ratio: {cafqa_approx_ratio}")
+
+results = {
+    "CAFQA_initialization_energy": energy_best,
+    "Random_initialization_energy": min_energy,
+    "Angle_rounding_energy": min_rounded_energy,
+    "Exact_solution_energy": exact_solution,
+    "Random_initialization_max_cut": random_max_cut_val,
+    "CAFQA_initialization_max_cut": cafqa_max_cut_val,
+    "Random_approx_ratio": random_approx_ratio,
+    "CAFQA_approx_ratio": cafqa_approx_ratio
 }
 
-np.save(f"../np_data/15_qbs/energies_{seed}", energies)
+# output_dir = f"../np_data/{n_qubits}_qbs"
+# os.makedirs(output_dir, exist_ok=True); np.save(os.path.join(output_dir, f"results_{seed}.npy"), results)
