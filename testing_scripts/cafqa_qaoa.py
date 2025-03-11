@@ -32,8 +32,8 @@ seed =  int(sys.argv[7])
 n = n_qubits
 k = 3 # for k-regular graphs
 
-# G = generate_random_complete_graph(num_vertices=n, weighted=True)
-G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+G = generate_random_complete_graph(num_vertices=n, weighted=True,seed=False)
+# G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
 
 # Evaluate Optimal Maxcut
 optimal_max_cut_val = compute_optimal_max_cut(G)
@@ -100,15 +100,18 @@ angle_multipliers = [-np.pi/4 if 'gamma' in param else np.pi/4 for param in orde
 cafqa_params = [param * (multiplier) for param,multiplier in zip(ks_best,angle_multipliers)] #This has to be in the order we come across the gates.
 
 # Evaluate Maxcut 
-print(f"Optimal Max Cut Value : {optimal_max_cut_val}")
-max_iters = 1
-random_max_cut_val,random_obj_values = evaluate_maxcut(G,pcirc, random_angles, cost_hamiltonian,max_iters)
-cafqa_max_cut_val,cafqa_obj_values = evaluate_maxcut(G,pcirc, cafqa_params, cost_hamiltonian,max_iters)
+max_iters = 1500
+random_max_cut_val,random_obj_values,random_fin_energy = evaluate_maxcut(G,pcirc, random_angles, cost_hamiltonian,max_iters)
+RA_max_cut_val,RA_obj_values,RA_fin_energy = evaluate_maxcut(G,pcirc, rounded_angles, cost_hamiltonian,max_iters)
+cafqa_max_cut_val,cafqa_obj_values,cafqa_fin_energy = evaluate_maxcut(G,pcirc, cafqa_params, cost_hamiltonian,max_iters)
+
 random_approx_ratio = random_max_cut_val / optimal_max_cut_val
 cafqa_approx_ratio = cafqa_max_cut_val / optimal_max_cut_val
 
-print(f"Max Cut value with Random initialization after 1 iteration: {random_max_cut_val}")
-print(f"Max Cut value with CAFQA initialization after 1 iteration: {cafqa_max_cut_val}")
+print(f"Optimal Max Cut Value : {optimal_max_cut_val}")
+
+print(f"Max Cut value with Random initialization after {max_iters} iteration: {random_max_cut_val}")
+print(f"Max Cut value with CAFQA initialization after {max_iters} iteration: {cafqa_max_cut_val}")
 
 print(f"Random Approx. Ratio: {random_approx_ratio}")
 print(f"CAFQA Approx. Ratio: {cafqa_approx_ratio}")
@@ -121,8 +124,11 @@ results = {
     "Random_initialization_max_cut": random_max_cut_val,
     "CAFQA_initialization_max_cut": cafqa_max_cut_val,
     "Random_approx_ratio": random_approx_ratio,
-    "CAFQA_approx_ratio": cafqa_approx_ratio
+    "CAFQA_approx_ratio": cafqa_approx_ratio,
+    "Final_random_energy": random_fin_energy,
+    "Final_Rounded_Angle_energy":RA_fin_energy,
+    "Final_cafqa_energy": cafqa_fin_energy
 }
 
-# output_dir = f"../np_data/{n_qubits}_qbs"
-# os.makedirs(output_dir, exist_ok=True); np.save(os.path.join(output_dir, f"results_{seed}.npy"), results)
+output_dir = f"../np_data/rep_sweep_2000_gens/{reps}_layers"
+os.makedirs(output_dir, exist_ok=True); np.save(os.path.join(output_dir, f"results_{seed}.npy"), results)

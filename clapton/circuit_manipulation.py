@@ -11,14 +11,17 @@ def multi_angle_qaoa_circuit(gamma_params, beta_params, num_qubits, G , reps):
     qc.h(range(num_qubits))
 
     for rep in range(reps):
+        gamma_offset = rep * len(G.edge_list())
+        beta_offset = rep * len(G.node_indexes())
+        
         for idx, (i, j) in enumerate(G.edge_list()):
-            gamma = gamma_params[rep * len(G.edge_list()) + idx]  # Get the gamma parameter
+            gamma = gamma_params[gamma_offset + idx]  # Get the gamma parameter
             qc.cx(i, j)
             qc.rz(-2 * gamma, j)
             qc.cx(i, j)
 
         for idx, i in enumerate(G.node_indexes()):
-            beta = beta_params[rep * len(G.node_indexes()) + idx]  # Get the beta parameter
+            beta = beta_params[beta_offset + idx]  # Get the beta parameter
             qc.rx(2 * beta, i)
 
     return qc

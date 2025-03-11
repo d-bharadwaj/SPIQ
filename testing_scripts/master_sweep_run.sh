@@ -16,6 +16,13 @@
 #     sbatch --output=../logs/ga_sweep/Crossover_Sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE=$crossover_type sweep_run.sh
 # done
 
-for seed in {1..100}; do
-    sbatch --output=../logs/graphs_sweep/15_qb_graph_sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
+# for seed in {1..10}; do
+#     sbatch --output=../logs/maxcut_graphs_eval/approx_ratio_14_qb_k_reg_maxcut_%j.log --export=ALL,N_QUBITS=14,N_REPS=5,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
+# done
+
+
+for rep in 1 2 5; do
+    for seed in {1..5}; do
+        sbatch --output=../logs/rep_sweep/2000_gens_Rep_Sweep_%j.log --export=ALL,N_QUBITS=10,N_REPS=$rep,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
+    done
 done
