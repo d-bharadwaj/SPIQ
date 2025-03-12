@@ -3,12 +3,9 @@ import numpy as np
 from typing import Sequence
 import rustworkx as rx
 
-
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import SamplerV2 as Sampler
-
-from energy_utils import cost_func_estimator
 
 def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter):
 
