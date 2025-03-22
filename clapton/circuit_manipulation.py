@@ -2,27 +2,57 @@ from clapton.clifford import ParametrizedCliffordCircuit
 
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import ParameterExpression,ParameterVector
+from qiskit.circuit import Parameter,ParameterExpression,ParameterVector
 import numpy as np
 
 # Function to build the QAOA circuit
-def multi_angle_qaoa_circuit(gamma_params, beta_params, num_qubits, G , reps):
+def multi_angle_qaoa_circuit(num_qubits, G , reps, gamma_params=None,beta_params=None):
+    if not gamma_params and not beta_params:
+        gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
+        beta_params = [Parameter(f'beta_{i}_{r}') for r in range(reps) for i in G.node_indexes()]
+
     qc = QuantumCircuit(num_qubits)
     qc.h(range(num_qubits))
-
+            
     for rep in range(reps):
         gamma_offset = rep * len(G.edge_list())
         beta_offset = rep * len(G.node_indexes())
         
-        for idx, (i, j) in enumerate(G.edge_list()):
+        for idx, (i, j, weight) in enumerate(G.weighted_edge_list()):
             gamma = gamma_params[gamma_offset + idx]  # Get the gamma parameter
             qc.cx(i, j)
-            qc.rz(-2 * gamma, j)
+            qc.rz(-2 * weight * gamma, j)
             qc.cx(i, j)
 
         for idx, i in enumerate(G.node_indexes()):
             beta = beta_params[beta_offset + idx]  # Get the beta parameter
             qc.rx(2 * beta, i)
+
+    return qc
+
+def multi_angle_qaoa_plus_circuit(num_qubits, G, reps=1):
+    qc = QuantumCircuit(num_qubits)
+    
+    gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
+    beta_params = [Parameter(f'beta_{i}_{r}') for r in range(reps) for i in G.node_indexes()]
+
+    gamma_plus_params = [Parameter(f'gamma_plus_{i}_{i+1}_{r}') for r in range(reps) for i in range(num_qubits-1)]
+    beta_plus_params = [Parameter(f'beta_plus_{i}_{r}') for r in range(reps) for i in range(num_qubits)]
+
+    for i in range(reps):
+        ma_qaoa_circ = multi_angle_qaoa_circuit(num_qubits,G,reps,gamma_params=gamma_params,beta_params=beta_params)
+        qc = qc.compose(ma_qaoa_circ)
+
+        for j in range(num_qubits-1):
+            gamma_plus = gamma_plus_params[i*(num_qubits-1) + j]  # Get the gamma plus parameter
+            a,b = j,j+1
+            qc.cx(a, b)
+            qc.rz(gamma_plus, b)
+            qc.cx(a,b)
+        
+        for j in range(num_qubits):
+            beta_plus = beta_plus_params[i*(num_qubits-1) + j]  # Get the beta plus parameter
+            qc.rx(beta_plus, j)
 
     return qc
 
@@ -231,3 +261,60 @@ def generate_qiskit_param_map(circuit):
 
     param_map = {i: qiskit_param_map[param] for i, param in enumerate(ordered_params)}
     return param_map
+
+def relax_qaoa_parameters(circ):
+    dag = circuit_to_dag(circ)
+    gamma_counter, beta_counter = 0, 0
+    angle_multipliers = {}
+    for node in dag.op_nodes():
+        if node.op.params and isinstance(node.op.params[0], ParameterExpression):
+            param_name = list(node.op.params[0].parameters)[0].name 
+            if "β" in param_name:
+
+                multiplier = float(str(node.op.params[0]).split("*")[0])
+
+                beta = Parameter(f'{multiplier}*beta_{beta_counter}')
+                new_params = [beta if (isinstance(p, ParameterExpression)) else p for p in node.op.params]
+                new_op = node.op.copy()
+                new_op.params = new_params  # Create a modified version of the operation
+                dag.substitute_node(node, new_op)  # Replace the node in the DAG
+                beta_counter += 1
+
+                angle_multipliers[beta.name] = multiplier
+            
+
+            elif "γ" in param_name:
+
+                multiplier = float(str(node.op.params[0]).split("*")[0])
+                
+                gamma = Parameter(f'{multiplier}*gamma_{gamma_counter}')
+                new_params = [gamma if (isinstance(p, ParameterExpression)) else p for p in node.op.params]
+                new_op = node.op.copy()
+                new_op.params = new_params  # Create a modified version of the operation
+                dag.substitute_node(node, new_op)  # Replace the node in the DAG
+                gamma_counter += 1
+
+                angle_multipliers[gamma.name] = multiplier
+
+    # Convert DAG back to a circuit
+    new_qc = dag_to_circuit(dag)
+    return new_qc, circuit_to_dag(new_qc) , angle_multipliers
+
+def transform_qiskit_to_stim(qiskit_circuit):
+    # Transform qiskit circuit to stim.
+    modified_circ = modify_circuit(qiskit_circuit)
+    pcirc = transform_to_allowed_gates(modified_circ)
+    stim_circ = qiskit_to_stim(pcirc)
+    return stim_circ,pcirc
+
+def qaoa_relax_parameters(circuit, opt_val=0.2):
+    # QAOA Relax Initalization method chosen from https://arxiv.org/pdf/2409.12104 paper.
+    constant_vals = {}
+    for param in circuit.parameters:
+        param_name = param.name
+        if 'beta' in param_name:
+            val = opt_val
+        else:
+            val = -1*opt_val
+        constant_vals[param_name] = val
+    return list(constant_vals.values())
