@@ -6,8 +6,11 @@ import rustworkx as rx
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import SamplerV2 as Sampler
+from qiskit_aer.noise import NoiseModel
+from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
 
-def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter):
+
+def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter,noise=False):
 
     objective_func_vals= []
 
@@ -26,7 +29,15 @@ def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter):
         objective_func_vals.append(cost)
         return cost
     
-    estimator = Estimator(mode=AerSimulator(method='statevector'))
+    if noise:
+        noise_model = NoiseModel()
+        noisy_backend = FakeMumbaiV2() # Your quantum backend
+        noise_model = NoiseModel.from_backend(noisy_backend) 
+        backend = AerSimulator(method='statevector',noise_model=noise_model)
+    else: 
+        backend = AerSimulator(method='statevector')
+
+    estimator = Estimator(mode=backend)
     result = minimize(
         cost_func_estimator,
         params,
@@ -39,8 +50,6 @@ def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter):
     optimized_circuit = circuit.assign_parameters(result.x)
     optimized_circuit.measure_all()
 
-    # If using qiskit-ibm-runtime<0.24.0, change `mode=` to `backend=`
-    backend = AerSimulator()
     sampler = Sampler(mode=backend)
     sampler.options.default_shots = 10000
 

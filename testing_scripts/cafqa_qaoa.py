@@ -100,9 +100,9 @@ cafqa_params = [param * (multiplier) for param,multiplier in zip(ks_best,angle_m
 
 # Evaluate Maxcut 
 max_iters = 1500
-random_max_cut_val,random_obj_values,random_fin_energy = evaluate_maxcut(G,pcirc, random_angles, cost_hamiltonian,max_iters)
-RA_max_cut_val,RA_obj_values,RA_fin_energy = evaluate_maxcut(G,pcirc, rounded_angles, cost_hamiltonian,max_iters)
-cafqa_max_cut_val,cafqa_obj_values,cafqa_fin_energy = evaluate_maxcut(G,pcirc, cafqa_params, cost_hamiltonian,max_iters)
+random_max_cut_val,random_obj_values,random_fin_energy = evaluate_maxcut(G,pcirc, random_angles, cost_hamiltonian,max_iters,noise=True)
+RA_max_cut_val,RA_obj_values,RA_fin_energy = evaluate_maxcut(G,pcirc, rounded_angles, cost_hamiltonian,max_iters,noise=True)
+cafqa_max_cut_val,cafqa_obj_values,cafqa_fin_energy = evaluate_maxcut(G,pcirc, cafqa_params, cost_hamiltonian,max_iters,noise=True)
 
 random_approx_ratio = random_max_cut_val / optimal_max_cut_val
 cafqa_approx_ratio = cafqa_max_cut_val / optimal_max_cut_val
