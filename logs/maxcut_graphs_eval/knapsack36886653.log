@@ -1,0 +1,3 @@
+slurmstepd: error: execve(): python3: No such file or directory
+srun: error: nid004910: task 0: Exited with exit code 2
+srun: Terminating StepId=36886653.0
