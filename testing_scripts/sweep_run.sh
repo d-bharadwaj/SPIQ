@@ -25,15 +25,21 @@ module load python
 
 conda activate qaoa_w_sage
 
-echo "Running GA Job with Parameters:"
-echo "  Number of Qubits     : $N_QUBITS"
-echo "  Ansatz Reps          : $N_REPS"
-echo "  Generations          : $NUM_GENERATIONS"
-echo "  Mutation Probability : $MUTATION_PROB"
-echo "  Elitism              : $KEEP_ELITISM"
-echo "  Crossover Type       : $CROSSOVER_TYPE"
+# echo "Running GA Job with Parameters:"
+# echo "  Number of Qubits     : $N_QUBITS"
+# echo "  Ansatz Reps          : $N_REPS"
+# echo "  Generations          : $NUM_GENERATIONS"
+# echo "  Mutation Probability : $MUTATION_PROB"
+# echo "  Elitism              : $KEEP_ELITISM"
+# echo "  Crossover Type       : $CROSSOVER_TYPE"
 
 export PYTHONWARNINGS="ignore"
 
 # Execute Python script with labeled parameters
-srun --cpu-bind=cores python cafqa_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED
+# srun --cpu-bind=cores python cafqa_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED
+
+#Knapsack
+srun --cpu-bind=cores python knapsack.py $N_QUBITS $N_REPS $SEED
+
+# QAOA+
+# srun --cpu-bind=cores python new_ansatz_comparision.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED

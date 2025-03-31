@@ -2,7 +2,7 @@ from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 
 def evaluate_energy(circuit, hamiltonian, parameters):
-    estimator = Estimator(mode=AerSimulator(method='statevector'))
+    estimator = Estimator(mode=AerSimulator(method='statevector')) #TODO: Maybe Change this 
     isa_hamiltonian = hamiltonian.apply_layout(circuit.layout)
 
     pub = (circuit, isa_hamiltonian, parameters)

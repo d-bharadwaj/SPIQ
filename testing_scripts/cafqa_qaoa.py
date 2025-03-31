@@ -1,6 +1,8 @@
 import rustworkx as rx
 import numpy as np
 import warnings
+import os
+import sys
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -11,14 +13,13 @@ from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from scipy.optimize import minimize
 
-import sys
 sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
 from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis, compute_optimal_max_cut
 from testing_scripts.energy_utils import evaluate_energy
 from maxcut_processing import evaluate_maxcut
-import os
+
 
 # Get arguments from command line
 n_qubits = int(sys.argv[1])  
@@ -26,7 +27,7 @@ reps = int(sys.argv[2])
 n_gens = int(sys.argv[3])        
 mutation_prob = tuple(map(float, sys.argv[4].split()))
 elitism = int(sys.argv[5])
-crossover_type = str(sys.argv[6])
+crossover_type = str(sys.argv[6])   
 seed =  int(sys.argv[7])
 
 n = n_qubits
@@ -43,9 +44,7 @@ cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 paulis,coeffs = cost_hamiltonian.paulis.to_labels(),cost_hamiltonian.coeffs.real
 reversed_paulis = [p[::-1] for p in paulis] #to respect stim ordering for hamiltonian
 
-gamma_params = [Parameter(f'gamma_{i}_{j}_{r}') for r in range(reps) for i, j in G.edge_list()]
-beta_params = [Parameter(f'beta_{i}_{r}') for r in range(reps) for i in G.node_indexes()]
-circuit = multi_angle_qaoa_circuit(gamma_params,beta_params,n,G ,reps)
+circuit = multi_angle_qaoa_circuit(n,G,reps)
 
 # Transform qiskit circ. to stim.
 modified_circ = modify_circuit(circuit)
