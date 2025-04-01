@@ -29,13 +29,11 @@ def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter,noise=False):
         objective_func_vals.append(cost)
         return cost
     
+    backend = AerSimulator(method='statevector')
     if noise:
-        noise_model = NoiseModel()
-        noisy_backend = FakeMumbaiV2() # Your quantum backend
-        noise_model = NoiseModel.from_backend(noisy_backend) 
-        backend = AerSimulator(method='statevector',noise_model=noise_model)
-    else: 
-        backend = AerSimulator(method='statevector')
+        noisy_backend = FakeMumbaiV2()  # Your quantum backend
+        noise_model = NoiseModel.from_backend(noisy_backend)
+        backend.set_options(noise_model=noise_model)
 
     estimator = Estimator(mode=backend)
     result = minimize(
