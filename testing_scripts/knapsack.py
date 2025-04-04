@@ -20,8 +20,9 @@ import sys
 sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map,relax_qaoa_parameters
-from testing_scripts.energy_utils import evaluate_energy
-from testing_scripts.knapsack_utils import generate_knapsack_instance,evaluate_knapsack
+from testing_scripts.qaoa_utils import evaluate_energy,run_qaoa
+from testing_scripts.knapsack_utils import generate_knapsack_instance
+from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
 
 n_items = int(sys.argv[1])  
 reps = int(sys.argv[2]) 
@@ -48,63 +49,43 @@ reversed_paulis = [p[::-1] for p in paulis]
 
 # Transform qiskit circ. to stim.
 circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-modified_circ = modify_circuit(circuit)
-pcirc = transform_to_allowed_gates(modified_circ)
 
-# Relax Ansatz Parameters
-pcirc, dag , angle_multipliers= relax_qaoa_parameters(pcirc)
-stim_circ = qiskit_to_stim(pcirc)
+knapsack_qaoa = QAOASolver(cost_hamiltonian,circuit)
+knapsack_qaoa.prepare_circuit()
 
-# Parameter Mapping
-param_map = generate_qiskit_param_map(pcirc)
-stim_circ.define_parameter_map(param_map)
-
-# CAFQA 
-ks_best, _, energy_best = claptonize(
-    reversed_paulis,
-    coeffs,
-    stim_circ,
-    n_proc=4,           # total number of processes in parallel
-    n_starts=4,         # number of random genetic algorithm starts in parallel
-    n_rounds=1,         # number of budget rounds, if None it will terminate itself
-    callback=print,     # callback for internal parameter (#iteration, energies, ks) processing
-    budget=1500//2        # budget per genetic algorithm instance
-)
-print(f"Minimum Energy found with CAFQA initalization: {energy_best}")
-stim_circ.assign(ks_best)
+# Run CAFQA Process
+knapsack_qaoa.run_CAFQA(n_gens=1000)
 
 # Solve with classical Eigensolver for comparison
-eigensolver = NumPyMinimumEigensolver()
-exact_solution = eigensolver.compute_minimum_eigenvalue(cost_hamiltonian).eigenvalue.real
+exact_solution = knapsack_qaoa.evaluate_exact_energy()
 print("Exact Energy from Eigensolver:", exact_solution)
 
-cafqa_angles = [param * np.pi/2 for param in ks_best]
-
-# energies = [evaluate_energy(pcirc, cost_hamiltonian, cafqa_angles) for _ in range(100)]
-# average_energy = np.mean(energies)
-# print(f"Average CAFQA Qiskit Energy: {average_energy}")
+cafqa_angles = [param * np.pi/2 for param in knapsack_qaoa.ks_best]
 
 # Random Initalization 
-random_angles = np.random.random(len(ks_best))
-random_energies = [evaluate_energy(pcirc, cost_hamiltonian, random_angles) for _ in range(100)]
+random_angles = np.random.random(len(knapsack_qaoa.ks_best))
+random_energies = [evaluate_energy(knapsack_qaoa.pcirc, cost_hamiltonian, random_angles) for _ in range(100)]
 min_energy = min(random_energies)
 print(f"Minimum Energy found with Random initialization over 100 runs: {min_energy}")
 
-cafqa_params = [param * np.pi/2 for param in ks_best]
+cafqa_params = [param * np.pi/2 for param in knapsack_qaoa.ks_best]
 
 # Evaluate Maxcut 
 max_iters = 1000
-random_obj_values,random_fin_energy = evaluate_knapsack(pcirc, random_angles, cost_hamiltonian,max_iters)
-cafqa_obj_values,cafqa_fin_energy = evaluate_knapsack(pcirc, cafqa_params, cost_hamiltonian,max_iters)
+random_result,random_obj_values = knapsack_qaoa.run_qaoa(random_angles,max_iters,noise=True)
+cafqa_result,cafqa_obj_values = knapsack_qaoa.run_qaoa(cafqa_params, max_iters,noise=True)
 
 # Save energies to a dictionary
 energies_dict = {
-    "CAFQA_initial_energy": energy_best,
+    "CAFQA_initial_energy": knapsack_qaoa.energy_best,
     "Exact_solution_energy": exact_solution,
     "Min_initial_random_energy": min_energy,
-    "Final_cafqa_energy": cafqa_fin_energy,
-    "Final_random_energy": random_fin_energy
+    "Final_cafqa_energy": cafqa_result.fun,
+    "Final_random_energy": random_result.fun,
+    "Random_objective_values": random_obj_values,
+    "CAFQA_objective_values": cafqa_obj_values
 }
 
 output_dir = f"../np_data/knapsack/rep_sweep/{op.num_qubits}_qubits"
-os.makedirs(output_dir, exist_ok=True); np.save(os.path.join(output_dir, f"results_{seed}.npy"), energies_dict)
+os.makedirs(output_dir, exist_ok=True)
+np.save(os.path.join(output_dir, f"results_single_noisy{seed}.npy"), energies_dict)
