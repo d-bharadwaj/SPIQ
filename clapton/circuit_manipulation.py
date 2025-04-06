@@ -21,7 +21,7 @@ def multi_angle_qaoa_circuit(num_qubits, G , reps, gamma_params=None,beta_params
         for idx, (i, j, weight) in enumerate(G.weighted_edge_list()):
             gamma = gamma_params[gamma_offset + idx]  # Get the gamma parameter
             qc.cx(i, j)
-            qc.rz(-2 * weight * gamma, j)
+            qc.rz(-2 * weight * gamma, j) # if we add weights here, then we need to use the weights for circuit conversion.
             qc.cx(i, j)
 
         for idx, i in enumerate(G.node_indexes()):
@@ -269,7 +269,7 @@ def relax_qaoa_parameters(circ):
     for node in dag.op_nodes():
         if node.op.params and isinstance(node.op.params[0], ParameterExpression):
             param_name = list(node.op.params[0].parameters)[0].name 
-            if "β" in param_name:
+            if "β" in param_name or 'beta' in param_name:
 
                 multiplier = float(str(node.op.params[0]).split("*")[0])
 
@@ -283,7 +283,7 @@ def relax_qaoa_parameters(circ):
                 angle_multipliers[beta.name] = multiplier
             
 
-            elif "γ" in param_name:
+            elif "γ" in param_name or 'gamma' in param_name:
 
                 multiplier = float(str(node.op.params[0]).split("*")[0])
                 
@@ -300,13 +300,6 @@ def relax_qaoa_parameters(circ):
     new_qc = dag_to_circuit(dag)
     return new_qc, circuit_to_dag(new_qc) , angle_multipliers
 
-def transform_qiskit_to_stim(qiskit_circuit):
-    # Transform qiskit circuit to stim.
-    modified_circ = modify_circuit(qiskit_circuit)
-    pcirc = transform_to_allowed_gates(modified_circ)
-    stim_circ = qiskit_to_stim(pcirc)
-    return stim_circ,pcirc
-
 def qaoa_relax_parameters(circuit, opt_val=0.2):
     # QAOA Relax Initalization method chosen from https://arxiv.org/pdf/2409.12104 paper.
     constant_vals = {}
@@ -318,3 +311,12 @@ def qaoa_relax_parameters(circuit, opt_val=0.2):
             val = -1*opt_val
         constant_vals[param_name] = val
     return list(constant_vals.values())
+
+def transform_qiskit_to_stim(qiskit_circuit):
+    # Transform qiskit circuit to stim.
+    modified_circ = modify_circuit(qiskit_circuit)
+    pcirc = transform_to_allowed_gates(modified_circ)
+    pcirc, dag , angle_multipliers= relax_qaoa_parameters(pcirc)
+    stim_circ = qiskit_to_stim(pcirc)
+    return stim_circ,pcirc
+

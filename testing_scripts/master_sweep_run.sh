@@ -21,12 +21,12 @@
 # done
 
 #Rep Sweep 
-for rep in 1 2 5; do
-    for seed in {1..5}; do
-        # sbatch --output=../logs/rep_sweep/2000_gens_Rep_Sweep_%j.log --export=ALL,N_QUBITS=10,N_REPS=$rep,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
-        sbatch --output=../logs/rep_sweep/knapsack/kp_rep_sweep_%j.log --export=ALL,N_QUBITS=6,N_REPS=$rep,SEED=$seed sweep_run.sh
-    done
-done
+# for rep in 1 2 5; do
+#     for seed in {1..5}; do
+#         # sbatch --output=../logs/rep_sweep/2000_gens_Rep_Sweep_%j.log --export=ALL,N_QUBITS=10,N_REPS=$rep,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
+#         sbatch --output=../logs/rep_sweep/knapsack/kp_rep_sweep_%j.log --export=ALL,N_QUBITS=6,N_REPS=$rep,SEED=$seed sweep_run.sh
+#     done
+# done
 
 # #Knapsack
 # for seed in {1..10}; do
@@ -37,3 +37,9 @@ done
 # for seed in {1..3}; do
     # sbatch --qos=premium --output=../logs/ansatz_comparision/ma_qaoa_plus_%j.log --export=ALL,N_QUBITS=12,N_REPS=2,NUM_GENERATIONS=500,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
 # done
+
+#Teague Code
+sbatch --qos=premium --output=../logs/teague_%j.log sweep_run.sh
+
+#Noisy Sim 
+    # sbatch --qos=premium --output=../logs/maxcut_graphs_eval/noisy/noisy_14_qb_complete_%j.log --export=ALL,N_QUBITS=14,N_REPS=2,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=1,NOISE=1 sweep_run.sh

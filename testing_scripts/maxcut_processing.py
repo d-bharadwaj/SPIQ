@@ -10,40 +10,7 @@ from qiskit_aer.noise import NoiseModel
 from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
 
 
-def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter,noise=False):
-
-    objective_func_vals= []
-
-    def cost_func_estimator(params, ansatz, hamiltonian, estimator,objective_func_vals):
-
-        # transform the observable defined on virtual qubits to
-        # an observable defined on all physical qubits
-        isa_hamiltonian = hamiltonian.apply_layout(ansatz.layout)
-
-        pub = (ansatz, isa_hamiltonian, params)
-        job = estimator.run([pub])
-
-        results = job.result()[0]
-        cost = results.data.evs
-        
-        objective_func_vals.append(cost)
-        return cost
-    
-    backend = AerSimulator(method='statevector')
-    if noise:
-        noisy_backend = FakeMumbaiV2()  # Your quantum backend
-        noise_model = NoiseModel.from_backend(noisy_backend)
-        backend.set_options(noise_model=noise_model)
-
-    estimator = Estimator(mode=backend)
-    result = minimize(
-        cost_func_estimator,
-        params,
-        args=(circuit, cost_hamiltonian, estimator,objective_func_vals),
-        method="COBYLA",
-        tol=1e-4,
-        options={'maxiter': maxiter}
-    )
+def evaluate_maxcut(G,circuit,result,backend):
 
     optimized_circuit = circuit.assign_parameters(result.x)
     optimized_circuit.measure_all()
@@ -78,5 +45,5 @@ def evaluate_maxcut(G,circuit,params,cost_hamiltonian,maxiter,noise=False):
 
     cut_value= evaluate_sample(most_likely_bitstring, G)
 
-    return cut_value,objective_func_vals,result.fun
+    return cut_value
 

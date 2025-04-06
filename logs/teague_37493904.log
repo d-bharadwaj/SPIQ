@@ -1,0 +1,3 @@
+slurmstepd: error: execve(): /global/u1/d/dhanvib/development/QAOA/testing_scripts/../teague_code/code-for-gokul/teague_qaoa.py: Permission denied
+srun: error: nid004176: task 0: Exited with exit code 13
+srun: Terminating StepId=37493904.0

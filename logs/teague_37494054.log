@@ -1,0 +1,9 @@
+Current working directory: /global/u1/d/dhanvib/development/QAOA/testing_scripts
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py", line 41, in <module>
+    feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'sampled_{n_qubits}_features_subproblem_1')
+  File "/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/pcbo_utils.py", line 24, in load_features_and_corr_files
+    with open(f"{problem_dir}/sampled_features.json", "r") as file:
+FileNotFoundError: [Errno 2] No such file or directory: 'sampled_8_features_subproblem_1/sampled_features.json'
+srun: error: nid004176: task 0: Exited with exit code 1
+srun: Terminating StepId=37494054.0

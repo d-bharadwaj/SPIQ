@@ -21,7 +21,9 @@ from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 
 import sys
+import os
 sys.path.append("../")
+print("Current working directory:", os.getcwd())
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, transform_qiskit_to_stim,generate_qiskit_param_map,relax_qaoa_parameters
 from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph,compute_optimal_max_cut,build_max_cut_paulis
@@ -35,8 +37,8 @@ import pcbo_utils
 from qiskit.quantum_info import SparsePauliOp
 import os
 
-n_qubits = 8
-feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'sampled_{n_qubits}_features_subproblem_1')
+n_qubits = 14
+feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'../teague_code/code-for-gokul/sampled_{n_qubits}_features_subproblem_1')
 
 pcbo_obj = pcbo_utils.create_three_body_cubo(
     feature_set,
@@ -49,7 +51,7 @@ pcbo_obj = pcbo_utils.create_three_body_cubo(
 
 pubo = {key: float(value) for key, value in pcbo_obj.to_pubo().items()}
 
-def convert_pubo_to_ising(hypergraph: dict) -> list[tuple[str, float]]:
+def convert_pubo_to_ising(hypergraph: dict) -> list[tuple[str, float]]: #TODO: put this in util file.
     """Convert a hypergraph dictionary to a list of Pauli strings with weights."""
     n = n_qubits # Number of qubits
     pauli_list = []
@@ -77,7 +79,7 @@ teague_qaoa = QAOASolver(cost_hamiltonian,circuit)
 teague_qaoa.prepare_circuit()
 
 # run CAFQA
-teague_qaoa.run_CAFQA(n_gens=1000)
+teague_qaoa.run_CAFQA(n_gens=1000) 
 
 # Solve with classical Eigensolver for comparison
 exact_solution = teague_qaoa.evaluate_exact_energy()
@@ -85,15 +87,14 @@ exact_solution = teague_qaoa.evaluate_exact_energy()
 cafqa_angles = [param * np.pi/2 for param in teague_qaoa.ks_best]
 random_angles = np.random.random(len(teague_qaoa.ks_best))
 
-
 max_iters = 1000
 cafqa_result,cafqa_iteration_vals = teague_qaoa.run_qaoa(cafqa_angles,max_iters)
 random_result,random_iteration_vals = teague_qaoa.run_qaoa(random_angles,max_iters)
 
 results_dict = {
-    "cafqa_result": cafqa_result,
+    "cafqa_fin_energy": cafqa_result.fun,
     "cafqa_iteration_vals": cafqa_iteration_vals,
-    "random_result": random_result,
+    "random_result_energy": random_result.fun,
     "random_iteration_vals": random_iteration_vals,
 }
 
