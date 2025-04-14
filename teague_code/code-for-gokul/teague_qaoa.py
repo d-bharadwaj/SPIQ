@@ -37,7 +37,7 @@ import pcbo_utils
 from qiskit.quantum_info import SparsePauliOp
 import os
 
-n_qubits = 14
+n_qubits = 12
 feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'../teague_code/code-for-gokul/sampled_{n_qubits}_features_subproblem_1')
 
 pcbo_obj = pcbo_utils.create_three_body_cubo(
@@ -87,7 +87,7 @@ exact_solution = teague_qaoa.evaluate_exact_energy()
 cafqa_angles = [param * np.pi/2 for param in teague_qaoa.ks_best]
 random_angles = np.random.random(len(teague_qaoa.ks_best))
 
-max_iters = 1000
+max_iters = 3000
 cafqa_result,cafqa_iteration_vals = teague_qaoa.run_qaoa(cafqa_angles,max_iters)
 random_result,random_iteration_vals = teague_qaoa.run_qaoa(random_angles,max_iters)
 

@@ -159,6 +159,7 @@ class ParametrizedCliffordCircuit:
         self.circ_snapshot = None
         self.circ_snapshot_noiseless = None
         self.pauli_twirl_list = None
+        self.group_dict = None #NOTE:
     def _append_gate(self, GateType, *qbs):
         """Hidden function that appends gate to list and updates #qubits."""
         gate = GateType(*qbs)

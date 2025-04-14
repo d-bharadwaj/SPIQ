@@ -15,6 +15,7 @@ def loss_func(
         trans_pcirc: ParametrizedCliffordCircuit | None = None, 
         alpha: float | None = None, 
         return_sublosses: bool = False,
+        group = False,
         **energy_kwargs
     ):
     if trans_pcirc is None:
@@ -23,7 +24,18 @@ def loss_func(
             for circuit in vqe_pcirc.pauli_twirl_list:
                 circuit.assign(x)
 
-        vqe_pcirc.assign(x) 
+        if group:
+            group_dict = vqe_pcirc.group_dict
+            # group_dict = {'γ[0]': [0,1], 'β[0]': [2]} #NOTE: This is hook 
+            placeholder_list = [0] * sum(map(len, group_dict.values()))
+
+            for i,j in enumerate(group_dict.items()):
+                val = x[i]
+                for k in j[1]:
+                    placeholder_list[k] = val
+            x = placeholder_list
+
+        vqe_pcirc.assign(x)
         vqe_pcirc.snapshot()
         vqe_pcirc.snapshot_noiseless()
 
@@ -42,7 +54,7 @@ def loss_func(
                             )
         pauli_weight_loss = 0.
         loss = energy + energy_noiseless
-    
+
     else: #NOTE: Currently, PT does not account for this case.
         trans_circ = trans_pcirc.assign(x).stim_circuit()
         paulis_trans, signs = transform_paulis(trans_circ, paulis)
@@ -82,6 +94,7 @@ def eval_xs_terms(
         p_end_idx: int | None = None, 
         result_queue = None,
         result_id: int | None = None,
+        group=False,
         **loss_kwargs
     ):
     S = len(xs)
@@ -91,6 +104,7 @@ def eval_xs_terms(
     idx1 = p_start_idx
     idx2 = P - 1
     partial_losses = []
+
     for s in range(S-1):
         partial_losses.append(loss_func(
             xs[s], 
@@ -98,6 +112,7 @@ def eval_xs_terms(
             coeffs[idx1:idx2+1], 
             vqe_pcirc,
             trans_pcirc,
+            group=group,
             **loss_kwargs,
             ))
         idx1 = 0
@@ -108,6 +123,7 @@ def eval_xs_terms(
             coeffs[idx1:idx2+1], 
             vqe_pcirc,
             trans_pcirc,
+            group=group,
             **loss_kwargs
             ))
     if result_queue is None:
@@ -139,6 +155,7 @@ def eval_xs_terms_mp(
         n_proc: int = 1, 
         out_data: list | None = None, 
         callback = None, 
+        group=False,
         **loss_kwargs
     ):
     S = len(xs)
@@ -151,10 +168,11 @@ def eval_xs_terms_mp(
     processes = []
     result_queue = mp.Manager().Queue()
     loss_kwargs["return_sublosses"] = True
+
     # start n_proc - 1 other subprocesses
     for i in range(1, n_proc):
         process = mp.Process(
-            target=eval_xs_terms,
+            target=eval_xs_terms,#NOTE: this function needs to change 
             args=(
                 xs[sp_start_idc[i][0]:sp_end_idc[i][0]+1],
                 paulis,
@@ -164,7 +182,8 @@ def eval_xs_terms_mp(
                 sp_start_idc[i][1],
                 sp_end_idc[i][1],
                 result_queue,
-                i
+                i,
+                group
             ),
             kwargs=loss_kwargs
         )
@@ -179,6 +198,7 @@ def eval_xs_terms_mp(
         trans_pcirc,
         sp_start_idc[0][1],
         sp_end_idc[0][1],
+        group=group,
         **loss_kwargs
     )
     losses = np.zeros((S, len(partial_losses[0])))
@@ -274,6 +294,7 @@ def claptonize(
             trans_pcirc,
             **optimizer_and_loss_kwargs
         )
+
         best_count = len(xs)
 
         # wait until others are finished
@@ -330,6 +351,139 @@ def claptonize(
     else:
         return list(x_best), energy_noisy, energy_ideal
 
+def group_claptonize(
+        paulis: list[str],
+        coeffs: list[float],
+        vqe_pcirc: ParametrizedCliffordCircuit,
+        trans_pcirc: ParametrizedCliffordCircuit | None = None,
+        n_proc: int = 10,
+        n_starts: int = 10,
+        n_rounds: int | None = None,
+        n_retry_rounds: int = 0,
+        return_n_rounds: bool = False,
+        mix_best_pop_frac: float = 0.2,
+        mutation_probability :tuple[float, float] = (0.25,0.01),
+        crossover_type : str =  "single_point",
+        keep_elitism : int = 5,
+        group_dict = None,
+        **optimizer_and_loss_kwargs
+    ):
+    sig_handler = SignalHandler()
+
+    group_reps = list(int(x) for x in np.zeros(len(group_dict)))
+
+    assert vqe_pcirc.num_physical_qubits == len(paulis[0])
+    if trans_pcirc is not None:
+        assert trans_pcirc.num_physical_qubits == len(paulis[0])
+        # take snapshot for more efficient sim in cost function (is initialized to params all 0)
+        vqe_pcirc.snapshot()
+        vqe_pcirc.snapshot_noiseless()
+    
+    n_proc = n_proc // n_starts
+    if n_proc == 0:
+        n_proc = 1
+    initial_populations = [None] * n_starts
+    out_data = [-1, [np.inf]*3, None]
+    optimizer_and_loss_kwargs["n_proc"] = n_proc
+    optimizer_and_loss_kwargs["return_best_pop_frac"] = mix_best_pop_frac
+    optimizer_and_loss_kwargs["out_data"] = out_data
+
+    optimizer_and_loss_kwargs["mutation_probability"] = mutation_probability
+    optimizer_and_loss_kwargs["crossover_type"] = crossover_type
+    optimizer_and_loss_kwargs["keep_elitism"] = keep_elitism
+    
+    r_idx = 0
+    r_idx_last_change = 0
+    last_best_energy_ideal = np.inf
+    while True:
+        print(f"STARTING ROUND {r_idx}\n\n")
+        # start parallelization
+        master_processes = []
+        master_queue = mp.Manager().Queue()
+        # start n_starts - 1 other master processes
+        for m in range(1, n_starts):
+            optimizer_and_loss_kwargs["initial_population"] = initial_populations[m]
+            master_process = mp.Process(
+                                target=group_genetic_algorithm, 
+                                args=(
+                                    group_reps,
+                                    paulis,
+                                    coeffs,
+                                    vqe_pcirc,
+                                    trans_pcirc,
+                                    master_queue,
+                                    m
+                                ),
+                                kwargs=optimizer_and_loss_kwargs)
+            master_processes.append(master_process)
+            master_process.start()
+
+        # this is also a master process
+        optimizer_and_loss_kwargs["initial_population"] = initial_populations[0]
+        xs, losses = group_genetic_algorithm(
+            group_reps,
+            paulis,
+            coeffs,
+            vqe_pcirc,
+            trans_pcirc,
+            **optimizer_and_loss_kwargs
+        )
+        best_count = len(xs)
+
+        # wait until others are finished
+        for master_process in master_processes:
+            master_process.join()
+        # fetch others
+        while not master_queue.empty():
+            item = master_queue.get()
+            xs = np.vstack((xs, item[1]))
+            losses = np.concatenate((losses, item[2]))
+        num_xs = xs.shape[0]
+        assert num_xs == n_starts * best_count
+        
+        # create new initial populations for next round
+        rand_shuffled_idc = np.random.choice(range(num_xs), size=num_xs, replace=False)
+        for i in range(n_starts):
+            idc = rand_shuffled_idc[i*best_count:(i+1)*best_count]
+            initial_populations[i] = xs[idc]
+
+        best_idx = np.argmin(losses)
+        x_best = xs[best_idx]
+
+        _, energy_noisy, energy_ideal, _ = loss_func(
+                                                x_best, 
+                                                paulis, 
+                                                coeffs, 
+                                                vqe_pcirc, 
+                                                trans_pcirc,
+                                                alpha=optimizer_and_loss_kwargs.get("alpha"),
+                                                return_sublosses=True,
+                                                group=True
+                                                )
+
+        if n_rounds is None:
+            if energy_ideal < last_best_energy_ideal:
+                r_idx_last_change = r_idx
+                last_best_energy_ideal = energy_ideal
+                r_idx += 1
+            else:
+                if r_idx == r_idx_last_change + 1 + n_retry_rounds:
+                    # no change within n_retry_rounds
+                    r_idx += 1
+                    break
+                else:
+                    r_idx += 1
+        else:
+            r_idx += 1
+            if r_idx == n_rounds:
+                break
+    
+    sig_handler.restore_handlers()
+        
+    if return_n_rounds:
+        return list(x_best), energy_noisy, energy_ideal, r_idx
+    else:
+        return list(x_best), energy_noisy, energy_ideal
 
 ### Solvers
 def genetic_algorithm(
@@ -383,6 +537,126 @@ def genetic_algorithm(
             n_proc,
             out_data,
             callback,
+            **loss_kwargs
+            )
+    ga_instance = pygad.GA(
+                    num_generations=num_generations,
+                    num_parents_mating=num_parents_mating,
+                    fitness_func=fitness_func,
+                    sol_per_pop=population_size,
+                    num_genes=num_genes,
+                    parent_selection_type=parent_selection_type,
+                    keep_parents=keep_parents,
+                    crossover_type=crossover_type,
+                    mutation_type=mutation_type,
+                    gene_space=gene_space,
+                    gene_type=[int]*num_params,
+                    crossover_probability=crossover_probability,
+                    mutation_probability=mutation_probability,
+                    keep_elitism=keep_elitism,
+                    fitness_batch_size=population_size,
+                    random_seed=0,
+                    )
+    
+    print(f"GA parameters used for this experiment:\n"
+          f"  num_generations={num_generations}\n"
+          f"  num_parents_mating={num_parents_mating}\n"
+          f"  population_size={population_size}\n"
+          f"  num_genes={num_genes}\n"
+          f"  parent_selection_type={parent_selection_type}\n"
+          f"  keep_parents={keep_parents}\n"
+          f"  crossover_type={crossover_type}\n"
+          f"  mutation_type={mutation_type}\n"
+          f"  crossover_probability={crossover_probability}\n"
+          f"  mutation_probability={mutation_probability}\n"
+          f"  keep_elitism={keep_elitism}")
+
+    if initial_population is not None:
+        initial_population = np.asarray(initial_population)
+        assert len(initial_population.shape) == 2
+        assert initial_population.shape[1] == num_params
+        num_fixed_pops = initial_population.shape[0]
+        ga_instance.initial_population[:num_fixed_pops] = initial_population[:population_size]
+        ga_instance.population[:num_fixed_pops] = initial_population[:population_size].copy()
+    else:
+        if init_no_2qb:
+            ga_instance.initial_population[:,idc_param_2qb] = 0 
+            ga_instance.population[:,idc_param_2qb] = 0 
+    
+    ga_instance.run()
+    last_losses = -ga_instance.last_generation_fitness
+    best_idc = np.argsort(last_losses)[:best_count]
+    best_losses = last_losses[best_idc]
+    best_xs = ga_instance.population[best_idc,:]
+
+    if master_queue is None:
+        return best_xs, best_losses
+    else:
+        master_queue.put((master_id, best_xs, best_losses))
+        
+
+### Trial
+def group_genetic_algorithm(
+        group_reps: list[int],
+        paulis: list[str], 
+        coeffs: list[str],
+        vqe_pcirc: ParametrizedCliffordCircuit,
+        trans_pcirc: ParametrizedCliffordCircuit | None,
+        master_queue = None,
+        master_id: int | None = None,
+        n_proc: int = 1,
+        out_data: list | None = None,
+        callback = None,
+        budget: int = 100,
+        population_size: int = 100,
+        return_best_pop_frac: int = 0.2,
+        initial_population: np.ndarray = None,
+        init_no_2qb: bool = True,
+        keep_elitism: bool = None,
+        num_parents_mating: int = None,
+        parent_selection_type: str = "tournament", #"sss"
+        keep_parents: int = -1,
+        crossover_type: str = "single_point",
+        crossover_probability: float = 0.9,
+        mutation_type: str = "adaptive",
+        mutation_probability: tuple[float, float] =(0.25, 0.01), #(0.25, 0.05) 
+        **loss_kwargs
+    ):
+    print(f"started GA at id {master_id} with {n_proc} procs\n")
+    if trans_pcirc is None:
+        if group_reps: 
+            gene_space = [list(range(4)) for _ in range(len(group_reps))] #NOTE: 
+            # gene_space = [[0,1,2,3],[0,1,2,3]]
+            idc_param_2qb = vqe_pcirc.idc_param_2qb()
+        else:
+            gene_space = vqe_pcirc.parameter_space()
+            idc_param_2qb = vqe_pcirc.idc_param_2qb()
+    else:
+        gene_space = trans_pcirc.parameter_space()
+        idc_param_2qb = trans_pcirc.idc_param_2qb()
+
+    # num_params = len(gene_space)
+    num_params = len(group_reps)
+
+    num_generations = budget
+    num_genes = num_params
+    if keep_elitism is None:
+        keep_elitism = population_size // 10
+    if num_parents_mating is None:
+        num_parents_mating = 2 * population_size // 10
+    best_count = int(population_size * return_best_pop_frac)
+
+    def fitness_func(ga_instance, solutions, solutions_idc):
+        return -eval_xs_terms_mp(
+            solutions, 
+            paulis, 
+            coeffs,
+            vqe_pcirc,
+            trans_pcirc,
+            n_proc,
+            out_data,
+            callback,
+            group=True,
             **loss_kwargs
             )
     ga_instance = pygad.GA(

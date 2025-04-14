@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/noise_sweep.py", line 21, in <module>
+    from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
+ImportError: cannot import name 'evaluate_energy' from 'testing_scripts.qaoa_utils' (/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py)
+srun: error: nid004389: task 0: Exited with exit code 1
+srun: Terminating StepId=37751969.0

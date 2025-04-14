@@ -1,0 +1,25 @@
+STARTING ROUND 0
+
+
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/noise_sweep.py", line 60, in <module>
+    maxcut_qaoa.run_CAFQA(n_gens=n_gens)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 90, in run_CAFQA
+    self.ks_best, _, self.energy_best = claptonize(
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../clapton/clapton.py", line 286, in claptonize
+    master_process.start()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/context.py", line 288, in _Popen
+    return Popen(process_obj)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 32, in __init__
+    super().__init__(process_obj)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 47, in _launch
+    reduction.dump(process_obj, fp)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/multiprocessing/reduction.py", line 60, in dump
+    ForkingPickler(file, protocol).dump(obj)
+AttributeError: Can't pickle local object 'ParametrizedCliffordCircuit.define_parameter_map.<locals>.param_map'

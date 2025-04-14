@@ -3,6 +3,8 @@ import numpy as np
 import warnings
 import os
 import sys
+
+from playground_scripts.ma_qaoa_plus import RA_fin_energy
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -78,6 +80,8 @@ ordered_params = [param.name for param in maxcut_qaoa.pcirc.parameters]
 angle_multipliers = [-np.pi/4 if 'gamma' in param else np.pi/4 for param in ordered_params]
 cafqa_params = [param * (multiplier) for param,multiplier in zip(maxcut_qaoa.ks_best,angle_multipliers)] #This has to be in the order we come across the gates.
 
+#NOTE: Change this above^ 
+
 # Evaluate Maxcut 
 max_iters = 1000
 
@@ -86,7 +90,7 @@ RA_result,RA_obj_values = maxcut_qaoa.run_qaoa(rounded_angles, max_iters,noise)
 cafqa_result, cafqa_obj_values = maxcut_qaoa.run_qaoa(cafqa_params,max_iters,noise)
 
 random_fin_energy =  random_result.fun
-RA_fin_energy = RA_result.fun
+# RA_fin_energy = RA_result.fun
 cafqa_fin_energy = cafqa_result.fun
 
 random_max_cut_val = evaluate_maxcut(G,maxcut_qaoa.pcirc,random_result,maxcut_qaoa.backend)
