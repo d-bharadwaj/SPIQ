@@ -141,6 +141,17 @@ class QAOASolver:
         objective_func_vals.append(cost)
         return cost
 
+    def evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,noise=False,err=None):
+
+        self._initialize_backend(err=err,noise=noise)
+        isa_hamiltonian = hamiltonian.apply_layout(qiskit_circuit.layout)
+
+        pub = (qiskit_circuit, isa_hamiltonian, parameters)
+        job = self.estimator.run([pub])
+
+        results = job.result()[0]
+        return results.data.evs
+
     def _run_qaoa(self, initial_params, maxiter=1000):
         """
         Run the QAOA optimization.
