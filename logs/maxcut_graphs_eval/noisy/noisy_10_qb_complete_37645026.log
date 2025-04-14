@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/noise_sweep.py", line 21, in <module>
+    from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 199
+    return cost..
+                ^
+SyntaxError: invalid syntax
+srun: error: nid004312: task 0: Exited with exit code 1
+srun: Terminating StepId=37645026.0

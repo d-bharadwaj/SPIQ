@@ -4,7 +4,7 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu
 #SBATCH -q regular
-#SBATCH -t 10:00:00
+#SBATCH -t 15:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
@@ -42,4 +42,7 @@ export PYTHONWARNINGS="ignore"
 # srun --cpu-bind=cores python knapsack.py $N_QUBITS $N_REPS $SEED
 
 #Teague 
-srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py
+# srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py
+
+#Noisy sweep
+srun --cpu-bind=cores python noise_sweep.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE

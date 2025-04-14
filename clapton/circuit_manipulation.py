@@ -21,7 +21,7 @@ def multi_angle_qaoa_circuit(num_qubits, G , reps, gamma_params=None,beta_params
         for idx, (i, j, weight) in enumerate(G.weighted_edge_list()):
             gamma = gamma_params[gamma_offset + idx]  # Get the gamma parameter
             qc.cx(i, j)
-            qc.rz(-2 * weight * gamma, j) # if we add weights here, then we need to use the weights for circuit conversion.
+            qc.rz(-2 * 1 * gamma, j)
             qc.cx(i, j)
 
         for idx, i in enumerate(G.node_indexes()):
@@ -262,7 +262,45 @@ def generate_qiskit_param_map(circuit):
     param_map = {i: qiskit_param_map[param] for i, param in enumerate(ordered_params)}
     return param_map
 
+#NOTE:
+def group_generate_qiskit_param_map(circuit):
+    dag = circuit_to_dag(circuit)
+    param_list = [list(node.op.params[0].parameters)[0].name for node in dag.op_nodes() if node.op.params and isinstance(node.op.params[0], ParameterExpression)]
+    qiskit_param_map = {}
+    for k, v in enumerate(param_list):
+        if v not in qiskit_param_map:
+            qiskit_param_map[v] = []
+        qiskit_param_map[v].append(k)
+
+
+    # Ensure the sorted names are correct
+    ordered_params = [param.name for param in circuit.parameters]
+    assert sorted(qiskit_param_map.keys()) == ordered_params
+
+    # param_map = {i: qiskit_param_map[param] for i, param in enumerate(ordered_params)}
+    return qiskit_param_map
+
+    # for instruction in circuit:
+    #     print(instruction)
+
 def relax_qaoa_parameters(circ):
+    """
+    Relaxes QAOA circuit parameters by replacing parameterized angles (gamma and beta) 
+    with new parameters that include their multipliers in their names.
+
+    Args:
+        circ (QuantumCircuit): Input QAOA circuit.
+
+    Returns:
+        tuple:
+            - QuantumCircuit: Modified circuit with updated parameters.
+            - DAGCircuit: DAG representation of the modified circuit.
+            - dict: Mapping of new parameter names to their multipliers.
+
+    Notes:
+        - Identifies "gamma" and "beta" parameters.
+        - Extracts multipliers (e.g., `2*gamma`) and updates parameters.
+    """
     dag = circuit_to_dag(circ)
     gamma_counter, beta_counter = 0, 0
     angle_multipliers = {}
