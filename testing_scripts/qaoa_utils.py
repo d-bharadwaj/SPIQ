@@ -7,6 +7,14 @@ from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
 from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
+from qiskit_aer.noise import  (
+    NoiseModel,
+    QuantumError,
+    ReadoutError,
+    depolarizing_error,
+    pauli_error,
+    thermal_relaxation_error,
+)
 
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import (
@@ -16,6 +24,7 @@ from clapton.circuit_manipulation import (
     relax_qaoa_parameters,
     generate_qiskit_param_map,
 )
+from clapton.depolarization import GateGeneralDepolarizationModel
 
 # Suppress warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -69,7 +78,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_CAFQA(self, n_gens):
+    def run_CAFQA(self, n_gens , noise=None):
         """
         Run the CAFQA initialization.
 
@@ -78,6 +87,11 @@ class QAOASolver:
         """
         paulis, coeffs = self.cost_hamiltonian.paulis.to_labels(), self.cost_hamiltonian.coeffs.real
         reversed_paulis = [p[::-1] for p in paulis]
+
+        if noise: 
+                # let's add a noise model where we specify global 1q and 2q gate errors
+                nm = GateGeneralDepolarizationModel(p1=noise, p2=noise)
+                self.stim_circ.add_depolarization_model(nm)
 
         self.ks_best, _, self.energy_best = claptonize(
             reversed_paulis,
@@ -89,9 +103,9 @@ class QAOASolver:
             callback=print,
             budget=n_gens // 2,
         )
+
         print(f"Minimum Energy found with CAFQA initialization: {self.energy_best}")
         self.stim_circ.assign(self.ks_best)
-
     def evaluate_exact_energy(self):
         """
         Solve the problem classically using the NumPyMinimumEigensolver.
@@ -104,7 +118,15 @@ class QAOASolver:
         print("Exact Energy from Eigensolver:", exact_solution)
         return exact_solution
 
-    def _initialize_backend(self, noise=False):
+    def _create_noise_model(self,err):
+        noise_model = NoiseModel()
+        error = depolarizing_error(err, 1)
+        cx_err = depolarizing_error(err, 2)
+        noise_model.add_all_qubit_quantum_error(error, ["rx", "rz"])
+        noise_model.add_all_qubit_quantum_error(cx_err, ["cx"])
+        return noise_model
+
+    def _initialize_backend(self, err=1e-3, noise=False):
         """
         Initialize the quantum backend with or without noise.
 
@@ -116,8 +138,8 @@ class QAOASolver:
         """
         self.backend = AerSimulator(method='statevector')
         if noise:
-            noisy_backend = FakeMumbaiV2()
-            noise_model = NoiseModel.from_backend(noisy_backend)
+            # noisy_backend = FakeMumbaiV2()
+            noise_model = self._create_noise_model(err)
             self.backend.set_options(noise_model=noise_model)
 
         self.estimator = Estimator(mode=self.backend)
@@ -174,7 +196,7 @@ class QAOASolver:
         )
         return result, objective_func_vals
 
-    def run_qaoa(self, initial_params, max_iters=1000, noise=False):
+    def run_qaoa(self, initial_params, err=None, max_iters=1000, noise=False):
         """
         Run QAOA with custom initial angles.
 
@@ -186,6 +208,6 @@ class QAOASolver:
         Returns:
             Optimization result and the list of objective function values.
         """
-        self._initialize_backend(noise)
+        self._initialize_backend(err=err,noise=noise)
         result, obj_values = self._run_qaoa(initial_params, max_iters)
         return result, obj_values
