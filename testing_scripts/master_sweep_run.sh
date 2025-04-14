@@ -39,7 +39,7 @@
 # done
 
 #Teague Code
-# sbatch --qos=premium --output=../logs/teague_%j.log sweep_run.sh
+sbatch --qos=premium --output=../logs/teague_%j.log sweep_run.sh
 
 #Noisy Sim 
-    sbatch --qos=premium --output=../logs/maxcut_graphs_eval/noisy/noisy_12_qb_complete_%j.log --export=ALL,N_QUBITS=12,N_REPS=2,NUM_GENERATIONS=500,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=1,NOISE=1 sweep_run.sh
+    # sbatch --qos=premium --output=../logs/maxcut_graphs_eval/noisy/noisy_14_qb_complete_%j.log --export=ALL,N_QUBITS=14,N_REPS=2,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=1,NOISE=1 sweep_run.sh
