@@ -55,6 +55,7 @@ class QAOASolver:
         self.pcirc = None
         self.stim_circ = None
         self.param_map = None
+        self.vanilla = False
 
         # Attributes for CAFQA results
         self.ks_best = None
@@ -155,8 +156,13 @@ class QAOASolver:
         Returns:
             Cost value.
         """
-        isa_hamiltonian = self.cost_hamiltonian.apply_layout(self.pcirc.layout)
-        pub = (self.pcirc, isa_hamiltonian, params)
+
+        if self.vanilla:
+            circuit = self.circuit
+        else:
+            circuit = self.pcirc
+        isa_hamiltonian = self.cost_hamiltonian.apply_layout(circuit.layout)
+        pub = (circuit, isa_hamiltonian, params)
         job = self.estimator.run([pub])
         results = job.result()[0]
         cost = results.data.evs
@@ -191,7 +197,7 @@ class QAOASolver:
             initial_params,
             args=(objective_func_vals,),
             method="COBYLA",
-            tol=1e-4,
+            tol=1e-30,
             options={'maxiter': maxiter},
         )
         return result, objective_func_vals
