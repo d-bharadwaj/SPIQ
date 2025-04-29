@@ -267,7 +267,7 @@ def claptonize(
 
         # this is also a master process
         optimizer_and_loss_kwargs["initial_population"] = initial_populations[0]
-        xs, losses = genetic_algorithm(
+        xs, losses , best_solutions, best_fitness_vals= genetic_algorithm(
             paulis,
             coeffs,
             vqe_pcirc,
@@ -324,11 +324,10 @@ def claptonize(
                 break
     
     sig_handler.restore_handlers()
-        
     if return_n_rounds:
-        return list(x_best), energy_noisy, energy_ideal, r_idx
+        return list(x_best), energy_noisy, energy_ideal, r_idx, best_solutions, best_fitness_vals
     else:
-        return list(x_best), energy_noisy, energy_ideal
+        return list(x_best), energy_noisy, energy_ideal, best_solutions, best_fitness_vals
 
 
 ### Solvers
@@ -385,6 +384,7 @@ def genetic_algorithm(
             callback,
             **loss_kwargs
             )
+    
     ga_instance = pygad.GA(
                     num_generations=num_generations,
                     num_parents_mating=num_parents_mating,
@@ -402,6 +402,7 @@ def genetic_algorithm(
                     keep_elitism=keep_elitism,
                     fitness_batch_size=population_size,
                     random_seed=0,
+                    save_best_solutions=True
                     )
     
     print(f"GA parameters used for this experiment:\n"
@@ -434,8 +435,10 @@ def genetic_algorithm(
     best_idc = np.argsort(last_losses)[:best_count]
     best_losses = last_losses[best_idc]
     best_xs = ga_instance.population[best_idc,:]
+    best_solutions = ga_instance.best_solutions
+    best_fitness_vals = [val/-2 for val in ga_instance.best_solutions_fitness]
 
     if master_queue is None:
-        return best_xs, best_losses
+        return best_xs, best_losses , best_solutions, best_fitness_vals
     else:
-        master_queue.put((master_id, best_xs, best_losses))
+        master_queue.put((master_id, best_xs, best_losses, best_solutions, best_fitness_vals))
