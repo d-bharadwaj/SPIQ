@@ -87,9 +87,6 @@ def execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, o
     # Return results
     return {
         "CAFQA_initialization_energy": maxcut_qaoa.energy_best,
-        # "Random_initialization_energy": min_energy,
-        # "Angle_rounding_energy": min_rounded_energy,
-        # "Exact_solution_energy": exact_solution,
         "Random_initialization_max_cut": random_max_cut_val,
         "CAFQA_initialization_max_cut": cafqa_max_cut_val,
         "Random_approx_ratio": random_approx_ratio,
@@ -146,7 +143,7 @@ def main():
     cafqa_params = [param * (np.pi / 2) for param, multiplier in zip(maxcut_qaoa.ks_best, angle_multipliers)]
 
     # Execute QAOA tasks
-    max_iters = 10
+    max_iters = 1000
     
     start = timer()
     results = execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, optimal_max_cut_val)
