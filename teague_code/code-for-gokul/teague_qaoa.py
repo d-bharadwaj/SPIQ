@@ -88,24 +88,24 @@ cafqa_angles = [param * np.pi/2 for param in teague_qaoa.ks_best]
 random_angles = np.random.random(len(teague_qaoa.ks_best))
 
 max_iters = 1000
-cafqa_result,cafqa_iteration_vals = teague_qaoa.run_qaoa(cafqa_angles,max_iters)
-random_result,random_iteration_vals = teague_qaoa.run_qaoa(random_angles,max_iters)
+cafqa_result,cafqa_iteration_vals = teague_qaoa.run_qaoa(initial_params=cafqa_angles,max_iters=max_iters,opt="SPSA")
+random_result,random_iteration_vals = teague_qaoa.run_qaoa(initial_params=random_angles,max_iters=max_iters,opt="SPSA")
 
-# Vanill QAOA
-circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=2)
-vanilla_teague = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
-vanilla_teague.vanilla = True
-vanilla_res,vanilla_iteration_vals=vanilla_teague.run_qaoa(random_angles, max_iters=1000)
+# # Vanilla QAOA
+# circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
+# vanilla_teague = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
+# vanilla_teague.vanilla = True
+# vanilla_res,vanilla_iteration_vals=vanilla_teague.run_qaoa(random_angles, max_iters=max_iters)
 
 results_dict = {
     "cafqa_fin_energy": cafqa_result.fun,
     "cafqa_iteration_vals": cafqa_iteration_vals,
     "random_result_energy": random_result.fun,
     "random_iteration_vals": random_iteration_vals,
-    "vanilla_res_energy": vanilla_res.fun,
-    "vanilla_iteration_vals": vanilla_iteration_vals,
+    # "vanilla_res_energy": vanilla_res.fun,
+    # "vanilla_iteration_vals": vanilla_iteration_vals,
 }
 
-output_dir = f"../np_data/teague_data/{n_qubits}_qubits"
+output_dir = f"../np_data/teague_data/SPSA_test/{n_qubits}_qubits"
 os.makedirs(output_dir, exist_ok=True)
-np.save(os.path.join(output_dir, "vanilla_results.npy"), results_dict)
+np.save(os.path.join(output_dir, "SPSA_results.npy"), results_dict)

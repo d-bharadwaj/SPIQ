@@ -33,10 +33,8 @@ seed =  int(sys.argv[7])
 noise = bool(int(sys.argv[8]))
 
 n = n_qubits
-k = 3 # for k-regular graphs
 
-G = generate_random_complete_graph(num_vertices=n, weighted=True,seed=False)
-# G = generate_k_regular_graph(num_vertices=n, k=k, weighted=True)
+G = generate_random_complete_graph(num_vertices=n, weighted=True,seed=True)
 
 # Evaluate Optimal Maxcut
 optimal_max_cut_val = compute_optimal_max_cut(G)
@@ -76,7 +74,7 @@ cafqa_params = [param * (np.pi/2) for param,multiplier in zip(maxcut_qaoa.ks_bes
 
 # Evaluate Maxcut 
 max_iters = 200
-noise_levels = [1e-3,1e-1]
+noise_levels = [1e-3,1e-4,1e-5]
 results_per_noise = {}
 
 for noise_level in noise_levels:
@@ -99,10 +97,10 @@ for noise_level in noise_levels:
     # Save results for this noise level
     output_dir = f"../np_data/rep_sweep_2000_gens/single/{reps}_layers"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"results_{seed}_noise_{noise_level}.npy"), result)
+    np.save(os.path.join(output_dir, f"new_results_{seed}_noise_{noise_level}.npy"), result)
 
     results_per_noise[noise_level] = result
 
 # Save the combined results_per_noise dictionary
-output_file = f"../np_data/rep_sweep_2000_gens/{reps}_layers/n-cafqa_single_noisy_results_{seed}.npy"
+output_file = f"../np_data/rep_sweep_2000_gens/{reps}_layers/1e-3_new_n-cafqa_single_noisy_results_{seed}.npy"
 np.save(output_file, results_per_noise)
