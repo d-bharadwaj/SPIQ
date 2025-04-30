@@ -16,9 +16,9 @@
 #     sbatch --output=../logs/ga_sweep/Crossover_Sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE=$crossover_type sweep_run.sh
 # done
 
-# for seed in {1..10}; do
-#     sbatch --output=../logs/maxcut_graphs_eval/approx_ratio_14_qb_k_reg_maxcut_%j.log --export=ALL,N_QUBITS=14,N_REPS=5,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed sweep_run.sh
-# done
+for seed in {1..1}; do
+    sbatch --qos=premium --output=../logs/maxcut_graphs_eval/NM_test%j.log --export=ALL,N_QUBITS=12,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+done
 
 #Rep Sweep 
 # for rep in 1 2 5; do
@@ -28,9 +28,9 @@
 #     done
 # done
 
-# #Knapsack
-# for seed in {1..10}; do
-#     sbatch  --output=../logs/maxcut_graphs_eval/knapsack%j.log --export=ALL,SEED=$seed sweep_run.sh
+# # Knapsack
+# for seed in {1..1}; do
+#     sbatch --qos=premium --output=../logs/maxcut_graphs_eval/COBYQA_knapsack_%j.log --export=ALL,N_QUBITS=8,N_REPS=2,SEED=$seed sweep_run.sh
 # done
  
 # # Ansatz Comparision
@@ -39,7 +39,10 @@
 # done
 
 #Teague Code
-sbatch --qos=premium --output=../logs/teague_%j.log sweep_run.sh
+# sbatch --qos=premium --output=../logs/SPSA_teague_%j.log sweep_run.sh
 
-#Noisy Sim 
+# Noisy Sim 
     # sbatch --qos=premium --output=../logs/maxcut_graphs_eval/noisy/noisy_14_qb_complete_%j.log --export=ALL,N_QUBITS=14,N_REPS=2,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=1,NOISE=1 sweep_run.sh
+
+# Optimizer sweep
+    # sbatch --qos=premium --output=../logs/optimizer_sweep/noise_sweep_%j.log --export=ALL,N_QUBITS=10,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=0,NOISE=0 sweep_run.sh

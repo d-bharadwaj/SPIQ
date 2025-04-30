@@ -36,10 +36,16 @@ conda activate qaoa_w_sage
 export PYTHONWARNINGS="ignore"
 
 # Execute Python script with labeled parameters
-# srun --cpu-bind=cores python maxcut_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+# srun --cpu-bind=cores python noise_sweep.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
 
 #Knapsack
 # srun --cpu-bind=cores python knapsack.py $N_QUBITS $N_REPS $SEED
 
 #Teague 
-srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py
+# srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py
+
+#optimizer sweep 
+# srun --cpu-bind=cores python optimizer_sweep.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+
+#Maxcut
+srun --cpu-bind=cores python maxcut_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
