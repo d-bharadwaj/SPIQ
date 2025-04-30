@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/knapsack.py", line 23, in <module>
+    from testing_scripts.qaoa_utils import evaluate_energy,run_qaoa
+ImportError: cannot import name 'run_qaoa' from 'testing_scripts.qaoa_utils' (/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py)
+srun: error: nid004613: task 0: Exited with exit code 1
+srun: Terminating StepId=37858552.0
