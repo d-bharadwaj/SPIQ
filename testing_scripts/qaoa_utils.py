@@ -2,7 +2,9 @@ import numpy as np
 import os
 import warnings
 from scipy.optimize import minimize
+from skquant.opt import minimize as skquant_minimize
 from qiskit_algorithms import NumPyMinimumEigensolver
+from qiskit_algorithms.optimizers import SPSA
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
@@ -15,6 +17,7 @@ from qiskit_aer.noise import  (
     pauli_error,
     thermal_relaxation_error,
 )
+
 
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import (
@@ -89,12 +92,16 @@ class QAOASolver:
         paulis, coeffs = self.cost_hamiltonian.paulis.to_labels(), self.cost_hamiltonian.coeffs.real
         reversed_paulis = [p[::-1] for p in paulis]
 
+        self.best_cafqa_gen_params = None
+        self.best_cafqa_gen_fitness = None
+
+
         if noise: 
                 # let's add a noise model where we specify global 1q and 2q gate errors
                 nm = GateGeneralDepolarizationModel(p1=noise, p2=noise)
                 self.stim_circ.add_depolarization_model(nm)
 
-        self.ks_best, _, self.energy_best = claptonize(
+        self.ks_best, _, self.energy_best, self.best_cafqa_gen_params, self.best_cafqa_gen_fitness = claptonize(
             reversed_paulis,
             coeffs,
             self.stim_circ,
@@ -107,6 +114,7 @@ class QAOASolver:
 
         print(f"Minimum Energy found with CAFQA initialization: {self.energy_best}")
         self.stim_circ.assign(self.ks_best)
+
     def evaluate_exact_energy(self):
         """
         Solve the problem classically using the NumPyMinimumEigensolver.
@@ -121,8 +129,8 @@ class QAOASolver:
 
     def _create_noise_model(self,err):
         noise_model = NoiseModel()
-        error = depolarizing_error(err, 1)
-        cx_err = depolarizing_error(err, 2)
+        error = depolarizing_error(err, 1)      
+        cx_err = depolarizing_error(10*err, 2)
         noise_model.add_all_qubit_quantum_error(error, ["rx", "rz"])
         noise_model.add_all_qubit_quantum_error(cx_err, ["cx"])
         return noise_model
@@ -180,7 +188,7 @@ class QAOASolver:
         results = job.result()[0]
         return results.data.evs
 
-    def _run_qaoa(self, initial_params, maxiter=1000):
+    def _run_qaoa(self, initial_params, maxiter=1000,opt="COBYLA"):
         """
         Run the QAOA optimization.
 
@@ -192,17 +200,58 @@ class QAOASolver:
             Optimization result and the list of objective function values.
         """
         objective_func_vals = []
-        result = minimize(
-            self._cost_function,
-            initial_params,
-            args=(objective_func_vals,),
-            method="COBYLA",
-            tol=1e-30,
-            options={'maxiter': maxiter},
-        )
+
+        def _cost_function_with_vals(x):
+            return self._cost_function(x, objective_func_vals)
+
+        if opt == "SPSA":
+
+            # Auto-configure based on problem scale
+            lr, pert = SPSA.calibrate(
+                _cost_function_with_vals, 
+                initial_params,
+                target_magnitude=0.01, # changed from 0.01 Controls step aggressiveness
+                c=0.1,
+                alpha=0.202,            # Learning rate decay
+                gamma=0.101             # Perturbation decay
+            )
+
+            spsa = SPSA(maxiter=maxiter,
+                        learning_rate=lr,
+                        perturbation=pert)
+
+            # spsa = SPSA(maxiter=maxiter, #more accurate
+            #             learning_rate=0.001,
+            #             perturbation=0.005)
+
+            result = spsa.minimize(_cost_function_with_vals, 
+                                   x0=initial_params,
+                                   bounds=[(0,2*np.pi)*len(initial_params)])
+    
+        elif opt in ['imfil', 'snobfit', 'orbit', 'nomad', 'bobyqa']:
+            bounds=np.array([[0,2*np.pi]]*len(initial_params), dtype=float)
+
+            # method can be ImFil, SnobFit, Orbit, NOMAD, or Bobyqa
+            result, history = \
+                skquant_minimize(_cost_function_with_vals, 
+                        x0=initial_params, 
+                        bounds=bounds, 
+                        budget=maxiter,
+                        method=opt)
+
+        else:
+            result = minimize(
+                self._cost_function,
+                initial_params,
+                args=(objective_func_vals,),
+                method=opt,
+                tol=1e-6,
+                options={'maxiter': maxiter,
+                         'initial_tr_radius': 5.0},
+                )
         return result, objective_func_vals
 
-    def run_qaoa(self, initial_params, err=None, max_iters=1000, noise=False):
+    def run_qaoa(self, initial_params, err=None, max_iters=1000, noise=False,opt = "COBYLA"):
         """
         Run QAOA with custom initial angles.
 
@@ -215,5 +264,5 @@ class QAOASolver:
             Optimization result and the list of objective function values.
         """
         self._initialize_backend(err=err,noise=noise)
-        result, obj_values = self._run_qaoa(initial_params, max_iters)
+        result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
         return result, obj_values
