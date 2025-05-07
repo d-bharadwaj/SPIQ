@@ -95,7 +95,6 @@ class QAOASolver:
         self.best_cafqa_gen_params = None
         self.best_cafqa_gen_fitness = None
 
-
         if noise: 
                 # let's add a noise model where we specify global 1q and 2q gate errors
                 nm = GateGeneralDepolarizationModel(p1=noise, p2=noise)
@@ -105,7 +104,7 @@ class QAOASolver:
             reversed_paulis,
             coeffs,
             self.stim_circ,
-            n_proc=4,
+            n_proc=16,
             n_starts=4,
             n_rounds=1,
             callback=print,
@@ -245,7 +244,7 @@ class QAOASolver:
                 initial_params,
                 args=(objective_func_vals,),
                 method=opt,
-                tol=1e-6,
+                tol=1e-5,
                 options={'maxiter': maxiter,
                          'initial_tr_radius': 5.0},
                 )
