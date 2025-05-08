@@ -35,8 +35,6 @@ def run_qaoa_task_pool(args):
     # QAOA Optimization
     cafqa_params = [param * (np.pi / 2) for param in initial_params]
 
-    print(f"Task {task_id} is running on PID {os.getpid()}, CPU affinity: {os.sched_getaffinity(0)}")
-
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
         result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")

@@ -146,7 +146,6 @@ class QAOASolver:
         """
         self.backend = AerSimulator(method='statevector')
         if noise:
-            # noisy_backend = FakeMumbaiV2()
             noise_model = self._create_noise_model(err)
             self.backend.set_options(noise_model=noise_model)
 
@@ -168,8 +167,7 @@ class QAOASolver:
             circuit = self.circuit
         else:
             circuit = self.pcirc
-        isa_hamiltonian = self.cost_hamiltonian.apply_layout(circuit.layout)
-        pub = (circuit, isa_hamiltonian, params)
+        pub = (circuit, self.cost_hamiltonian, params)
         job = self.estimator.run([pub])
         results = job.result()[0]
         cost = results.data.evs
@@ -179,9 +177,8 @@ class QAOASolver:
     def evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,noise=False,err=None):
 
         self._initialize_backend(err=err,noise=noise)
-        isa_hamiltonian = hamiltonian.apply_layout(qiskit_circuit.layout)
 
-        pub = (qiskit_circuit, isa_hamiltonian, parameters)
+        pub = (qiskit_circuit, hamiltonian, parameters)
         job = self.estimator.run([pub])
 
         results = job.result()[0]
