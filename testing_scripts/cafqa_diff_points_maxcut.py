@@ -35,6 +35,8 @@ def run_qaoa_task_pool(args):
     # QAOA Optimization
     cafqa_params = [param * (np.pi / 2) for param in initial_params]
 
+    print(f"Task {task_id} is running on PID {os.getpid()}, CPU affinity: {os.sched_getaffinity(0)}")
+
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
         result, obj_values = maxcut_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")
@@ -134,8 +136,9 @@ def main():
 
     unique_fitness_values = np.unique(best_cafqa_fitness_values)
 
-    # When choosing best out of unique energies
+    # # When choosing best out of unique energies
     # selected_spaced_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
+
     # selected_spaced_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
     # selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_spaced_fitness_vals]
     # selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
@@ -154,10 +157,10 @@ def main():
     end = timer()
     print(f"Total Time : {end - start}")
 
-    # Save results
-    output_dir = f"../np_data/CAFQA_Analysis/{n_qubits}_qbs"
-    os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"SPSA_best_same_5_point_analysis_{seed}.npy"), results)
+    # # Save results
+    # output_dir = f"../np_data/CAFQA_Analysis/{n_qubits}_qbs"
+    # os.makedirs(output_dir, exist_ok=True)
+    # np.save(os.path.join(output_dir, f"SPSA_best_same_5_point_analysis_{seed}.npy"), results)
 
 # Entry point
 if __name__ == "__main__":
