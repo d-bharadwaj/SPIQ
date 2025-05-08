@@ -1,0 +1,4 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+srun: error: Unable to create step for job 38439843: Invalid generic resource (gres) specification
