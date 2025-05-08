@@ -17,7 +17,7 @@
 # done
 
 for seed in {1..1}; do
-    sbatch --qos=premium --output=../logs/maxcut_graphs_eval/NM_test%j.log --export=ALL,N_QUBITS=12,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+    sbatch --qos=premium --output=../logs/CAFQA_Analysis/Knapsack/SPSA_best_spaced_5_point_analysis_%j.log --export=ALL,N_QUBITS=9,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
 done
 
 #Rep Sweep 

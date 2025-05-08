@@ -4,11 +4,11 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu
 #SBATCH -q regular
-#SBATCH -t 10:00:00
+#SBATCH -t 5:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=16
 #SBATCH --mail-type=BEGIN,END,FAIL
 ## change the job name to your script name
 ## SBATCH --output=../logs/%x_%j.log
@@ -19,6 +19,7 @@
 ## nproc
 module load conda
 module load python
+# module load cuda/11.7
 ## assume you have a virtual environment in the current directory named env
 
 # Activate conda venv. 
@@ -48,4 +49,7 @@ export PYTHONWARNINGS="ignore"
 # srun --cpu-bind=cores python optimizer_sweep.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
 
 #Maxcut
-srun --cpu-bind=cores python maxcut_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+# srun --cpu-bind=cores python maxcut_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+
+#Cafqa points analysis
+srun python cafqa_diff_points_knapsack.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
