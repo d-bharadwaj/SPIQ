@@ -19,7 +19,7 @@ sys.path.append("../")
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
 from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis, compute_optimal_max_cut
-from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
+from testing_scripts.qaoa_utils import QAOASolver
 from maxcut_processing import evaluate_maxcut
 
 import multiprocess as mp

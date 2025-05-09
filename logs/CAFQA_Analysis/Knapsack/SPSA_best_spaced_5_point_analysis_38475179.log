@@ -52127,3 +52127,6 @@ GA parameters used for this experiment:
 Minimum Energy found with CAFQA initialization: -42013.5
 15 Qubits and 2 reps
 Minimum Energy found with CAFQA initialization: -42013.5
+slurmstepd: error: *** STEP 38475179.0 ON nid006941 CANCELLED AT 2025-05-09T01:24:40 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 38475179 ON nid006941 CANCELLED AT 2025-05-09T01:24:40 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.

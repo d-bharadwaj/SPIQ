@@ -4,7 +4,7 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu
 #SBATCH -q regular
-#SBATCH -t 5:00:00
+#SBATCH -t 10:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1

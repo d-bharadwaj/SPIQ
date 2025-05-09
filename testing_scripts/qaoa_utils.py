@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 from skquant.opt import minimize as skquant_minimize
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_algorithms.optimizers import SPSA
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
+# from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
 from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
@@ -17,7 +17,7 @@ from qiskit_aer.noise import  (
     pauli_error,
     thermal_relaxation_error,
 )
-
+from qiskit_aer.primitives import EstimatorV2 as Estimator
 
 from clapton.clapton import claptonize
 from clapton.circuit_manipulation import (
@@ -144,12 +144,13 @@ class QAOASolver:
         Returns:
             A configured quantum backend.
         """
-        self.backend = AerSimulator(method='statevector')
+        self.backend = AerSimulator(method='statevector',device='GPU')
         if noise:
             noise_model = self._create_noise_model(err)
             self.backend.set_options(noise_model=noise_model)
 
-        self.estimator = Estimator(mode=self.backend)
+        self.estimator = Estimator(options={"backend_options": 
+                                            {"method": 'statevector', "device": 'GPU'}})
 
     def _cost_function(self, params, objective_func_vals):
         """
@@ -167,7 +168,7 @@ class QAOASolver:
             circuit = self.circuit
         else:
             circuit = self.pcirc
-        pub = (circuit, self.cost_hamiltonian, params)
+        pub = (circuit, self.cost_hamiltonian, params) 
         job = self.estimator.run([pub])
         results = job.result()[0]
         cost = results.data.evs
