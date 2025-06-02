@@ -56,20 +56,20 @@ def run_qaoa_task_pool(args):
         }
 
 # Function to execute in parallel using Pool
-def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_parameters, selected_spaced_fitness_vals):
+def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_parameters, selected_fitness_vals):
 
     cafqa_args = [
         (f"task_{i}", ma_qaoa_object, params, fitness)
-        for i, (params, fitness) in enumerate(zip(selected_cafqa_parameters, selected_spaced_fitness_vals))
+        for i, (params, fitness) in enumerate(zip(selected_cafqa_parameters, selected_fitness_vals))
     ]
 
     # Random Init. Params for MA-QAOA 
     random_angles = np.random.random(ma_qaoa_object.pcirc.num_parameters)
-    random_args = [("Random_MA-QAOA",ma_qaoa_object,random_angles,selected_spaced_fitness_vals)]
+    random_args = [("Random_MA-QAOA",ma_qaoa_object,random_angles,selected_fitness_vals)]
 
     # Prepare task for Vanilla QAOA
     random_vanilla_angles = np.random.random(vanilla_qaoa_object.circuit.num_parameters)
-    vanilla_args = [("Vanilla_task", vanilla_qaoa_object, random_vanilla_angles, selected_spaced_fitness_vals)]
+    vanilla_args = [("Vanilla_task", vanilla_qaoa_object, random_vanilla_angles, selected_fitness_vals)]
 
     # Combine all tasks
     all_args = cafqa_args + random_args + vanilla_args 
@@ -136,15 +136,15 @@ def main():
     unique_fitness_values = np.unique(best_cafqa_fitness_values)
 
     # # When choosing best out of unique energies
-    selected_spaced_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
-    # selected_spaced_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
+    # selected_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
+    # selected_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
 
-    selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_spaced_fitness_vals]
-    selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
+    # selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_fitness_vals]
+    # selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
     
     # #When choosing just best 5 (can be same energies) 
-    # selected_spaced_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
-    # selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
+    selected_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
+    selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
     
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
@@ -152,14 +152,14 @@ def main():
     vanilla_knapsack.vanilla = True
 
     start = timer()
-    results = execute_qaoa_tasks(knapsack_qaoa, vanilla_knapsack, selected_cafqa_parameters, selected_spaced_fitness_vals)
+    results = execute_qaoa_tasks(knapsack_qaoa, vanilla_knapsack, selected_cafqa_parameters, selected_fitness_vals)
     end = timer()
     print(f"Total Time : {end - start}")
 
     # Save results
     output_dir = f"../np_data/CAFQA_Analysis/Knapsack/{op.num_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"SPSA_best_spaced_5_point_analysis_{seed}.npy"), results)
+    np.save(os.path.join(output_dir, f"SPSA_best_same_5_point_analysis_{seed}.npy"), results)
 
 # Entry point
 if __name__ == "__main__":
