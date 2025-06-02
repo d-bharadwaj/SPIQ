@@ -169,29 +169,24 @@ def get_final_distribution(qaoa_obj,final_params):
 def calculate_approximation_ratio(fin_distribution, graph):
     """
     Calculates the approximation ratio for QAOA's MaxCut solution.
-    
+
     Args:
-        probabilities (list): List of probabilities for each measured bitstring
-        cut_values (list): List of cut values corresponding to each bitstring
-        optimal_cut (float): Optimal MaxCut value for the graph
-        
+        fin_distribution (dict): Dictionary mapping bitstrings (as int or str) to probabilities.
+        graph (rx.PyGraph): The input graph.
+
     Returns:
         float: Approximation ratio (between 0 and 1)
     """
-    # Handle edge case where optimal cut is 0 (unlikely for non-trivial graphs)
-
     optimal_cut = compute_optimal_max_cut(graph)
     if optimal_cut == 0:
         return 0.0
-    
-    # Calculate expected cut value
-    bitstrings = list(fin_distribution.keys())
-    probabilities = list(fin_distribution.values())
+
     num_bits = len(graph)
-    bitstrings_seq = [to_bitstring(int(bitstring),num_bits) for bitstring in bitstrings] 
-
-    cut_values = [_evaluate_sample(bitstring_seq,graph) for bitstring_seq in bitstrings_seq]
-
-    expected_cut = sum(p * c for p, c in zip(probabilities, cut_values))
+    # Precompute cut values for all unique bitstrings
+    expected_cut = 0.0
+    for bitstring, prob in fin_distribution.items():
+        x = to_bitstring(int(bitstring), num_bits)
+        cut = _evaluate_sample(x, graph)
+        expected_cut += prob * cut
 
     return expected_cut / optimal_cut
