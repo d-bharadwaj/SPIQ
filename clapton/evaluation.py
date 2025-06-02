@@ -99,7 +99,6 @@ def get_energy(
     # print("This is the energy of current sol. :", energy)
     return energy
 
-
 def weighted_relative_pauli_weight(
         paulis: list[str], 
         coeffs: list[str]

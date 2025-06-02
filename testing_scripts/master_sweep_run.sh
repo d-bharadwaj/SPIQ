@@ -16,8 +16,8 @@
 #     sbatch --output=../logs/ga_sweep/Crossover_Sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE=$crossover_type sweep_run.sh
 # done
 
-for seed in {1..1}; do
-    sbatch --qos=premium --output=../logs/CAFQA_Analysis/Knapsack/SPSA_best_spaced_5_point_analysis_%j.log --export=ALL,N_QUBITS=9,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+for seed in {2..2}; do
+    sbatch --qos=premium --output=../logs/CAFQA_Analysis/Approx_Ratio/Maxcut/approx_ratio_COBYLA_best_spaced_5_point_analysis_%j.log --export=ALL,N_QUBITS=18,N_REPS=2,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
 done
 
 #Rep Sweep 
