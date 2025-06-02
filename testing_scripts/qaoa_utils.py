@@ -34,7 +34,8 @@ warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def evaluate_energy(circuit, hamiltonian, parameters):
-    estimator = Estimator(mode=AerSimulator(method='statevector'))
+    estimator = Estimator(options={"backend_options": 
+                                            {"method": 'statevector', "device": 'CPU'}})
     isa_hamiltonian = hamiltonian.apply_layout(circuit.layout)
 
     pub = (circuit, isa_hamiltonian, parameters)
@@ -42,6 +43,30 @@ def evaluate_energy(circuit, hamiltonian, parameters):
 
     results = job.result()[0]
     return results.data.evs
+
+def convert_pubo_to_ising(hypergraph: dict, n: int) -> list[tuple[str, float]]:
+    """Convert a hypergraph dictionary to a list of Pauli strings with weights.
+
+    Args:
+        hypergraph: Dictionary where keys are tuples of node indices and values are weights.
+        n: Total number of qubits (nodes).
+
+    Returns:
+        List of tuples (Pauli string, weight).
+    """
+    pauli_list = []
+
+    for edge, weight in hypergraph.items():
+        if edge:  # Ensure the edge is not empty
+            # Create a Pauli string with "I" for all qubits
+            paulis = ["I"] * n
+            # Replace "I" with "Z" for qubits in the edge
+            for node in edge:
+                paulis[node] = "Z"
+            # Append the reversed Pauli string and weight to the list
+            pauli_list.append(("".join(paulis[::-1]), weight))
+
+    return pauli_list
 
 class QAOASolver:
     def __init__(self, cost_hamiltonian, qaoa_ansatz):
@@ -82,7 +107,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_CAFQA(self, n_gens , noise=None):
+    def run_CAFQA(self, n_gens , err=None):
         """
         Run the CAFQA initialization.
 
@@ -95,16 +120,16 @@ class QAOASolver:
         self.best_cafqa_gen_params = None
         self.best_cafqa_gen_fitness = None
 
-        if noise: 
+        if err:
                 # let's add a noise model where we specify global 1q and 2q gate errors
-                nm = GateGeneralDepolarizationModel(p1=noise, p2=noise)
+                nm = GateGeneralDepolarizationModel(p1=err, p2=err)
                 self.stim_circ.add_depolarization_model(nm)
 
-        self.ks_best, _, self.energy_best, self.best_cafqa_gen_params, self.best_cafqa_gen_fitness = claptonize(
+        self.ks_best, self.noisy_energy_best, self.energy_best, self.best_cafqa_gen_params, self.best_cafqa_gen_fitness = claptonize(
             reversed_paulis,
             coeffs,
             self.stim_circ,
-            n_proc=16,
+            n_proc=64,
             n_starts=4,
             n_rounds=1,
             callback=print,
@@ -134,7 +159,7 @@ class QAOASolver:
         noise_model.add_all_qubit_quantum_error(cx_err, ["cx"])
         return noise_model
 
-    def _initialize_backend(self, err=1e-3, noise=False):
+    def _initialize_backend(self, err=0):
         """
         Initialize the quantum backend with or without noise.
 
@@ -145,7 +170,7 @@ class QAOASolver:
             A configured quantum backend.
         """
         self.backend = AerSimulator(method='statevector',device='GPU')
-        if noise:
+        if err:
             noise_model = self._create_noise_model(err)
             self.backend.set_options(noise_model=noise_model)
 
@@ -175,9 +200,9 @@ class QAOASolver:
         objective_func_vals.append(cost)
         return cost
 
-    def evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,noise=False,err=None):
+    def evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,err=0):
 
-        self._initialize_backend(err=err,noise=noise)
+        self._initialize_backend(err=err)
 
         pub = (qiskit_circuit, hamiltonian, parameters)
         job = self.estimator.run([pub])
@@ -248,7 +273,7 @@ class QAOASolver:
                 )
         return result, objective_func_vals
 
-    def run_qaoa(self, initial_params, err=None, max_iters=1000, noise=False,opt = "COBYLA"):
+    def run_qaoa(self, initial_params, err=0, max_iters=1000 ,opt = "COBYLA"):
         """
         Run QAOA with custom initial angles.
 
@@ -260,6 +285,6 @@ class QAOASolver:
         Returns:
             Optimization result and the list of objective function values.
         """
-        self._initialize_backend(err=err,noise=noise)
+        self._initialize_backend(err=err)
         result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
         return result, obj_values
