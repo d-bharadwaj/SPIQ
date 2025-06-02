@@ -143,10 +143,27 @@ def to_bitstring(integer, num_bits):
     seq.reverse()
     return seq
 
-#NOTE: can we @njit or cython-ize any of this?
 def _evaluate_sample(x: Sequence[int], graph: rx.PyGraph) -> float:
     assert len(x) == len(list(graph.nodes())), "The length of x must coincide with the number of nodes in the graph."
     return sum(w*(x[u] * (1 - x[v]) + x[v] * (1 - x[u])) for u, v,w in list(graph.weighted_edge_list()))
+
+def get_final_distribution(qaoa_obj,final_params):
+    if qaoa_obj.vanilla:
+        optimized_circuit = qaoa_obj.circuit.assign_parameters(final_params)
+    else:
+        optimized_circuit = qaoa_obj.pcirc.assign_parameters(final_params)
+    optimized_circuit.measure_all()
+
+    sampler = Sampler(mode=qaoa_obj.backend)
+    sampler.options.default_shots = 10000 #NOTE: This is duplicate?
+
+    pub= (optimized_circuit, )
+    job = sampler.run([pub], shots=int(1e4))
+    counts_int = job.result()[0].data.meas.get_int_counts()
+    shots = sum(counts_int.values())
+    final_distribution_int = {key: val/shots for key, val in counts_int.items()}
+
+    return final_distribution_int
 
 #NOTE: can definitely make this super fast.
 def calculate_approximation_ratio(fin_distribution, graph):
@@ -178,18 +195,3 @@ def calculate_approximation_ratio(fin_distribution, graph):
     expected_cut = sum(p * c for p, c in zip(probabilities, cut_values))
 
     return expected_cut / optimal_cut
-
-def get_final_distribution(qaoa_obj,final_params):
-    optimized_circuit = qaoa_obj.pcirc.assign_parameters(final_params)
-    optimized_circuit.measure_all()
-
-    sampler = Sampler(mode=qaoa_obj.backend)
-    sampler.options.default_shots = 10000 #NOTE: This is duplicate?
-
-    pub= (optimized_circuit, )
-    job = sampler.run([pub], shots=int(1e4))
-    counts_int = job.result()[0].data.meas.get_int_counts()
-    shots = sum(counts_int.values())
-    final_distribution_int = {key: val/shots for key, val in counts_int.items()}
-
-    return final_distribution_int
