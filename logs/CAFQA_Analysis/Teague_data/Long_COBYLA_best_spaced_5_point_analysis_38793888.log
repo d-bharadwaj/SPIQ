@@ -1,0 +1,4 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+slurmstepd: error: *** JOB 38793888 ON nid003560 CANCELLED AT 2025-05-17T18:45:46 ***

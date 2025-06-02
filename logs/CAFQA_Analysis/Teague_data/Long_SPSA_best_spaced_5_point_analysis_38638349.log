@@ -1,0 +1,6 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/bin/python: can't open file '/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_teague.py': [Errno 2] No such file or directory
+srun: error: nid001376: task 0: Exited with exit code 2
+srun: Terminating StepId=38638349.0

@@ -1,0 +1,6 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+slurmstepd: error: *** STEP 38981259.0 ON nid008305 CANCELLED AT 2025-05-25T18:05:32 ***
+slurmstepd: error: *** JOB 38981259 ON nid008305 CANCELLED AT 2025-05-25T18:05:32 ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.

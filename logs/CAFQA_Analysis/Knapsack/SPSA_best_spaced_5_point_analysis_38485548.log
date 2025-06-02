@@ -1,0 +1,362 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+Problem name: Knapsack
+
+Maximize
+  5*x_0 + 19*x_1 + 3*x_2
+
+Subject to
+  Linear constraints (1)
+    5*x_0 + 2*x_1 + 8*x_2 <= 7  'c0'
+
+  Binary variables (3)
+    x_0 x_1 x_2
+
+num qubits: 6, offset: 1232.5
+
+STARTING ROUND 0
+
+
+started GA at id 1 with 4 procs
+
+GA parameters used for this experiment:
+  num_generations=5
+  num_parents_mating=20
+  population_size=100
+  num_genes=54
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+started GA at id 2 with 4 procs
+
+GA parameters used for this experiment:
+  num_generations=5
+  num_parents_mating=20
+  population_size=100
+  num_genes=54
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+started GA at id None with 4 procs
+
+GA parameters used for this experiment:
+  num_generations=5
+  num_parents_mating=20
+  population_size=100
+  num_genes=54
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+started GA at id 3 with 4 procs
+
+GA parameters used for this experiment:
+  num_generations=5
+  num_parents_mating=20
+  population_size=100
+  num_genes=54
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+[0, array([-1901. ,  -950.5,  -950.5,     0. ]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 3, 0, 1, 0, 1,
+       3, 1, 3, 2, 3, 1, 3, 2, 3, 2, 1, 0, 2, 2, 3, 0, 2, 1, 1, 1, 0, 2,
+       1, 0, 0, 3, 3, 0, 0, 1, 3, 1], dtype=object)]
+[0, array([-1901. ,  -950.5,  -950.5,     0. ]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 3, 0, 1, 0, 1,
+       3, 1, 3, 2, 3, 1, 3, 2, 3, 2, 1, 0, 2, 2, 3, 0, 2, 1, 1, 1, 0, 2,
+       1, 0, 0, 3, 3, 0, 0, 1, 3, 1], dtype=object)]
+[0, array([-1901. ,  -950.5,  -950.5,     0. ]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 3, 0, 1, 0, 1,
+       3, 1, 3, 2, 3, 1, 3, 2, 3, 2, 1, 0, 2, 2, 3, 0, 2, 1, 1, 1, 0, 2,
+       1, 0, 0, 3, 3, 0, 0, 1, 3, 1], dtype=object)]
+[0, array([-1901. ,  -950.5,  -950.5,     0. ]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 3, 0, 1, 0, 1,
+       3, 1, 3, 2, 3, 1, 3, 2, 3, 2, 1, 0, 2, 2, 3, 0, 2, 1, 1, 1, 0, 2,
+       1, 0, 0, 3, 3, 0, 0, 1, 3, 1], dtype=object)]
+[1, array([-1120.,  -560.,  -560.,     0.]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 1, 0, 2, 2, 0,
+       0, 3, 1, 0, 3, 3, 0, 1, 0, 1, 1, 1, 2, 2, 0, 2, 2, 0, 2, 0, 2, 1,
+       3, 0, 3, 1, 3, 3, 2, 0, 2, 0], dtype=object)]
+[1, array([-1120.,  -560.,  -560.,     0.]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 1, 0, 2, 2, 0,
+       0, 3, 1, 0, 3, 3, 0, 1, 0, 1, 1, 1, 2, 2, 0, 2, 2, 0, 2, 0, 2, 1,
+       3, 0, 3, 1, 3, 3, 2, 0, 2, 0], dtype=object)]
+[1, array([-1120.,  -560.,  -560.,     0.]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 1, 0, 2, 2, 0,
+       0, 3, 1, 0, 3, 3, 0, 1, 0, 1, 1, 1, 2, 2, 0, 2, 2, 0, 2, 0, 2, 1,
+       3, 0, 3, 1, 3, 3, 2, 0, 2, 0], dtype=object)]
+[1, array([-1120.,  -560.,  -560.,     0.]), array([0, 3, 0, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 1, 2, 1, 0, 2, 2, 0,
+       0, 3, 1, 0, 3, 3, 0, 1, 0, 1, 1, 1, 2, 2, 0, 2, 2, 0, 2, 0, 2, 1,
+       3, 0, 3, 1, 3, 3, 2, 0, 2, 0], dtype=object)]
+[2, array([-1176.,  -588.,  -588.,     0.]), array([1, 3, 1, 2, 0, 0, 3, 2, 2, 0, 3, 0, 3, 1, 0, 1, 2, 2, 1, 1, 0, 1,
+       0, 1, 3, 2, 0, 0, 3, 2, 3, 0, 1, 0, 1, 0, 1, 0, 0, 0, 2, 3, 2, 0,
+       3, 1, 3, 2, 2, 1, 3, 3, 3, 1], dtype=object)]
+[2, array([-1176.,  -588.,  -588.,     0.]), array([1, 3, 1, 2, 0, 0, 3, 2, 2, 0, 3, 0, 3, 1, 0, 1, 2, 2, 1, 1, 0, 1,
+       0, 1, 3, 2, 0, 0, 3, 2, 3, 0, 1, 0, 1, 0, 1, 0, 0, 0, 2, 3, 2, 0,
+       3, 1, 3, 2, 2, 1, 3, 3, 3, 1], dtype=object)]
+[2, array([-1176.,  -588.,  -588.,     0.]), array([1, 3, 1, 2, 0, 0, 3, 2, 2, 0, 3, 0, 3, 1, 0, 1, 2, 2, 1, 1, 0, 1,
+       0, 1, 3, 2, 0, 0, 3, 2, 3, 0, 1, 0, 1, 0, 1, 0, 0, 0, 2, 3, 2, 0,
+       3, 1, 3, 2, 2, 1, 3, 3, 3, 1], dtype=object)]
+[2, array([-1176.,  -588.,  -588.,     0.]), array([1, 3, 1, 2, 0, 0, 3, 2, 2, 0, 3, 0, 3, 1, 0, 1, 2, 2, 1, 1, 0, 1,
+       0, 1, 3, 2, 0, 0, 3, 2, 3, 0, 1, 0, 1, 0, 1, 0, 0, 0, 2, 3, 2, 0,
+       3, 1, 3, 2, 2, 1, 3, 3, 3, 1], dtype=object)]
+[3, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[3, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[3, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[3, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[4, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[4, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[4, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[4, array([-1120.,  -560.,  -560.,     0.]), array([2, 2, 2, 3, 1, 3, 2, 2, 2, 2, 1, 0, 3, 1, 3, 3, 2, 3, 0, 0, 1, 0,
+       2, 2, 2, 2, 0, 3, 2, 1, 2, 3, 0, 2, 2, 2, 2, 0, 2, 0, 3, 1, 2, 2,
+       2, 3, 0, 3, 1, 1, 2, 1, 0, 0], dtype=object)]
+[5, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[5, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[5, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[5, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[6, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[6, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[6, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[6, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 3, 2, 2, 0, 0, 3, 3, 2, 3, 3, 3, 1, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[7, array([-1845. ,  -922.5,  -922.5,     0. ]), array([1, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 1, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[7, array([-1845. ,  -922.5,  -922.5,     0. ]), array([1, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 1, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[7, array([-1845. ,  -922.5,  -922.5,     0. ]), array([1, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 1, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[7, array([-1845. ,  -922.5,  -922.5,     0. ]), array([1, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 1, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[8, array([-1845. ,  -922.5,  -922.5,     0. ]), array([0, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 2, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[8, array([-1845. ,  -922.5,  -922.5,     0. ]), array([0, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 2, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[8, array([-1845. ,  -922.5,  -922.5,     0. ]), array([0, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 2, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[8, array([-1845. ,  -922.5,  -922.5,     0. ]), array([0, 3, 3, 1, 0, 0, 0, 0, 3, 0, 2, 2, 2, 2, 3, 0, 2, 2, 3, 3, 2, 0,
+       3, 2, 3, 0, 3, 0, 2, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 2, 1, 0, 1,
+       3, 0, 1, 2, 3, 1, 2, 0, 2, 0], dtype=object)]
+[9, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 2, 0, 0, 0, 1, 1, 0, 3, 1, 0, 0, 3, 0, 1, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[9, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 2, 0, 0, 0, 1, 1, 0, 3, 1, 0, 0, 3, 0, 1, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[9, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 2, 0, 0, 0, 1, 1, 0, 3, 1, 0, 0, 3, 0, 1, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[9, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 2, 0, 0, 0, 1, 1, 0, 3, 1, 0, 0, 3, 0, 1, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[10, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 1, 0, 0, 0, 0, 1, 0, 3, 1, 1, 0, 3, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[10, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 1, 0, 0, 0, 0, 1, 0, 3, 1, 1, 0, 3, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[10, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 1, 0, 0, 0, 0, 1, 0, 3, 1, 1, 0, 3, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+[10, array([-1789. ,  -894.5,  -894.5,     0. ]), array([0, 1, 0, 0, 0, 0, 1, 0, 3, 1, 1, 0, 3, 0, 2, 0, 1, 0, 2, 2, 3, 1,
+       0, 3, 0, 0, 3, 1, 2, 2, 3, 1, 1, 0, 1, 1, 2, 2, 0, 3, 1, 0, 3, 3,
+       2, 2, 3, 2, 1, 0, 3, 0, 2, 0], dtype=object)]
+Minimum Energy found with CAFQA initialization: -950.5
+6 Qubits and 2 reps
+Minimum Energy found with CAFQA initialization: -950.5
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_knapsack.py", line 40, in run_qaoa_task_pool
+    result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 264, in run_qaoa
+    result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 207, in _run_qaoa
+    lr, pert = SPSA.calibrate(
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_knapsack.py", line 40, in run_qaoa_task_pool
+    result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 337, in calibrate
+    losses = _batch_evaluate(loss, points, max_evals_grouped)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 697, in _batch_evaluate
+    return [
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 264, in run_qaoa
+    result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 698, in <listcomp>
+    function(*point) if isinstance(point, tuple) else function(point) for point in points
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 207, in _run_qaoa
+    lr, pert = SPSA.calibrate(
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 202, in _cost_function_with_vals
+    return self._cost_function(x, objective_func_vals)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 337, in calibrate
+    losses = _batch_evaluate(loss, points, max_evals_grouped)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 173, in _cost_function
+    results = job.result()[0]
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 697, in _batch_evaluate
+    return [
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit/primitives/primitive_job.py", line 51, in result
+    return self._future.result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 698, in <listcomp>
+    function(*point) if isinstance(point, tuple) else function(point) for point in points
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 202, in _cost_function_with_vals
+    return self._cost_function(x, objective_func_vals)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in _run
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 173, in _cost_function
+    results = job.result()[0]
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in <listcomp>
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit/primitives/primitive_job.py", line 51, in result
+    return self._future.result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 135, in _run_pub
+    ).result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/utils.py", line 38, in _wrapper
+    return func(self, *args, **kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/aerjob.py", line 96, in result
+    return self._future.result(timeout=timeout)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in _run
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aerbackend.py", line 474, in _execute_circuits_job
+    output = self._execute_circuits(aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in <listcomp>
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aer_simulator.py", line 906, in _execute_circuits
+    ret = cpp_execute_circuits(self._controller, aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/backend_utils.py", line 446, in cpp_execute_circuits
+    return controller.execute(aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 135, in _run_pub
+    ).result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/utils.py", line 38, in _wrapper
+    return func(self, *args, **kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/aerjob.py", line 96, in result
+    return self._future.result(timeout=timeout)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+RuntimeError: No CUDA device available!
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aerbackend.py", line 474, in _execute_circuits_job
+    output = self._execute_circuits(aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aer_simulator.py", line 906, in _execute_circuits
+    ret = cpp_execute_circuits(self._controller, aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/backend_utils.py", line 446, in cpp_execute_circuits
+    return controller.execute(aer_circuits, noise_model, config)
+RuntimeError: No CUDA device available!
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_knapsack.py", line 40, in run_qaoa_task_pool
+    result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 264, in run_qaoa
+    result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 207, in _run_qaoa
+    lr, pert = SPSA.calibrate(
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 337, in calibrate
+    losses = _batch_evaluate(loss, points, max_evals_grouped)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 697, in _batch_evaluate
+    return [
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_algorithms/optimizers/spsa.py", line 698, in <listcomp>
+    function(*point) if isinstance(point, tuple) else function(point) for point in points
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 202, in _cost_function_with_vals
+    return self._cost_function(x, objective_func_vals)
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/../testing_scripts/qaoa_utils.py", line 173, in _cost_function
+    results = job.result()[0]
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit/primitives/primitive_job.py", line 51, in result
+    return self._future.result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in _run
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 110, in <listcomp>
+    return PrimitiveResult([self._run_pub(pub) for pub in pubs], metadata={"version": 2})
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/primitives/estimator_v2.py", line 135, in _run_pub
+    ).result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/utils.py", line 38, in _wrapper
+    return func(self, *args, **kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/jobs/aerjob.py", line 96, in result
+    return self._future.result(timeout=timeout)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aerbackend.py", line 474, in _execute_circuits_job
+    output = self._execute_circuits(aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/aer_simulator.py", line 906, in _execute_circuits
+    ret = cpp_execute_circuits(self._controller, aer_circuits, noise_model, config)
+  File "/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/lib/python3.10/site-packages/qiskit_aer/backends/backend_utils.py", line 446, in cpp_execute_circuits
+    return controller.execute(aer_circuits, noise_model, config)
+RuntimeError: No CUDA device available!
+Starting task: task_0 for val : -950.5
+Error in task task_0: No CUDA device available!
+Starting task: Random_MA-QAOA for val : [np.float64(-950.5)]
+Error in task Random_MA-QAOA: No CUDA device available!
+Starting task: Vanilla_task for val : [np.float64(-950.5)]
+Error in task Vanilla_task: No CUDA device available!
+Total Time : 13.324330000992632
