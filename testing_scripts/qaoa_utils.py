@@ -79,6 +79,7 @@ class QAOASolver:
         """
         # Attributes for QAOA setup
         self.cost_hamiltonian = cost_hamiltonian
+        self.exact_energy = None
         self.circuit = qaoa_ansatz
         self.pcirc = None
         self.stim_circ = None
@@ -149,6 +150,7 @@ class QAOASolver:
         eigensolver = NumPyMinimumEigensolver()
         exact_solution = eigensolver.compute_minimum_eigenvalue(self.cost_hamiltonian).eigenvalue.real
         print("Exact Energy from Eigensolver:", exact_solution)
+        self.exact_energy  = exact_solution
         return exact_solution
 
     def _create_noise_model(self,err):
@@ -267,7 +269,7 @@ class QAOASolver:
                 initial_params,
                 args=(objective_func_vals,),
                 method=opt,
-                tol=1e-5,
+                tol=1e-3,
                 options={'maxiter': maxiter,
                          'initial_tr_radius': 5.0},
                 )

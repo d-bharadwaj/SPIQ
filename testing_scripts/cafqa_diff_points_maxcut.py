@@ -16,11 +16,9 @@ from scipy.optimize import minimize
 from timeit import default_timer as timer
 
 sys.path.append("../")
-from clapton.clapton import claptonize
-from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
+from clapton.circuit_manipulation import multi_angle_qaoa_circuit
 import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.qaoa_utils import QAOASolver
-from maxcut_processing import evaluate_maxcut
 
 import multiprocess as mp
 import traceback
@@ -29,7 +27,7 @@ import numpy as np
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 10*1e+3
+    max_iters = 50*1e+3
     task_id, maxcut_qaoa, initial_params, fitness_val, graph = args
 
     # QAOA Optimization
@@ -43,7 +41,6 @@ def run_qaoa_task_pool(args):
         # Approximation Ratio
         distribution = graph_utils.get_final_distribution(maxcut_qaoa,result.x)
         approx_ratio = graph_utils.calculate_approximation_ratio(distribution,graph)
-        print(approx_ratio)
 
         return {
             "task_name": task_id,
@@ -94,6 +91,7 @@ def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_param
     # Return results
     return {
         "CAFQA_initialization_energy": ma_qaoa_object.energy_best,
+        "Exact_Ground_State_Energy":ma_qaoa_object.exact_energy,
         "Task_results": results,
         "Task_objective_values": task_objective_values,
     }
@@ -110,7 +108,7 @@ def main():
     seed = int(sys.argv[7])
     noise = bool(int(sys.argv[8]))
 
-    n = n_qubits
+    n = n_qubits  
     k = 3  # for k-regular graphs
 
     # Generate the graph
@@ -126,6 +124,9 @@ def main():
     # Create QAOA object
     maxcut_qaoa = QAOASolver(cost_hamiltonian, circuit)
     maxcut_qaoa.prepare_circuit()
+
+    #Evaluate Exact Ground State Energy 
+    maxcut_qaoa.evaluate_energy()
 
     # Run CAFQA process
     maxcut_qaoa.run_CAFQA(n_gens=n_gens)
@@ -160,9 +161,9 @@ def main():
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = f"../np_data/CAFQA_Analysis/Approx_Ratio/Maxcut/{n_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"approx_ratio_Long__more_gens_COBYLA_best_spaced_5_point_analysis_{seed}.npy"), results)
+    np.save(os.path.join(output_dir, f"test_{seed}.npy"), results)
 
 # Entry point
 if __name__ == "__main__":
