@@ -6,19 +6,12 @@ import sys
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from qiskit.circuit import Parameter
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit.quantum_info import SparsePauliOp
-from qiskit_aer import AerSimulator
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from qiskit_optimization.applications import Knapsack
 from qiskit_optimization.converters import QuadraticProgramToQubo
-from scipy.optimize import minimize
 from timeit import default_timer as timer
 
 sys.path.append("../")
-from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
+from testing_scripts.qaoa_utils import QAOASolver
 from testing_scripts.knapsack_utils import generate_knapsack_instance
 
 
@@ -29,7 +22,7 @@ import numpy as np
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 2000
+    max_iters = 10*1e+3
     task_id, knapsack_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
@@ -37,7 +30,7 @@ def run_qaoa_task_pool(args):
 
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
-        result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="SPSA")
+        result, obj_values = knapsack_qaoa.run_qaoa(initial_params=cafqa_params, max_iters=max_iters, opt="COBYLA")
         print(f"Finished task: {task_id}")
         return {
             "task_name": task_id,
@@ -87,6 +80,7 @@ def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_param
     # Return results
     return {
         "CAFQA_initialization_energy": ma_qaoa_object.energy_best,
+        "Exact_Ground_State_Energy":ma_qaoa_object.exact_energy,
         "Task_results": results,
         "Task_objective_values": task_objective_values,
     }
@@ -124,6 +118,9 @@ def main():
     knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit)
     knapsack_qaoa.prepare_circuit()
 
+    #Evaluate Exact Ground State Energy 
+    knapsack_qaoa.evaluate_exact_energy()
+
     # Run CAFQA process
     knapsack_qaoa.run_CAFQA(n_gens=n_gens)
     print(f"{op.num_qubits} Qubits and {reps} reps")
@@ -136,15 +133,15 @@ def main():
     unique_fitness_values = np.unique(best_cafqa_fitness_values)
 
     # # When choosing best out of unique energies
-    # selected_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
+    selected_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
     # selected_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
 
-    # selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_fitness_vals]
-    # selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
+    selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_fitness_vals]
+    selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
     
     # #When choosing just best 5 (can be same energies) 
-    selected_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
-    selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
+    # selected_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
+    # selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
     
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
@@ -157,9 +154,9 @@ def main():
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = f"../np_data/CAFQA_Analysis/Knapsack/{op.num_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Knapsack/{op.num_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"SPSA_best_same_5_point_analysis_{seed}.npy"), results)
+    np.save(os.path.join(output_dir, f"result_{seed}.npy"), results)
 
 # Entry point
 if __name__ == "__main__":

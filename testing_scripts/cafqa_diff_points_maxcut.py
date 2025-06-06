@@ -6,13 +6,8 @@ import sys
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from qiskit.circuit import Parameter
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit.quantum_info import SparsePauliOp
-from qiskit_aer import AerSimulator
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from scipy.optimize import minimize
 from timeit import default_timer as timer
 
 sys.path.append("../")
@@ -27,7 +22,7 @@ import numpy as np
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 50*1e+3
+    max_iters = 10*1e+3
     task_id, maxcut_qaoa, initial_params, fitness_val, graph = args
 
     # QAOA Optimization
@@ -112,7 +107,7 @@ def main():
     k = 3  # for k-regular graphs
 
     # Generate the graph
-    G = graph_utils.generate_random_complete_graph(num_vertices=n, weighted=True, seed=seed)
+    G = graph_utils.generate_k_regular_graph(num_vertices=n, k=k, weighted=True,seed=seed)
 
     # Build the cost Hamiltonian
     max_cut_paulis = graph_utils.build_max_cut_paulis(G)
@@ -126,7 +121,7 @@ def main():
     maxcut_qaoa.prepare_circuit()
 
     #Evaluate Exact Ground State Energy 
-    maxcut_qaoa.evaluate_energy()
+    maxcut_qaoa.evaluate_exact_energy()
 
     # Run CAFQA process
     maxcut_qaoa.run_CAFQA(n_gens=n_gens)
@@ -161,9 +156,9 @@ def main():
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = f"../np_data/Final_Data_Collection/{n_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Maxcut/K_Reg_Graphs/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"test_{seed}.npy"), results)
+    np.save(os.path.join(output_dir, f"result_{seed}.npy"), results)
 
 # Entry point
 if __name__ == "__main__":
