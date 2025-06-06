@@ -2,11 +2,10 @@ import rustworkx as rx
 import random
 from sage.all import Graph
 from typing import Sequence
-import numpy as np 
+import numpy as np
 from qiskit_ibm_runtime import SamplerV2 as Sampler
 
-
-def generate_k_regular_graph(num_vertices, k, weighted=False, seed=False):
+def generate_k_regular_graph(num_vertices, k, weighted=False, seed=None):
     """
     Generate a k-regular graph with a specified number of vertices.
 
@@ -18,12 +17,12 @@ def generate_k_regular_graph(num_vertices, k, weighted=False, seed=False):
         Each vertex will have exactly k edges. Must be less than num_vertices and num_vertices * k must be even.
     weighted : bool, optional
         If True, the edges will have random weights between 1 and 10. If False, all edges will have a weight of 1. Default is False.
-    seed : bool, optional
-        If True, the random number generator will be seeded with 0 for reproducibility. Default is False.
+    seed : int, optional
+        If provided, the random number generator will be seeded with `seed` for reproducibility. Default is None.
 
     Returns
     -------
-    graph : rx.PyGraph
+    graph : rustworkx.PyGraph
         A k-regular graph with the specified number of vertices and edges.
 
     Raises
@@ -33,15 +32,16 @@ def generate_k_regular_graph(num_vertices, k, weighted=False, seed=False):
 
     Notes
     -----
-    The function uses a retry mechanism to ensure that a valid k-regular graph is generated. If a deadlock is detected during edge assignment, the process restarts from scratch.
+    The function uses a retry mechanism to ensure that a valid k-regular graph is generated.
+    If a deadlock is detected during edge assignment, the process restarts from scratch.
     """
     if seed:
-        random.seed(0)
+        random.seed(seed)
 
     if k >= num_vertices or (num_vertices * k) % 2 != 0:
         raise ValueError("Invalid parameters: k must be < n and n*k must be even")
 
-    while True:  # Retry if we fail to complete the graph
+    while True:
         graph = rx.PyGraph()
         graph.add_nodes_from(range(num_vertices))
 
@@ -57,41 +57,43 @@ def generate_k_regular_graph(num_vertices, k, weighted=False, seed=False):
                 random.shuffle(stubs)
                 v = stubs.pop()
                 attempts += 1
-                if attempts > len(stubs):  # Deadlock detected, restart
+                if attempts > len(stubs):
                     break
             else:
                 edges.add((u, v))
                 weight = random.randint(1, 10) if weighted else 1
                 graph.add_edge(u, v, weight)
                 continue
-            break  # Restart from scratch
+            break
 
         if len(edges) == (num_vertices * k) // 2:
-            return graph  # Successfully created a k-regular graph
-    
-def generate_random_complete_graph(num_vertices, weighted=False, seed=False, save_path=None):
+            return graph
+
+def generate_random_complete_graph(num_vertices, weighted=False, seed=None, save_path=None):
     """
     Generate a random complete graph.
+
     Parameters
     ----------
     num_vertices : int
         The number of vertices in the graph.
     weighted : bool, optional
         If True, edges will have random weights between 1 and 10. Default is False.
-    seed : bool, optional
-        If True, the random seed will be set to 0 for reproducibility. Default is False.
+    seed : int, optional
+        If provided, the random seed will be set to `seed` for reproducibility. Default is None.
     save_path : str, optional
         Path to save the generated graph. Default is None.
+
     Returns
     -------
-    G : rx.PyGraph
+    G : rustworkx.PyGraph
         The generated complete graph.
     """
     G = rx.PyGraph()
     G.add_nodes_from(range(num_vertices))
 
     if seed:
-        random.seed(0)
+        random.seed(seed)
 
     for i in range(num_vertices):
         for j in range(i + 1, num_vertices):
@@ -105,7 +107,7 @@ def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
 
     Parameters
     ----------
-    graph : rx.PyGraph
+    graph : rustworkx.PyGraph
         The input graph.
 
     Returns
@@ -113,41 +115,92 @@ def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
     int
         The weight of the optimal Max-Cut.
     """
-    # Convert rustworkx graph into SageMath Graph.
     sage_graph = Graph()
     for u, v, weight in graph.weighted_edge_list():
         sage_graph.add_edge(u, v, weight)
-
-    # Compute the Max-Cut
     return sage_graph.max_cut(use_edge_labels=True)
 
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
-    """Convert the graph to Pauli list.
+    """
+    Convert the graph to a list of Pauli strings for Max-Cut.
 
-    This function does the inverse of `build_max_cut_graph`
+    Parameters
+    ----------
+    graph : rustworkx.PyGraph
+        The input graph.
+
+    Returns
+    -------
+    pauli_list : list of tuple of (str, float)
+        List of tuples where each tuple contains a Pauli string and its corresponding edge weight.
     """
     pauli_list = []
     for edge in list(graph.edge_list()):
         paulis = ["I"] * len(graph)
         paulis[edge[0]], paulis[edge[1]] = "Z", "Z"
-
         weight = graph.get_edge_data(edge[0], edge[1])
-
         pauli_list.append(("".join(paulis)[::-1], weight))
-
     return pauli_list
 
 def to_bitstring(integer, num_bits):
+    """
+    Convert an integer to a bitstring of given width, reversed as a list.
+
+    Parameters
+    ----------
+    integer : int
+        The integer to convert.
+    num_bits : int
+        The width of the bitstring.
+
+    Returns
+    -------
+    seq : list of int
+        The reversed bitstring as a list of bits.
+    """
     result = np.binary_repr(integer, width=num_bits)
-    seq =  [int(digit) for digit in result]
+    seq = [int(digit) for digit in result]
     seq.reverse()
     return seq
 
 def _evaluate_sample(x: Sequence[int], graph: rx.PyGraph) -> float:
-    assert len(x) == len(list(graph.nodes())), "The length of x must coincide with the number of nodes in the graph."
-    return sum(w*(x[u] * (1 - x[v]) + x[v] * (1 - x[u])) for u, v,w in list(graph.weighted_edge_list()))
+    """
+    Evaluate the Max-Cut value for a given bitstring assignment.
 
-def get_final_distribution(qaoa_obj,final_params):
+    Parameters
+    ----------
+    x : Sequence[int]
+        Bitstring assignment for the nodes.
+    graph : rustworkx.PyGraph
+        The input graph.
+
+    Returns
+    -------
+    float
+        The cut value for the assignment.
+    """
+    assert len(x) == len(list(graph.nodes())), "The length of x must coincide with the number of nodes in the graph."
+    return sum(
+        w * (x[u] * (1 - x[v]) + x[v] * (1 - x[u]))
+        for u, v, w in list(graph.weighted_edge_list())
+    )
+
+def get_final_distribution(qaoa_obj, final_params):
+    """
+    Get the final measurement distribution from a QAOA object and parameters.
+
+    Parameters
+    ----------
+    qaoa_obj : object
+        QAOA object with circuit and backend attributes.
+    final_params : array-like
+        Optimized parameters for the QAOA circuit.
+
+    Returns
+    -------
+    final_distribution_int : dict
+        Dictionary mapping bitstrings (as int) to probabilities.
+    """ 
     if qaoa_obj.vanilla:
         optimized_circuit = qaoa_obj.circuit.assign_parameters(final_params)
     else:
@@ -155,34 +208,34 @@ def get_final_distribution(qaoa_obj,final_params):
     optimized_circuit.measure_all()
 
     sampler = Sampler(mode=qaoa_obj.backend)
-    sampler.options.default_shots = 10000 #NOTE: This is duplicate?
-
-    pub= (optimized_circuit, )
+    pub = (optimized_circuit,)
     job = sampler.run([pub], shots=int(1e4))
     counts_int = job.result()[0].data.meas.get_int_counts()
     shots = sum(counts_int.values())
-    final_distribution_int = {key: val/shots for key, val in counts_int.items()}
-
+    final_distribution_int = {key: val / shots for key, val in counts_int.items()}
     return final_distribution_int
 
-#NOTE: can definitely make this super fast.
 def calculate_approximation_ratio(fin_distribution, graph):
     """
-    Calculates the approximation ratio for QAOA's MaxCut solution.
+    Calculate the approximation ratio for QAOA's Max-Cut solution.
 
-    Args:
-        fin_distribution (dict): Dictionary mapping bitstrings (as int or str) to probabilities.
-        graph (rx.PyGraph): The input graph.
+    Parameters
+    ----------
+    fin_distribution : dict
+        Dictionary mapping bitstrings (as int or str) to probabilities.
+    graph : rustworkx.PyGraph
+        The input graph.
 
-    Returns:
-        float: Approximation ratio (between 0 and 1)
+    Returns
+    -------
+    float
+        Approximation ratio (between 0 and 1).
     """
     optimal_cut = compute_optimal_max_cut(graph)
     if optimal_cut == 0:
         return 0.0
 
     num_bits = len(graph)
-    # Precompute cut values for all unique bitstrings
     expected_cut = 0.0
     for bitstring, prob in fin_distribution.items():
         x = to_bitstring(int(bitstring), num_bits)
