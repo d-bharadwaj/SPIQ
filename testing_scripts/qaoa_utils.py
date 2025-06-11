@@ -69,7 +69,7 @@ def convert_pubo_to_ising(hypergraph: dict, n: int) -> list[tuple[str, float]]:
     return pauli_list
 
 class QAOASolver:
-    def __init__(self, cost_hamiltonian, qaoa_ansatz):
+    def __init__(self, cost_hamiltonian, qaoa_ansatz, sim_device):
         """
         Initialize the QAOA object.
 
@@ -93,6 +93,10 @@ class QAOASolver:
         # Backend and Estimator
         self.backend = None
         self.estimator = None
+
+        #CPU or GPU simulation 
+        self.sim_device = sim_device
+        assert self.sim_device, "sim_device must be provided as either 'cpu' or 'gpu'"
 
     def prepare_circuit(self):
         """
@@ -123,7 +127,7 @@ class QAOASolver:
 
         if err:
                 # let's add a noise model where we specify global 1q and 2q gate errors
-                nm = GateGeneralDepolarizationModel(p1=err, p2=err)
+                nm = GateGeneralDepolarizationModel(p1=err, p2=10*err)
                 self.stim_circ.add_depolarization_model(nm)
 
         self.ks_best, self.noisy_energy_best, self.energy_best, self.best_cafqa_gen_params, self.best_cafqa_gen_fitness = claptonize(
@@ -155,10 +159,10 @@ class QAOASolver:
 
     def _create_noise_model(self,err):
         noise_model = NoiseModel()
-        error = depolarizing_error(err, 1)      
-        cx_err = depolarizing_error(10*err, 2)
-        noise_model.add_all_qubit_quantum_error(error, ["rx", "rz"])
-        noise_model.add_all_qubit_quantum_error(cx_err, ["cx"])
+        single_qb_error = depolarizing_error(err, 1)
+        double_qb_error = depolarizing_error(10*err, 2) #This might be the culprit
+        noise_model.add_all_qubit_quantum_error(single_qb_error, ["h","rz","s","sx","id"])
+        noise_model.add_all_qubit_quantum_error(double_qb_error, ["cx"])
         return noise_model
 
     def _initialize_backend(self, err=0):
@@ -171,14 +175,19 @@ class QAOASolver:
         Returns:
             A configured quantum backend.
         """
-        self.backend = AerSimulator(method='statevector',device='GPU')
+
+        noise_model=None
+
+        self.backend = AerSimulator(method='statevector',device=self.sim_device)
         if err:
             noise_model = self._create_noise_model(err)
             self.backend.set_options(noise_model=noise_model)
-
+        
         self.estimator = Estimator(options={"backend_options": 
-                                            {"method": 'statevector', "device": 'GPU'}})
-
+                                            {"method": 'statevector',
+                                             "device": self.sim_device,
+                                             "noise_model":noise_model}})
+        
     def _cost_function(self, params, objective_func_vals):
         """
         Cost function to be minimized.
@@ -202,9 +211,10 @@ class QAOASolver:
         objective_func_vals.append(cost)
         return cost
 
-    def evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,err=0):
+    def  evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,err=0):
 
-        self._initialize_backend(err=err)
+        if not self.backend:
+            self._initialize_backend(err=err)
 
         pub = (qiskit_circuit, hamiltonian, parameters)
         job = self.estimator.run([pub])
@@ -234,7 +244,7 @@ class QAOASolver:
             lr, pert = SPSA.calibrate(
                 _cost_function_with_vals, 
                 initial_params,
-                target_magnitude=0.01, # changed from 0.01 Controls step aggressiveness
+                target_magnitude=0.01, # Controls step aggressiveness
                 c=0.1,
                 alpha=0.202,            # Learning rate decay
                 gamma=0.101             # Perturbation decay
