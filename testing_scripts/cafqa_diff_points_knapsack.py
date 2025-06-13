@@ -57,11 +57,11 @@ def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_param
     ]
 
     # Random Init. Params for MA-QAOA 
-    random_angles = np.random.random(ma_qaoa_object.pcirc.num_parameters)
+    random_angles = np.random.random(0,2*np.pi, ma_qaoa_object.pcirc.num_parameters)
     random_args = [("Random_MA-QAOA",ma_qaoa_object,random_angles,selected_fitness_vals)]
 
     # Prepare task for Vanilla QAOA
-    random_vanilla_angles = np.random.random(vanilla_qaoa_object.circuit.num_parameters)
+    random_vanilla_angles = np.random.random(0,2*np.pi,vanilla_qaoa_object.circuit.num_parameters)
     vanilla_args = [("Vanilla_task", vanilla_qaoa_object, random_vanilla_angles, selected_fitness_vals)]
 
     # Combine all tasks
@@ -115,8 +115,9 @@ def main():
     # Transform qiskit circ. to stim.
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
 
-    knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit)
+    knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit,sim_device="GPU")
     knapsack_qaoa.prepare_circuit()
+    knapsack_qaoa.err = noise
 
     #Evaluate Exact Ground State Energy 
     knapsack_qaoa.evaluate_exact_energy()
@@ -145,7 +146,7 @@ def main():
     
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-    vanilla_knapsack = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
+    vanilla_knapsack = QAOASolver(cost_hamiltonian,circuit.decompose().decompose(),sim_device="GPU")
     vanilla_knapsack.vanilla = True
 
     start = timer()
@@ -154,7 +155,7 @@ def main():
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = f"../np_data/Final_Data_Collection/Knapsack/{op.num_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Knapsack/Long_Gens/{op.num_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
     np.save(os.path.join(output_dir, f"result_{seed}.npy"), results)
 

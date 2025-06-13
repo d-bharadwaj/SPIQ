@@ -67,11 +67,11 @@ def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_param
     ]
 
     # Random Init. Params for MA-QAOA 
-    random_angles = np.random.random(ma_qaoa_object.pcirc.num_parameters)
+    random_angles = np.random.random(0,2*np.pi,ma_qaoa_object.pcirc.num_parameters)
     random_args = [("Random_MA-QAOA",ma_qaoa_object,random_angles,selected_fitness_vals)]
 
     # Prepare task for Vanilla QAOA
-    random_vanilla_angles = np.random.random(vanilla_qaoa_object.circuit.num_parameters)
+    random_vanilla_angles = np.random.random(0,2*np.pi, vanilla_qaoa_object.circuit.num_parameters)
     vanilla_args = [("Vanilla_task", vanilla_qaoa_object, random_vanilla_angles, selected_fitness_vals)]
 
     # Combine all tasks
@@ -126,12 +126,12 @@ def main():
 
     reps=2
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-    teague_qaoa = QAOASolver(cost_hamiltonian,circuit)
+    teague_qaoa = QAOASolver(cost_hamiltonian,circuit,sim_device="GPU")
 
     teague_qaoa.prepare_circuit()
 
     # Run CAFQA process
-    # teague_qaoa.run_CAFQA(n_gens=n_gens)
+    # teague_qaoa.run_CAFQA(n_gens=n_gens,err=noise)
     # print(f"{n} Qubits and {reps} reps")
     # print(f"Minimum Energy found with CAFQA initialization: {teague_qaoa.energy_best}")
 
@@ -162,7 +162,7 @@ def main():
     
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-    vanilla_teague = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
+    vanilla_teague = QAOASolver(cost_hamiltonian,circuit.decompose().decompose(),sim_device="GPU")
     vanilla_teague.vanilla = True
 
     start = timer()
