@@ -94,6 +94,9 @@ class QAOASolver:
         self.backend = None
         self.estimator = None
 
+        #Noise Model 
+        self.err = None
+
         #CPU or GPU simulation 
         self.sim_device = sim_device
         assert self.sim_device, "sim_device must be provided as either 'cpu' or 'gpu'"
@@ -112,7 +115,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_CAFQA(self, n_gens , err=None):
+    def run_CAFQA(self, n_gens):
         """
         Run the CAFQA initialization.
 
@@ -125,9 +128,9 @@ class QAOASolver:
         self.best_cafqa_gen_params = None
         self.best_cafqa_gen_fitness = None
 
-        if err:
+        if self.err:
                 # let's add a noise model where we specify global 1q and 2q gate errors
-                nm = GateGeneralDepolarizationModel(p1=err, p2=10*err)
+                nm = GateGeneralDepolarizationModel(p1=self.err, p2=10*self.err)
                 self.stim_circ.add_depolarization_model(nm)
 
         self.ks_best, self.noisy_energy_best, self.energy_best, self.best_cafqa_gen_params, self.best_cafqa_gen_fitness = claptonize(
@@ -157,15 +160,15 @@ class QAOASolver:
         self.exact_energy  = exact_solution
         return exact_solution
 
-    def _create_noise_model(self,err):
+    def _create_noise_model(self):
         noise_model = NoiseModel()
-        single_qb_error = depolarizing_error(err, 1)
-        double_qb_error = depolarizing_error(10*err, 2) #This might be the culprit
+        single_qb_error = depolarizing_error(self.err, 1)
+        double_qb_error = depolarizing_error(10*self.err, 2) #This might be the culprit
         noise_model.add_all_qubit_quantum_error(single_qb_error, ["h","rz","s","sx","id"])
         noise_model.add_all_qubit_quantum_error(double_qb_error, ["cx"])
         return noise_model
 
-    def _initialize_backend(self, err=0):
+    def _initialize_backend(self):
         """
         Initialize the quantum backend with or without noise.
 
@@ -178,11 +181,13 @@ class QAOASolver:
 
         noise_model=None
 
+        #NOTE: This is not used anywhere
         self.backend = AerSimulator(method='statevector',device=self.sim_device)
-        if err:
-            noise_model = self._create_noise_model(err)
+        if self.err:
+            noise_model = self._create_noise_model()
             self.backend.set_options(noise_model=noise_model)
         
+        #Change to use density matrix simulator for noisy sims. 
         self.estimator = Estimator(options={"backend_options": 
                                             {"method": 'statevector',
                                              "device": self.sim_device,
@@ -211,10 +216,10 @@ class QAOASolver:
         objective_func_vals.append(cost)
         return cost
 
-    def  evaluate_energy(self, qiskit_circuit, hamiltonian, parameters,err=0):
+    def  evaluate_energy(self, qiskit_circuit, hamiltonian, parameters):
 
         if not self.backend:
-            self._initialize_backend(err=err)
+            self._initialize_backend()
 
         pub = (qiskit_circuit, hamiltonian, parameters)
         job = self.estimator.run([pub])
@@ -285,7 +290,7 @@ class QAOASolver:
                 )
         return result, objective_func_vals
 
-    def run_qaoa(self, initial_params, err=0, max_iters=1000 ,opt = "COBYLA"):
+    def run_qaoa(self, initial_params, max_iters=1000 ,opt = "COBYLA"):
         """
         Run QAOA with custom initial angles.
 
@@ -297,6 +302,6 @@ class QAOASolver:
         Returns:
             Optimization result and the list of objective function values.
         """
-        self._initialize_backend(err=err)
+        self._initialize_backend()
         result, obj_values = self._run_qaoa(initial_params, max_iters,opt=opt)
         return result, obj_values
