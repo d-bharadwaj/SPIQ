@@ -1,0 +1,12 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+Exact Energy from Eigensolver: -95.0
+Traceback (most recent call last):
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_maxcut.py", line 173, in <module>
+    main()
+  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_maxcut.py", line 132, in main
+    maxcut_qaoa.run_CAFQA(n_gens=n_gens,err=noise)
+TypeError: QAOASolver.run_CAFQA() got an unexpected keyword argument 'err'
+srun: error: nid008581: task 0: Exited with exit code 1
+srun: Terminating StepId=39524923.0
