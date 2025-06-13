@@ -63,11 +63,15 @@ def execute_qaoa_tasks(ma_qaoa_object, vanilla_qaoa_object, selected_cafqa_param
     ]
 
     # Random Init. Params for MA-QAOA 
-    random_angles = np.random.random(ma_qaoa_object.pcirc.num_parameters)
-    random_args = [("Random_MA-QAOA",ma_qaoa_object,random_angles,selected_spaced_fitness_vals, graph)]
+    # Generate 100 random parameter sets and evaluate their energies, then select the median
+    random_angles_arr = np.random.uniform(0, 2 * np.pi, (100, ma_qaoa_object.pcirc.num_parameters))
+    random_energies = [ma_qaoa_object.evaluate_energy(ma_qaoa_object.pcirc,ma_qaoa_object.cost_hamiltonian,params) for params in random_angles_arr]
+    median_idx = np.argsort(random_energies)[len(random_energies) // 2]
+    median_angles = random_angles_arr[median_idx]
+    random_args = [("Random_MA-QAOA", ma_qaoa_object, median_angles, selected_spaced_fitness_vals, graph)]
 
     # Prepare task for Vanilla QAOA
-    random_vanilla_angles = np.random.random(vanilla_qaoa_object.circuit.num_parameters)
+    random_vanilla_angles = np.random.uniform(0, 2 * np.pi, vanilla_qaoa_object.circuit.num_parameters)
     vanilla_args = [("Vanilla_task", vanilla_qaoa_object, random_vanilla_angles, selected_spaced_fitness_vals, graph)]
 
     # Combine all tasks
@@ -107,7 +111,7 @@ def main():
     k = 3  # for k-regular graphs
 
     # Generate the graph
-    G = graph_utils.generate_k_regular_graph(num_vertices=n, k=k, weighted=True,seed=seed)
+    G = graph_utils.generate_random_complete_graph(num_vertices=n, weighted=True,seed=seed)
 
     # Build the cost Hamiltonian
     max_cut_paulis = graph_utils.build_max_cut_paulis(G)
@@ -117,14 +121,18 @@ def main():
     circuit = multi_angle_qaoa_circuit(n, G, reps)
 
     # Create QAOA object
-    maxcut_qaoa = QAOASolver(cost_hamiltonian, circuit)
+    maxcut_qaoa = QAOASolver(cost_hamiltonian, circuit,sim_device="GPU")
     maxcut_qaoa.prepare_circuit()
+    maxcut_qaoa.err = noise
 
     #Evaluate Exact Ground State Energy 
     maxcut_qaoa.evaluate_exact_energy()
 
     # Run CAFQA process
+    start_cafqa = timer()
     maxcut_qaoa.run_CAFQA(n_gens=n_gens)
+    end_cafqa = timer()
+    print(f"CAFQA optimization time: {end_cafqa - start_cafqa} seconds")
     print(f"{n} Qubits and {reps} reps")
     print(f"Minimum Energy found with CAFQA initialization: {maxcut_qaoa.energy_best}")
 
@@ -136,8 +144,8 @@ def main():
 
     # When choosing best out of unique energies
     selected_spaced_fitness_vals = list(unique_fitness_values[::3][:5]) #Select 5 of the best unique spaced-out solutions.
+# selected_spaced_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
 
-    # selected_spaced_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
     selected_fitness_indices = [best_cafqa_fitness_values.index(value) for value in selected_spaced_fitness_vals]
     selected_cafqa_parameters = np.array(best_cafqa_parameters)[selected_fitness_indices]
     
@@ -147,7 +155,7 @@ def main():
     
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-    vanilla_maxcut = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
+    vanilla_maxcut = QAOASolver(cost_hamiltonian,circuit.decompose().decompose(),sim_device="GPU")
     vanilla_maxcut.vanilla = True
 
     start = timer()
@@ -156,7 +164,7 @@ def main():
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = f"../np_data/Final_Data_Collection/Maxcut/K_Reg_Graphs/{n_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Maxcut/Complete_Graphs/Less_Reps/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
     np.save(os.path.join(output_dir, f"result_{seed}.npy"), results)
 
