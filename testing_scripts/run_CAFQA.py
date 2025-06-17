@@ -85,10 +85,12 @@ def main():
 
     print("Best 20 best CAFQA fitness values:", unique_fitness_values[:20])
     
-    exact_energy = qaoa_obj.evaluate_exact_energy()
-    print("Exact energy:", exact_energy)
-    
-    # Organize results into a dictionary
+    if n_qubits<=20:
+        exact_energy = qaoa_obj.evaluate_exact_energy()
+        print("Exact energy:", exact_energy)
+    else:
+        exact_energy = None
+
     results_dict = {
         "best_cafqa_parameters": best_cafqa_params,
         "best_cafqa_fitness_values": best_cafqa_fitness_values,
