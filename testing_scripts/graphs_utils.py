@@ -134,6 +134,13 @@ def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     pauli_list : list of tuple of (str, float)
         List of tuples where each tuple contains a Pauli string and its corresponding edge weight.
     """
+
+    if len(graph)==0:
+        assert False, "Graph is empty"
+
+    if len(graph)==1:
+        assert False, "Single Node Graph!"
+
     pauli_list = []
     for edge in list(graph.edge_list()):
         paulis = ["I"] * len(graph)
