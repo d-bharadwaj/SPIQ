@@ -74,8 +74,6 @@ def main():
     results_file = os.path.join(results_dir, f"results_{seed}")  # This is a file path, not a directory
 
     # Run CAFQA process
-    print("Is file?", os.path.isfile(results_file))
-    print("Is dir?", os.path.isdir(results_file))   
     qaoa_obj.run_CAFQA(n_gens=n_gens,out_file = results_file)
 
     best_cafqa_params = qaoa_obj.best_cafqa_gen_params[::-1]

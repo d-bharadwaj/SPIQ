@@ -5,6 +5,7 @@ from clapton.clifford import ParametrizedCliffordCircuit
 from clapton.evaluation import transform_paulis, get_energy, weighted_relative_pauli_weight
 from clapton.utils import n_to_dits
 from clapton.mp_helpers import SignalHandler
+import os
 
 ### Clapton
 def loss_func(
@@ -125,7 +126,7 @@ def handle_out_data(
         if out_data is not None:
             out_data[0] += 1
             out_data[1] = losses
-            out_data[2] = x
+            # out_data[2] = x TODO: uncomment
             if callback is not None:
                 callback(out_data)
 
@@ -216,6 +217,7 @@ def claptonize(
         mutation_probability :tuple[float, float] = (0.25,0.01),
         crossover_type : str =  "single_point",
         keep_elitism : int = 5,
+        out_file : str = "",
         **optimizer_and_loss_kwargs
     ):
     sig_handler = SignalHandler()
@@ -261,7 +263,7 @@ def claptonize(
                                     master_queue,
                                     m
                                 ),
-                                kwargs=optimizer_and_loss_kwargs)
+                                kwargs={**optimizer_and_loss_kwargs, "out_file": out_file})
             master_processes.append(master_process)
             master_process.start()
 
@@ -272,6 +274,7 @@ def claptonize(
             coeffs,
             vqe_pcirc,
             trans_pcirc,
+            out_file = out_file,
             **optimizer_and_loss_kwargs
         )
         best_count = len(xs)
@@ -354,6 +357,7 @@ def genetic_algorithm(
         crossover_probability: float = 0.9,
         mutation_type: str = "adaptive",
         mutation_probability: tuple[float, float] =(0.25, 0.01), #(0.25, 0.05) 
+        out_file : str = "",
         **loss_kwargs
     ):
     print(f"started GA at id {master_id} with {n_proc} procs\n")
@@ -373,7 +377,7 @@ def genetic_algorithm(
     best_count = int(population_size * return_best_pop_frac)
 
     def fitness_func(ga_instance, solutions, solutions_idc):
-        return -eval_xs_terms_mp(
+        return  -eval_xs_terms_mp(
             solutions, 
             paulis, 
             coeffs,
@@ -385,6 +389,40 @@ def genetic_algorithm(
             **loss_kwargs
             )
     
+    def print_on_generation(ga_instance):
+        population = ga_instance.population
+        fitnesses = ga_instance.last_generation_fitness  # already computed
+
+        gen = ga_instance.generations_completed
+        best_idx = np.argmax(fitnesses)
+        best_solution = population[best_idx]
+        best_fitness = fitnesses[best_idx]
+        best_fit = best_fitness / -2
+
+        # Only print and log if best_fitness has changed since last generation
+        if not hasattr(print_on_generation, "last_best_fitness") or best_fitness != print_on_generation.last_best_fitness:
+            generation = ga_instance.generations_completed
+            print(f"GENERATION {generation}: BEST FITNESS FOUND : {best_fit}")
+            print_on_generation.last_best_fitness = best_fitness
+
+            # Check this out later
+            # if out_file:
+            #     os.makedirs(os.path.dirname(out_file), exist_ok=True)
+
+            #     # If file exists, load the existing array
+            #     if os.path.isfile(out_file):
+            #         log = np.load(out_file)
+            #     else:
+            #         log = np.empty((0, 2 + best_solution.shape[0]))
+
+            #     # Append new row
+            #     row = np.concatenate(([gen, best_fit], best_solution))
+            #     log = np.vstack((log, [row]))
+
+            #     # Save back to same file
+            #     print("Saving to:", out_file)
+            #     np.save(out_file, log)
+
     ga_instance = pygad.GA(
                     num_generations=num_generations,
                     num_parents_mating=num_parents_mating,
@@ -402,7 +440,8 @@ def genetic_algorithm(
                     keep_elitism=keep_elitism,
                     fitness_batch_size=population_size,
                     random_seed=0,
-                    save_best_solutions=True
+                    save_best_solutions=True,
+                    on_generation=print_on_generation
                     )
     
     print(f"GA parameters used for this experiment:\n"
