@@ -2,13 +2,13 @@
 ## sample script to run single node cpu task
 #SBATCH -A m4669
 ## specify cpu or gpu node at next line
-#SBATCH -C gpu
+#SBATCH -C cpu ## NOTE: Changed to CPU
 #SBATCH -q regular
-#SBATCH -t 01:00:00
+#SBATCH -t 36:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=128
 #SBATCH --mail-type=BEGIN,END,FAIL
 ## change the job name to your script name
 ## SBATCH --output=../logs/%x_%j.log
@@ -48,8 +48,11 @@ export PYTHONWARNINGS="ignore"
 #optimizer sweep  
 # srun --cpu-bind=cores python optimizer_sweep.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
 
-#Maxcut
+# #Maxcut
 # srun --cpu-bind=cores python maxcut_qaoa.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
 
 #Cafqa points analysis
-srun --gpus=1 python cafqa_diff_points_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+# srun --gpus=1 python cafqa_diff_points_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+
+# CAFQA Long Gen Runs
+srun --cpu-bind=cores python run_CAFQA_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE

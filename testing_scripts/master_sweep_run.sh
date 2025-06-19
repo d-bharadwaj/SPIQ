@@ -52,14 +52,12 @@
 
 
 
-
-
-# Multi Start Final Data Collectio - MaxCut
-for num_qubits in 12 16; do
-    for seed in {1..1}; do
-        sbatch --output=../logs/Final_Data_Collection/Maxcut/Less_Reps/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=1,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
-    done
-done
+# # Multi Start Final Data Collectio - MaxCut
+# for num_qubits in 12 16; do
+#     for seed in {1..1}; do
+#         sbatch --output=../logs/Final_Data_Collection/Maxcut/Complete_Graphs/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=2000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+#     done
+# done
 
 # # # Multi Start Final Data Collection - Knapsack
 # for num_qubits in 9 12; do
@@ -67,3 +65,20 @@ done
 #         sbatch --output=../logs/Final_Data_Collection/Knapsack/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=1000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
 #     done
 # done
+
+
+## Comprehensive 
+
+## Long Gen Runs for CAFQA - Knapsack
+# for num_qubits in 23; do
+#     for seed in {2..2}; do
+#         sbatch --output=../logs/Comprehensive_Proof/Knapsack/2_reps/$num_qubits/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+#     done
+# done
+
+## Long Gen Runs for CAFQA - Maxcut
+for num_qubits in 16; do
+    for seed in {1..1}; do
+        sbatch --output=../logs/Comprehensive_Proof/Maxcut/Complete_Graphs/2_reps/$num_qubits/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+    done
+done
