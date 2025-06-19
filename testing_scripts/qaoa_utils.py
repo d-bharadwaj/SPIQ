@@ -115,7 +115,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_CAFQA(self, n_gens):
+    def run_CAFQA(self, n_gens, out_file=None):
         """
         Run the CAFQA initialization.
 
@@ -137,11 +137,12 @@ class QAOASolver:
             reversed_paulis,
             coeffs,
             self.stim_circ,
-            n_proc=64,
+            n_proc=128,
             n_starts=4,
             n_rounds=1,
-            callback=print,
+            callback=None, #NOTE: usually print
             budget=n_gens // 2,
+            out_file = out_file
         )
 
         print(f"Minimum Energy found with CAFQA initialization: {self.energy_best}")
@@ -163,7 +164,7 @@ class QAOASolver:
     def _create_noise_model(self):
         noise_model = NoiseModel()
         single_qb_error = depolarizing_error(self.err, 1)
-        double_qb_error = depolarizing_error(10*self.err, 2) #This might be the culprit
+        double_qb_error = depolarizing_error(10*self.err, 2)
         noise_model.add_all_qubit_quantum_error(single_qb_error, ["h","rz","s","sx","id"])
         noise_model.add_all_qubit_quantum_error(double_qb_error, ["cx"])
         return noise_model
@@ -184,9 +185,11 @@ class QAOASolver:
         #NOTE: This is not used anywhere
         self.backend = AerSimulator(method='statevector',device=self.sim_device)
         if self.err:
-            noise_model = self._create_noise_model()
+            # noise_model = self._create_noise_model()
+            noise_model = NoiseModel.from_backend(FakeMumbaiV2())
             self.backend.set_options(noise_model=noise_model)
-        
+
+            
         #Change to use density matrix simulator for noisy sims. 
         self.estimator = Estimator(options={"backend_options": 
                                             {"method": 'statevector',
