@@ -1,1 +1,3 @@
 teague_code/code-for-gokul/teague_pickle_data/*.pkl
+__pycache__/
+*.pyc

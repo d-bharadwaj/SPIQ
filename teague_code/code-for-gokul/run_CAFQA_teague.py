@@ -24,6 +24,7 @@ print("Command-line arguments:", sys.argv)
 
 sys.path.append("../teague_code/code-for-gokul")
 from qiskit.quantum_info import SparsePauliOp
+import pcbo_utils
 import os
 
 def main():
@@ -49,39 +50,38 @@ def main():
     max_cut_paulis = graph_utils.build_max_cut_paulis(G)
 
     #Teague Data
-    # # Generate the graph
-    # feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'../teague_code/code-for-gokul/sampled_{n_qubits}_features_subproblem_1')
+    # Generate the graph
+    feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = pcbo_utils.load_features_and_corr_files(f'../teague_code/code-for-gokul/sampled_{n_qubits}_features_subproblem_1')
 
-    # pcbo_obj = pcbo_utils.create_three_body_cubo(
-    #     feature_set,
-    #     first_corr_arr,
-    #     second_corr_arr,
-    #     third_corr_arr,
-    #     feature_to_idx,
-    #     select_n_features=4,
-    # )
+    pcbo_obj = pcbo_utils.create_three_body_cubo(
+        feature_set,
+        first_corr_arr,
+        second_corr_arr,
+        third_corr_arr,
+        feature_to_idx,
+        select_n_features=4,
+    )
 
-    # pubo = {key: float(value) for key, value in pcbo_obj.to_pubo().items()}
+    pubo = {key: float(value) for key, value in pcbo_obj.to_pubo().items()}
 
-    # def convert_pubo_to_ising(hypergraph: dict) -> list[tuple[str, float]]:
-    #     """Convert a hypergraph dictionary to a list of Pauli strings with weights."""
-    #     n = n_qubits # Number of qubits
-    #     pauli_list = []
+    def convert_pubo_to_ising(hypergraph: dict) -> list[tuple[str, float]]:
+        """Convert a hypergraph dictionary to a list of Pauli strings with weights."""
+        n = n_qubits # Number of qubits
+        pauli_list = []
 
-    #     for edge, weight in hypergraph.items():
-    #         if edge:  # Ensure the edge is not empty
-    #             # Create a Pauli string with "I" for all qubits
-    #             paulis = ["I"] * n
-    #             # Replace "I" with "Z" for qubits in the edge
-    #             for node in edge:
-    #                 paulis[node] = "Z"
-    #             # Append the reversed Pauli string and weight to the list
-    #             pauli_list.append(("".join(paulis[::-1]), weight))
+        for edge, weight in hypergraph.items():
+            if edge:  # Ensure the edge is not empty
+                # Create a Pauli string with "I" for all qubits
+                paulis = ["I"] * n
+                # Replace "I" with "Z" for qubits in the edge
+                for node in edge:
+                    paulis[node] = "Z"
+                # Append the reversed Pauli string and weight to the list
+                pauli_list.append(("".join(paulis[::-1]), weight))
 
-    #     return pauli_list
+        return pauli_list
 
-    # max_cut_paulis = convert_pubo_to_ising(pubo)
-
+    max_cut_paulis = convert_pubo_to_ising(pubo)
 
     cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 
@@ -113,7 +113,7 @@ def main():
         "best_cafqa_parameters": best_cafqa_params,
         "CAFQA_initialization_energy" : qaoa_obj.energy_best
     }
-    with open(f"{pickle_folder}/20qb_teague_cafqa_results.pkl", "wb") as f:
+    with open(f"{pickle_folder}/{n_qubits}_qb_teague_cafqa_results.pkl", "wb") as f:
         pickle.dump(output_data, f)
 
 # Entry point
