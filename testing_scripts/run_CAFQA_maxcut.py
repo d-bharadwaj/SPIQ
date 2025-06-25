@@ -33,30 +33,18 @@ def main():
     n_qubits = int(sys.argv[1])  
     reps = int(sys.argv[2])     
     n_gens = int(sys.argv[3])        
-    seed = int(sys.argv[4])
-    noise = bool(int(sys.argv[5]))
-    graph =  str(sys.argv[6])   
+    mutation_prob = tuple(map(float, sys.argv[4].split()))
+    elitism = int(sys.argv[5])
+    crossover_type = str(sys.argv[6])   
+    seed = int(sys.argv[7])
+    noise = bool(int(sys.argv[8]))
 
     print(f"Num. qubits: {n_qubits}, Num reps: {reps}")
     
     ## Maxcut Formulation
+    k = 3  # for k-regular graphs
     # Generate the graph
-    if graph == "k_reg":
-        print("Selected graph type: k-regular")
-        k = 3  # for k-regular graphs
-        G = graph_utils.generate_k_regular_graph(num_vertices=n_qubits, weighted=True, seed=seed, k=k)
-    elif graph == "complete":
-        print("Selected graph type: complete")
-        G = graph_utils.generate_random_complete_graph(num_vertices=n_qubits, weighted=True, seed=seed)
-    elif graph == "ego":
-        print("Selected graph type: ego")
-        G = graph_utils.generate_random_ego_graph(num_nodes=n_qubits, weighted=True, seed=seed)
-
-    else:
-        raise ValueError(f"Graph type '{graph}' not available.")
-
-    # G = graph_utils.generate_random_erdos_renyi_graph(num_nodes=n_qubits,probability=0.4,weighted=True,seed=seed)
-    
+    G = graph_utils.generate_k_regular_graph(num_vertices=n_qubits, weighted=True,seed=seed,k=k)
     # Build the cost Hamiltonian
     max_cut_paulis = graph_utils.build_max_cut_paulis(G)
     cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
@@ -66,15 +54,9 @@ def main():
     qaoa_obj = QAOASolver(cost_hamiltonian,circuit,sim_device="CPU")
 
     qaoa_obj.prepare_circuit()
-    results_dir = f"../np_data/Comprehensive_Proof/Maxcut/{graph}/{reps}_reps/{n_qubits}_qbs"
+    results_dir = f"../np_data/Comprehensive_Proof/Maxcut/K_Reg_Graphs/{reps}_reps/{n_qubits}_qbs"
     os.makedirs(results_dir, exist_ok=True)  # Creates folder if it doesn't exist
-    results_file = os.path.join(results_dir, f"fig_1_results_{seed}")  # This is a file path, not a directory
-
-    if n_qubits<=22:
-        exact_energy = qaoa_obj.evaluate_exact_energy()
-        print("Exact energy:", exact_energy)
-    else:
-        exact_energy = None
+    results_file = os.path.join(results_dir, f"results_{seed}")  # This is a file path, not a directory
 
     # Run CAFQA process
     qaoa_obj.run_CAFQA(n_gens=n_gens,out_file = results_file)
@@ -86,6 +68,12 @@ def main():
 
     print("Best 20 best CAFQA fitness values:", unique_fitness_values[:20])
     
+    if n_qubits<=20:
+        exact_energy = qaoa_obj.evaluate_exact_energy()
+        print("Exact energy:", exact_energy)
+    else:
+        exact_energy = None
+
     results_dict = {
         "best_cafqa_parameters": best_cafqa_params,
         "best_cafqa_fitness_values": best_cafqa_fitness_values,
