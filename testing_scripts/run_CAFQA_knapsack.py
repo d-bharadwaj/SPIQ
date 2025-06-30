@@ -32,15 +32,21 @@ def main():
     # Initialize variables (replace with your actual initialization logic)
     n_qubits = int(sys.argv[1])  
     reps = int(sys.argv[2])     
-    n_gens = int(sys.argv[3])        
-    mutation_prob = tuple(map(float, sys.argv[4].split()))
-    elitism = int(sys.argv[5])
-    crossover_type = str(sys.argv[6])   
-    seed = int(sys.argv[7])
-    noise = bool(int(sys.argv[8]))
+    n_gens = int(sys.argv[3])         
+    seed = int(sys.argv[4])
+    noise = bool(int(sys.argv[5]))
 
     print(f"Num. qubits: {n_qubits}, Num reps: {reps}")
-    
+
+    task_id = os.environ.get("SLURM_PROCID")
+    if task_id is None:
+        print("Warning: SLURM_PROCID not set — running outside Slurm?")
+        task_id = 0
+    else:
+        task_id = int(task_id)
+    print(f"Running task with SLURM_PROCID = {task_id}")
+    seed = task_id
+
     ## Knapsack Formulation
     n_items = n_qubits 
     prob = generate_knapsack_instance(num_items=n_items,seed=seed)

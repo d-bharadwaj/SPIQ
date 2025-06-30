@@ -31,12 +31,9 @@ def main():
     # Initialize variables (replace with your actual initialization logic)
     n_qubits = int(sys.argv[1])  
     reps = int(sys.argv[2])     
-    n_gens = int(sys.argv[3])        
-    mutation_prob = tuple(map(float, sys.argv[4].split()))
-    elitism = int(sys.argv[5])
-    crossover_type = str(sys.argv[6])   
-    seed = int(sys.argv[7])
-    noise = bool(int(sys.argv[8]))
+    n_gens = int(sys.argv[3])         
+    seed = int(sys.argv[4])
+    noise = bool(int(sys.argv[5]))
 
     n = n_qubits  
 
@@ -90,19 +87,18 @@ def main():
 
     qaoa_obj.prepare_circuit()
 
+    exact_energy = qaoa_obj.evaluate_exact_energy()
+
     # Run CAFQA process
     qaoa_obj.run_CAFQA(n_gens=n_gens)
 
     best_cafqa_params = qaoa_obj.best_cafqa_gen_params[::-1]
     best_cafqa_fitness_values = qaoa_obj.best_cafqa_gen_fitness[::-1]
 
-
     unique_fitness_values = np.unique(best_cafqa_fitness_values)
 
     print("Best 20 best CAFQA fitness values:", unique_fitness_values[:20])
     
-    exact_energy = qaoa_obj.evaluate_exact_energy()
-    print("Exact energy:", exact_energy)
     
     pickle_folder = "../teague_code/code-for-gokul/teague_pickle_data"
     os.makedirs(pickle_folder, exist_ok=True)  # Creates folder if it doesn't exist
