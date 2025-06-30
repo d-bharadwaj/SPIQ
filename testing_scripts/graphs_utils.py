@@ -101,6 +101,77 @@ def generate_random_complete_graph(num_vertices, weighted=False, seed=None, save
             G.add_edge(i, j, weight)
     return G
 
+def generate_random_ego_graph(num_nodes, weighted=False, seed=None):
+    """
+    Generate a random ego network with the specified number of nodes.
+
+    Parameters
+    ----------
+    num_nodes : int
+        Total number of nodes in the ego network (including the ego).
+        Must be >= 2.
+    weighted : bool, optional
+        If True, assign random weights (1–10) to edges. If False, all edge weights are 1. Default is False.
+    seed : int, optional
+        Random seed for reproducibility. Default is None.
+
+    Returns
+    -------
+    graph : rustworkx.PyGraph
+        A randomly generated ego network with one ego node connected to all others,
+        and some random edges among the neighbors.
+
+    Raises
+    ------
+    ValueError
+        If num_nodes is less than 2.
+    """
+    if num_nodes < 2:
+        raise ValueError("Ego network must have at least 2 nodes (1 ego + 1 neighbor)")
+    if seed:
+        random.seed(seed)
+
+    graph = rx.PyGraph()
+    graph.add_nodes_from(range(num_nodes))
+
+    ego = 0  # node 0 is the ego
+    neighbors = list(range(1, num_nodes))
+
+    # Connect ego to all neighbors
+    for n in neighbors:
+        weight = random.randint(1, 10) if weighted else 1
+        graph.add_edge(ego, n, weight)
+
+    # Optionally add random edges between neighbors (like a small-world neighborhood)
+    for i in range(len(neighbors)):
+        for j in range(i + 1, len(neighbors)):
+            if random.random() < 0.3:  # 30% chance of adding edge
+                u, v = neighbors[i], neighbors[j]
+                weight = random.randint(1, 10) if weighted else 1
+                graph.add_edge(u, v, weight)
+
+    return graph
+
+def generate_random_erdos_renyi_graph(num_nodes, probability=0.5, weighted=False, seed=None):
+    if seed is not None:
+        random.seed(seed)
+    # Generate random Erdos-Renyi graph structure
+    random_graph = rx.undirected_gnp_random_graph(num_nodes, probability, seed=seed)
+    
+    # Create a new PyGraph and add the same number of nodes
+    graph = rx.PyGraph()
+    graph.add_nodes_from([None] * num_nodes)  # Adds num_nodes empty payloads
+
+    # Add edges with optional weights
+    for u, v in random_graph.edge_list():
+        weight = random.randint(1, 10) if weighted else 1
+        graph.add_edge(u, v, weight)
+
+    largest_cc = max(rx.connected_components(graph), key=len)
+    G_sub = graph.subgraph(list(largest_cc)).copy()
+
+    return G_sub
+
 def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
     """
     Compute the optimal Max-Cut of a graph.
