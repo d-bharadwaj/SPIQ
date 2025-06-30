@@ -137,7 +137,7 @@ class QAOASolver:
             reversed_paulis,
             coeffs,
             self.stim_circ,
-            n_proc=128,
+            n_proc=32,
             n_starts=4,
             n_rounds=1,
             callback=None, #NOTE: usually print
