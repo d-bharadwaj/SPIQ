@@ -126,7 +126,7 @@ def handle_out_data(
         if out_data is not None:
             out_data[0] += 1
             out_data[1] = losses
-            # out_data[2] = x TODO: uncomment
+            out_data[2] = x
             if callback is not None:
                 callback(out_data)
 
