@@ -4,11 +4,11 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu ## NOTE: Changed to CPU
 #SBATCH -q regular
-#SBATCH -t 36:00:00
+#SBATCH -t 48:00:00
 ## node numbers
 #SBATCH -N 1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=128
+#SBATCH --ntasks=8
+#SBATCH --cpus-per-task=32
 #SBATCH --mail-type=BEGIN,END,FAIL
 ## change the job name to your script name
 ## SBATCH --output=../logs/%x_%j.log
@@ -25,14 +25,6 @@ module load cuda/11.7
 # Activate conda venv. 
 
 conda activate qaoa_w_sage
-
-# echo "Running GA Job with Parameters:"
-# echo "  Number of Qubits     : $N_QUBITS"
-# echo "  Ansatz Reps          : $N_REPS"
-# echo "  Generations          : $NUM_GENERATIONS"
-# echo "  Mutation Probability : $MUTATION_PROB"
-# echo "  Elitism              : $KEEP_ELITISM"
-# echo "  Crossover Type       : $CROSSOVER_TYPE"
 
 export PYTHONWARNINGS="ignore"
 
@@ -55,4 +47,8 @@ export PYTHONWARNINGS="ignore"
 # srun --gpus=1 python cafqa_diff_points_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
 
 # CAFQA Long Gen Runs
-srun --cpu-bind=cores python run_CAFQA_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS "$MUTATION_PROB" $KEEP_ELITISM $CROSSOVER_TYPE $SEED $NOISE
+# srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/run_CAFQA_teague.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
+
+# Multi-Task attempt
+mkdir -p ../logs/Comprehensive_Proof/Knapsack/2_reps/$N_QUBITS/
+srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Knapsack/2_reps/$N_QUBITS/cafqa_result_task_%t_%j.log python run_CAFQA_knapsack.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE

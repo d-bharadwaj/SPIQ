@@ -69,16 +69,23 @@
 
 ## Comprehensive 
 
-## Long Gen Runs for CAFQA - Knapsack
-# for num_qubits in 23; do
-#     for seed in {2..2}; do
-#         sbatch --output=../logs/Comprehensive_Proof/Knapsack/2_reps/$num_qubits/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
+# Long Gen Runs for CAFQA - Knapsack
+for num_qubits in 16; do
+    for seed in {1..1}; do
+        sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=100000,SEED=$seed,NOISE=0 sweep_run.sh
+    done
+done
+
+## Long Gen Runs for CAFQA - Maxcut
+# for num_qubits in 12; do
+#     for seed in {1..1}; do
+#         sbatch --output=../logs/Comprehensive_Proof/Maxcut/K_Regular_Graphs/2_reps/$num_qubits/cafqa_result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,SEED=$seed,NOISE=0,GRAPH_TYPE="k_reg" sweep_run.sh
 #     done
 # done
 
-## Long Gen Runs for CAFQA - Maxcut
-for num_qubits in 16; do
-    for seed in {1..1}; do
-        sbatch --output=../logs/Comprehensive_Proof/Maxcut/Complete_Graphs/2_reps/$num_qubits/result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,MUTATION_PROB="0.25 0.01 ",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point",SEED=$seed,NOISE=0 sweep_run.sh
-    done
-done
+## Long Gen Runs for CAFQA - Teague
+# for num_qubits in 12 14; do
+#     for seed in {1..1}; do
+#         sbatch --output=../logs/Comprehensive_Proof/Teague/2_reps/$num_qubits/cafqa_result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,SEED=$seed,NOISE=0 sweep_run.sh
+#     done
+# done
