@@ -8,7 +8,7 @@ def n_to_dits(n, dims):
     x = [..., x_3, x_2, x_1, x_0], 0 <= x_i < a_i
     return x
     """
-    assert n <= np.prod(dims) - 1, "n cannot be represented in this basis"
+    assert n <= np.prod(dims) - 1, f"n cannot be represented in this basis -  n: {n}, dims: {dims}"
     x = np.zeros(len(dims), dtype=int)
     i = 0
     while n > 0:
