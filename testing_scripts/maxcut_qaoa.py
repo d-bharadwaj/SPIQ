@@ -3,6 +3,7 @@ import numpy as np
 import warnings
 import os
 import sys
+
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -18,10 +19,22 @@ from timeit import default_timer as timer
 
 sys.path.append("../")
 from clapton.clapton import claptonize
-from clapton.circuit_manipulation import transform_to_allowed_gates,qiskit_to_stim, modify_circuit, multi_angle_qaoa_circuit, generate_qiskit_param_map
-from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph, build_max_cut_paulis, compute_optimal_max_cut
-from testing_scripts.qaoa_utils import QAOASolver,evaluate_energy
+from clapton.circuit_manipulation import (
+    transform_to_allowed_gates,
+    qiskit_to_stim,
+    modify_circuit,
+    multi_angle_qaoa_circuit,
+    generate_qiskit_param_map,
+)
+from testing_scripts.graphs_utils import (
+    generate_random_complete_graph,
+    generate_k_regular_graph,
+    build_max_cut_paulis,
+    compute_optimal_max_cut,
+)
+from testing_scripts.qaoa_utils import QAOASolver, evaluate_energy
 from maxcut_processing import evaluate_maxcut
+
 print("Command-line arguments:", sys.argv)
 
 import multiprocess as mp
@@ -29,11 +42,14 @@ import traceback
 import os
 import numpy as np
 
+
 def run_qaoa_task_pool(args):
     task_name, qaoa_solver, initial_params, max_iters, opt = args
     try:
         print(f"Starting task: {task_name}")
-        result, obj_values = qaoa_solver.run_qaoa(initial_params=initial_params, max_iters=max_iters, opt=opt)
+        result, obj_values = qaoa_solver.run_qaoa(
+            initial_params=initial_params, max_iters=max_iters, opt=opt
+        )
         print(f"Finished task: {task_name}")
         return {
             "task_name": task_name,
@@ -49,8 +65,11 @@ def run_qaoa_task_pool(args):
             "error": str(e),
         }
 
+
 # Function to execute in parallel using Pool
-def execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, optimal_max_cut_val):
+def execute_qaoa_tasks(
+    maxcut_qaoa, random_angles, cafqa_params, max_iters, G, optimal_max_cut_val
+):
     tasks = [
         ("random", maxcut_qaoa, random_angles, max_iters, "COBYLA"),
         ("cafqa", maxcut_qaoa, cafqa_params, max_iters, "COBYLA"),
@@ -71,16 +90,24 @@ def execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, o
     cafqa_fin_energy = results["cafqa"]["final_energy"]
 
     maxcut_qaoa._initialize_backend()
-    random_max_cut_val = evaluate_maxcut(G, maxcut_qaoa.pcirc, random_result, maxcut_qaoa.backend)
-    cafqa_max_cut_val = evaluate_maxcut(G, maxcut_qaoa.pcirc, cafqa_result, maxcut_qaoa.backend)
+    random_max_cut_val = evaluate_maxcut(
+        G, maxcut_qaoa.pcirc, random_result, maxcut_qaoa.backend
+    )
+    cafqa_max_cut_val = evaluate_maxcut(
+        G, maxcut_qaoa.pcirc, cafqa_result, maxcut_qaoa.backend
+    )
 
     random_approx_ratio = random_max_cut_val / optimal_max_cut_val
     cafqa_approx_ratio = cafqa_max_cut_val / optimal_max_cut_val
 
     # Print results
     print(f"Optimal Max Cut Value : {optimal_max_cut_val}")
-    print(f"Max Cut value with Random initialization after {max_iters} iteration: {random_max_cut_val}")
-    print(f"Max Cut value with CAFQA initialization after {max_iters} iteration: {cafqa_max_cut_val}")
+    print(
+        f"Max Cut value with Random initialization after {max_iters} iteration: {random_max_cut_val}"
+    )
+    print(
+        f"Max Cut value with CAFQA initialization after {max_iters} iteration: {cafqa_max_cut_val}"
+    )
     print(f"Random Approx. Ratio: {random_approx_ratio}")
     print(f"CAFQA Approx. Ratio: {cafqa_approx_ratio}")
 
@@ -97,15 +124,16 @@ def execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, o
         "CAFQA_obj_values": cafqa_obj_values,
     }
 
+
 # Main function to set up and execute the script
 def main():
     # Initialize variables (replace with your actual initialization logic)
-    n_qubits = int(sys.argv[1])  
-    reps = int(sys.argv[2])     
-    n_gens = int(sys.argv[3])        
+    n_qubits = int(sys.argv[1])
+    reps = int(sys.argv[2])
+    n_gens = int(sys.argv[3])
     mutation_prob = tuple(map(float, sys.argv[4].split()))
     elitism = int(sys.argv[5])
-    crossover_type = str(sys.argv[6])   
+    crossover_type = str(sys.argv[6])
     seed = int(sys.argv[7])
     noise = bool(int(sys.argv[8]))
 
@@ -139,20 +167,28 @@ def main():
 
     # QAOA Optimization
     ordered_params = [param.name for param in maxcut_qaoa.pcirc.parameters]
-    angle_multipliers = [-np.pi / 4 if 'gamma' in param else np.pi / 4 for param in ordered_params]
-    cafqa_params = [param * (np.pi / 2) for param, multiplier in zip(maxcut_qaoa.ks_best, angle_multipliers)]
+    angle_multipliers = [
+        -np.pi / 4 if "gamma" in param else np.pi / 4 for param in ordered_params
+    ]
+    cafqa_params = [
+        param * (np.pi / 2)
+        for param, multiplier in zip(maxcut_qaoa.ks_best, angle_multipliers)
+    ]
 
     # Execute QAOA tasks
     max_iters = 1000
-    
+
     start = timer()
-    results = execute_qaoa_tasks(maxcut_qaoa, random_angles, cafqa_params, max_iters, G, optimal_max_cut_val)
+    results = execute_qaoa_tasks(
+        maxcut_qaoa, random_angles, cafqa_params, max_iters, G, optimal_max_cut_val
+    )
     end = timer()
     print(f"Total Time : {end - start}")
     # Save results
     output_dir = f"../np_data/rep_sweep_2000_gens/NM_test/{reps}_layers"
     os.makedirs(output_dir, exist_ok=True)
     np.save(os.path.join(output_dir, f"12_qb_single_results_{seed}.npy"), results)
+
 
 # Entry point
 if __name__ == "__main__":

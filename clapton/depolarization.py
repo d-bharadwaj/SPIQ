@@ -1,25 +1,23 @@
 # gate objects are ParametrizedClifford but cannot import as would cause cyclic import
 
+
 class DepolarizationModel:
     def __init__(self):
         pass
+
     def get_gate_depolarization(self, gate):
         pass
 
 
 class GateSpecificDepolarizationModel(DepolarizationModel):
-    def __init__(
-            self, 
-            params: dict[str, dict[tuple[int, int], float | None]] = {}
-        ):
+    def __init__(self, params: dict[str, dict[tuple[int, int], float | None]] = {}):
         self.params = params
+
     def set_gate_depolarization(
-            self, 
-            gate_id: str,
-            qbs: tuple[int] | tuple[int,int],
-            p: float
-        ):
+        self, gate_id: str, qbs: tuple[int] | tuple[int, int], p: float
+    ):
         self.params[gate_id][qbs] = p
+
     def get_gate_depolarization(self, gate):
         gate_id = gate.get_stim_id()
         if not gate_id in self.params:
@@ -29,13 +27,10 @@ class GateSpecificDepolarizationModel(DepolarizationModel):
 
 
 class GateGeneralDepolarizationModel(DepolarizationModel):
-    def __init__(
-            self, 
-            p1: float | None = None, 
-            p2: float | None = None
-        ):
+    def __init__(self, p1: float | None = None, p2: float | None = None):
         self.p1 = p1
         self.p2 = p2
+
     def get_gate_depolarization(self, gate):
         if len(gate.qbs) == 1:
             p = self.p1

@@ -1,6 +1,7 @@
 """
 Graph utilities.
 """
+
 from queue import SimpleQueue
 from typing import Sequence
 
@@ -57,7 +58,10 @@ def get_edge_diameter(graph: Graph) -> int:
     diameter = nx.diameter(graph)
     for node in peripheral_nodes:
         last_edge = list(nx.edge_bfs(graph, node))[-1]
-        if nx.shortest_path_length(graph, node, last_edge[0]) == diameter and nx.shortest_path_length(graph, node, last_edge[1]) == diameter:
+        if (
+            nx.shortest_path_length(graph, node, last_edge[0]) == diameter
+            and nx.shortest_path_length(graph, node, last_edge[1]) == diameter
+        ):
             return diameter + 1
     return diameter
 
@@ -71,7 +75,9 @@ def get_node_indices(graph: Graph) -> dict:
     return {node: i for i, node in enumerate(graph.nodes)}
 
 
-def get_index_edge_list(graph: Graph, edge_list: list[tuple[int, int]] = None) -> ndarray:
+def get_index_edge_list(
+    graph: Graph, edge_list: list[tuple[int, int]] = None
+) -> ndarray:
     """
     Returns 2D array of edges specified by pairs of node indices in the order of graph.nodes instead of node labels.
     :param graph: Graph to consider.
@@ -97,8 +103,8 @@ def read_graph_xqaoa(path):
     with open(path) as f:
         lines = f.readlines()
     lines = lines[2:]
-    graph = nx.read_edgelist(lines, delimiter=',', nodetype=int)
-    nx.set_edge_attributes(graph, 1, 'weight')
+    graph = nx.read_edgelist(lines, delimiter=",", nodetype=int)
+    nx.set_edge_attributes(graph, 1, "weight")
     return graph
 
 

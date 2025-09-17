@@ -1,5 +1,5 @@
 # This module defines a Qiskit transpiler pass from the official blog (https://docs.quantum.ibm.com/guides/custom-transpiler-pass) for adding Pauli twirls to two-qubit gates.
-# The PauliTwirl class inherits from TransformationPass and introduces Pauli twirling to 
+# The PauliTwirl class inherits from TransformationPass and introduces Pauli twirling to
 # specified two-qubit gates in a quantum circuit to mitigate errors.
 #
 # The PauliTwirl class:
@@ -17,16 +17,17 @@ from qiskit.quantum_info import Operator, pauli_basis
 import numpy as np
 from typing import Iterable, Optional
 
+
 class PauliTwirl(TransformationPass):
     """Add Pauli twirls to two-qubit gates."""
- 
+
     def __init__(self, gates_to_twirl: Optional[Iterable[Gate]] = None):
         if gates_to_twirl is None:
             gates_to_twirl = [CXGate(), ECRGate()]
         self.gates_to_twirl = gates_to_twirl
         self.build_twirl_set()
         super().__init__()
- 
+
     def build_twirl_set(self):
         self.twirl_set = {}
         for twirl_gate in self.gates_to_twirl:
@@ -38,7 +39,7 @@ class PauliTwirl(TransformationPass):
                     ):
                         twirl_list.append((pauli_left, pauli_right))
             self.twirl_set[twirl_gate.name] = twirl_list
- 
+
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         twirling_gate_classes = tuple(gate.base_class for gate in self.gates_to_twirl)
         for node in dag.op_nodes():
@@ -49,8 +50,12 @@ class PauliTwirl(TransformationPass):
             mini_dag = DAGCircuit()
             register = QuantumRegister(2)
             mini_dag.add_qreg(register)
-            mini_dag.apply_operation_back(twirl_pair[0].to_instruction(), [register[0], register[1]])
+            mini_dag.apply_operation_back(
+                twirl_pair[0].to_instruction(), [register[0], register[1]]
+            )
             mini_dag.apply_operation_back(node.op, [register[0], register[1]])
-            mini_dag.apply_operation_back(twirl_pair[1].to_instruction(), [register[0], register[1]])
+            mini_dag.apply_operation_back(
+                twirl_pair[1].to_instruction(), [register[0], register[1]]
+            )
             dag.substitute_node_with_dag(node, mini_dag)
         return dag

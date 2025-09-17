@@ -1,6 +1,7 @@
 """
 Functions that translate given parameters to MA-QAOA angles.
 """
+
 import numpy as np
 from numpy import ndarray
 import itertools as it
@@ -8,7 +9,9 @@ import itertools as it
 from data_processing import DiscreteSineTransform, DiscreteCosineTransform
 
 
-def duplicate_angles(input_angles: ndarray, duplication_scheme: list[ndarray]) -> ndarray:
+def duplicate_angles(
+    input_angles: ndarray, duplication_scheme: list[ndarray]
+) -> ndarray:
     """
     Duplicates input angles according to the duplication scheme to convert the angle format to MA-QAOA.
     :param input_angles: 1D array of angles.
@@ -17,13 +20,15 @@ def duplicate_angles(input_angles: ndarray, duplication_scheme: list[ndarray]) -
     :return: Updated list of angles where the angles are duplicated according to the provided scheme.
     """
     output_len = max([max(inner) for inner in duplication_scheme]) + 1
-    output_angles = np.zeros((output_len, ))
+    output_angles = np.zeros((output_len,))
     for i, inner in enumerate(duplication_scheme):
         output_angles[inner] = input_angles[i]
     return output_angles
 
 
-def convert_angles_qaoa_to_ma(angles: ndarray, num_edges: int, num_nodes: int) -> ndarray:
+def convert_angles_qaoa_to_ma(
+    angles: ndarray, num_edges: int, num_nodes: int
+) -> ndarray:
     """
     Repeats each QAOA angle necessary number of times to convert QAOA angle format to MA-QAOA.
     :param angles: angles in QAOA format (2 per layer).
@@ -46,9 +51,11 @@ def qaoa_decorator(ma_qaoa_func: callable, num_edges: int, num_nodes: int) -> ca
     :param num_nodes: Number of nodes in the graph.
     :return: Adapted function that accepts angles in QAOA format.
     """
+
     def qaoa_wrapped(*args, **kwargs):
         angles_maqaoa = convert_angles_qaoa_to_ma(args[0], num_edges, num_nodes)
         return ma_qaoa_func(angles_maqaoa, *args[1:], **kwargs)
+
     return qaoa_wrapped
 
 
@@ -88,9 +95,11 @@ def fourier_decorator(qaoa_func: callable) -> callable:
     :param qaoa_func: Function that expects QAOA angles as first parameter.
     :return: Adapted function that accepts angles in Fourier format as first parameter.
     """
+
     def fourier_wrapped(*args, **kwargs):
         angles_qaoa = convert_angles_fourier_to_qaoa(args[0])
         return qaoa_func(angles_qaoa, *args[1:], **kwargs)
+
     return fourier_wrapped
 
 
@@ -114,9 +123,11 @@ def linear_decorator(qaoa_func: callable, p: int) -> callable:
     :param p: Number of QAOA layers.
     :return: Adapted function that accepts angles in linear ramp format.
     """
+
     def linear_wrapped(*args, **kwargs):
         qaoa_angles = convert_angles_linear_to_qaoa(args[0], p)
         return qaoa_func(qaoa_angles, *args[1:], **kwargs)
+
     return linear_wrapped
 
 
@@ -140,9 +151,11 @@ def tqa_decorator(qaoa_func: callable, p: int) -> callable:
     :param p: Number of QAOA layers.
     :return: Adapted function that accepts angles in TQA format.
     """
+
     def tqa_wrapped(*args, **kwargs):
         qaoa_angles = convert_angles_tqa_to_qaoa(args[0], p)
         return qaoa_func(qaoa_angles, *args[1:], **kwargs)
+
     return tqa_wrapped
 
 
@@ -153,7 +166,7 @@ def interp_p_series(angles: ndarray) -> ndarray:
     :return: Initial guess for the series at level p + 1.
     """
     p = len(angles)
-    new_angles = np.zeros((p + 1, ))
+    new_angles = np.zeros((p + 1,))
     new_angles[0] = angles[0]
     for i in range(1, p):
         new_angles[i] = i / p * angles[i - 1] + (1 - i / p) * angles[i]
@@ -177,7 +190,9 @@ def interp_qaoa_angles(angles: ndarray, p: int) -> ndarray:
     return np.squeeze(new_angle_series.reshape((1, -1)))
 
 
-def fix_angles(eval_func: callable, num_angles: int, inds: list[int], values: list[float]) -> callable:
+def fix_angles(
+    eval_func: callable, num_angles: int, inds: list[int], values: list[float]
+) -> callable:
     """
     Decorator that returns an evaluator function with specified input elements fixed to the specified values.
     :param eval_func: Original evaluator function that accepts ndarray of angles.
@@ -186,6 +201,7 @@ def fix_angles(eval_func: callable, num_angles: int, inds: list[int], values: li
     :param values: Values for the fixed elements.
     :return: New evaluator function that expects smaller input array and augments it with the fixed elements and returns the result of the original evaluator.
     """
+
     def new_func(angles: ndarray):
         mask = np.zeros(num_angles, dtype=bool)
         mask[inds] = True
@@ -193,6 +209,7 @@ def fix_angles(eval_func: callable, num_angles: int, inds: list[int], values: li
         full_angles[mask] = values
         full_angles[~mask] = angles
         return eval_func(full_angles)
+
     return new_func
 
 

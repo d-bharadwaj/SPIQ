@@ -1,5 +1,6 @@
 from clapton.clifford import ParametrizedCliffordCircuit
-from qiskit.circuit import QuantumCircuit,ParameterVector
+from qiskit.circuit import QuantumCircuit, ParameterVector
+
 
 ### Ansatzes
 def linear_ansatz(N, reps=1, fix_2q=False):
@@ -9,9 +10,9 @@ def linear_ansatz(N, reps=1, fix_2q=False):
             pcirc.RY(i)
         for i in range(N):
             pcirc.RZ(i)
-        for i in range(N-1):
+        for i in range(N - 1):
             control = i
-            target = i+1
+            target = i + 1
             if fix_2q:
                 pcirc.Q2(control, target).fix(1)
             else:
@@ -22,6 +23,7 @@ def linear_ansatz(N, reps=1, fix_2q=False):
         pcirc.RZ(i)
     return pcirc
 
+
 def circular_ansatz(N, reps=1, fix_2q=False):
     pcirc = ParametrizedCliffordCircuit()
     for _ in range(reps):
@@ -30,7 +32,7 @@ def circular_ansatz(N, reps=1, fix_2q=False):
         for i in range(N):
             pcirc.RZ(i)
         for i in range(N):
-            control = (i-1) % N
+            control = (i - 1) % N
             target = i
             if fix_2q:
                 pcirc.Q2(control, target).fix(1)
@@ -51,7 +53,7 @@ def circular_ansatz_mirrored(N, reps=1, fix_2q=False):
         for i in range(N):
             pcirc.RZ(i)
         for i in range(N):
-            control = (i-1) % N
+            control = (i - 1) % N
             target = i
             if fix_2q:
                 pcirc.Q2(control, target).fix(1)
@@ -61,8 +63,8 @@ def circular_ansatz_mirrored(N, reps=1, fix_2q=False):
             pcirc.RY(i)
         for i in range(N):
             pcirc.RZ(i)
-        for i in range(N-1, -1, -1):
-            control = (i-1) % N
+        for i in range(N - 1, -1, -1):
+            control = (i - 1) % N
             target = i
             if fix_2q:
                 pcirc.Q2(control, target).fix(1)
@@ -71,8 +73,8 @@ def circular_ansatz_mirrored(N, reps=1, fix_2q=False):
     for i in range(N):
         pcirc.RY(i)
     for i in range(N):
-        pcirc.RZ(i) 
-    return pcirc  
+        pcirc.RZ(i)
+    return pcirc
 
 
 def full_ansatz(N, reps=1, fix_2q=False):
@@ -82,8 +84,8 @@ def full_ansatz(N, reps=1, fix_2q=False):
             pcirc.RY(i)
         for i in range(N):
             pcirc.RZ(i)
-        for i in range(N-1):
-            for j in range(i+1, N):
+        for i in range(N - 1):
+            for j in range(i + 1, N):
                 if fix_2q:
                     pcirc.Q2(i, j).fix(1)
                 else:
@@ -92,7 +94,7 @@ def full_ansatz(N, reps=1, fix_2q=False):
         pcirc.RY(i)
     for i in range(N):
         pcirc.RZ(i)
-    return pcirc  
+    return pcirc
 
 
 def full_ansatz_C1(N, reps=1):
@@ -100,18 +102,17 @@ def full_ansatz_C1(N, reps=1):
     for _ in range(reps):
         for i in range(N):
             pcirc.C1(i)
-        for i in range(N-1):
-            for j in range(i+1, N):
+        for i in range(N - 1):
+            for j in range(i + 1, N):
                 pcirc.Q2(i, j)
     for i in range(N):
         pcirc.C1(i)
-    return pcirc  
+    return pcirc
 
 
 def ansatz_from_instructions(
-        instructions: list[tuple[str, list[int], bool, int]], 
-        meas_map_dict=None
-    ):
+    instructions: list[tuple[str, list[int], bool, int]], meas_map_dict=None
+):
     """
     instructions: [(lbl, [qbs], is_parametrized, param)]
     lbl: RX, RY, RZ, 2Q
@@ -119,6 +120,7 @@ def ansatz_from_instructions(
     param: if is_parametrized: parameter index in original input
                          else: fixed parameter
     """
+
     def ansatz(N=None):
         pcirc = ParametrizedCliffordCircuit()
         param_map = {}
@@ -141,26 +143,28 @@ def ansatz_from_instructions(
         pcirc.define_parameter_map(param_map)
         pcirc.define_measurement_map(meas_map_dict)
         return pcirc
+
     return ansatz
 
+
 # For Pauli Twirling in VQE
-def qiskit_circular_ansatz(N, reps=1): 
+def qiskit_circular_ansatz(N, reps=1):
     qc = QuantumCircuit(N)
 
     # define your parameters
-    p = ParameterVector('p', (N*2) *(reps+1)) 
+    p = ParameterVector("p", (N * 2) * (reps + 1))
 
-    for r in range(reps): 
+    for r in range(reps):
         for i in range(N):
-            qc.ry(p[2*N*r+i], i)  
+            qc.ry(p[2 * N * r + i], i)
         for i in range(N):
-            qc.rz(p[2*N*r+(i+N)], i)
+            qc.rz(p[2 * N * r + (i + N)], i)
         for i in range(N):
-            control = (i-1) % N
+            control = (i - 1) % N
             target = i
             qc.cx(control, target)
     for i in range(N):
-        qc.ry(p[2*N*reps+i], i)
+        qc.ry(p[2 * N * reps + i], i)
     for i in range(N):
-        qc.rz(p[2*N*reps + (i+N)], i)
+        qc.rz(p[2 * N * reps + (i + N)], i)
     return qc

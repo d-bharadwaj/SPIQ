@@ -1,9 +1,11 @@
 import rustworkx as rx
+import networkx as nx
 import random
 from sage.all import Graph
 from typing import Sequence
 import numpy as np
 from qiskit_ibm_runtime import SamplerV2 as Sampler
+
 
 def generate_k_regular_graph(num_vertices, k, weighted=False, seed=None):
     """
@@ -69,7 +71,10 @@ def generate_k_regular_graph(num_vertices, k, weighted=False, seed=None):
         if len(edges) == (num_vertices * k) // 2:
             return graph
 
-def generate_random_complete_graph(num_vertices, weighted=False, seed=None, save_path=None):
+
+def generate_random_complete_graph(
+    num_vertices, weighted=False, seed=None, save_path=None
+):
     """
     Generate a random complete graph.
 
@@ -100,6 +105,7 @@ def generate_random_complete_graph(num_vertices, weighted=False, seed=None, save
             weight = random.randint(1, 10) if weighted else 1
             G.add_edge(i, j, weight)
     return G
+
 
 def generate_random_ego_graph(num_nodes, weighted=False, seed=None):
     """
@@ -152,12 +158,15 @@ def generate_random_ego_graph(num_nodes, weighted=False, seed=None):
 
     return graph
 
-def generate_random_erdos_renyi_graph(num_nodes, probability=0.5, weighted=False, seed=None):
+
+def generate_random_erdos_renyi_graph(
+    num_nodes, probability=0.5, weighted=False, seed=None
+):
     if seed is not None:
         random.seed(seed)
     # Generate random Erdos-Renyi graph structure
     random_graph = rx.undirected_gnp_random_graph(num_nodes, probability, seed=seed)
-    
+
     # Create a new PyGraph and add the same number of nodes
     graph = rx.PyGraph()
     graph.add_nodes_from([None] * num_nodes)  # Adds num_nodes empty payloads
@@ -171,6 +180,7 @@ def generate_random_erdos_renyi_graph(num_nodes, probability=0.5, weighted=False
     G_sub = graph.subgraph(list(largest_cc)).copy()
 
     return G_sub
+
 
 def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
     """
@@ -191,6 +201,7 @@ def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
         sage_graph.add_edge(u, v, weight)
     return sage_graph.max_cut(use_edge_labels=True)
 
+
 def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
     """
     Convert the graph to a list of Pauli strings for Max-Cut.
@@ -206,10 +217,10 @@ def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
         List of tuples where each tuple contains a Pauli string and its corresponding edge weight.
     """
 
-    if len(graph)==0:
+    if len(graph) == 0:
         assert False, "Graph is empty"
 
-    if len(graph)==1:
+    if len(graph) == 1:
         assert False, "Single Node Graph!"
 
     pauli_list = []
@@ -219,6 +230,7 @@ def build_max_cut_paulis(graph: rx.PyGraph) -> list[tuple[str, float]]:
         weight = graph.get_edge_data(edge[0], edge[1])
         pauli_list.append(("".join(paulis)[::-1], weight))
     return pauli_list
+
 
 def to_bitstring(integer, num_bits):
     """
@@ -241,6 +253,7 @@ def to_bitstring(integer, num_bits):
     seq.reverse()
     return seq
 
+
 def _evaluate_sample(x: Sequence[int], graph: rx.PyGraph) -> float:
     """
     Evaluate the Max-Cut value for a given bitstring assignment.
@@ -257,13 +270,16 @@ def _evaluate_sample(x: Sequence[int], graph: rx.PyGraph) -> float:
     float
         The cut value for the assignment.
     """
-    assert len(x) == len(list(graph.nodes())), "The length of x must coincide with the number of nodes in the graph."
+    assert len(x) == len(
+        list(graph.nodes())
+    ), "The length of x must coincide with the number of nodes in the graph."
     return sum(
         w * (x[u] * (1 - x[v]) + x[v] * (1 - x[u]))
         for u, v, w in list(graph.weighted_edge_list())
     )
 
-def get_final_distribution(qaoa_obj, final_params):
+
+def get_final_distribution(qaoa_obj, final_params, shots=1e4):
     """
     Get the final measurement distribution from a QAOA object and parameters.
 
@@ -278,7 +294,7 @@ def get_final_distribution(qaoa_obj, final_params):
     -------
     final_distribution_int : dict
         Dictionary mapping bitstrings (as int) to probabilities.
-    """ 
+    """
     if qaoa_obj.vanilla:
         optimized_circuit = qaoa_obj.circuit.assign_parameters(final_params)
     else:
@@ -287,11 +303,12 @@ def get_final_distribution(qaoa_obj, final_params):
 
     sampler = Sampler(mode=qaoa_obj.backend)
     pub = (optimized_circuit,)
-    job = sampler.run([pub], shots=int(1e4))
+    job = sampler.run([pub], shots=int(shots))
     counts_int = job.result()[0].data.meas.get_int_counts()
     shots = sum(counts_int.values())
     final_distribution_int = {key: val / shots for key, val in counts_int.items()}
     return final_distribution_int
+
 
 def calculate_approximation_ratio(fin_distribution, graph):
     """
@@ -321,3 +338,67 @@ def calculate_approximation_ratio(fin_distribution, graph):
         expected_cut += prob * cut
 
     return expected_cut / optimal_cut
+
+
+def rustworkx_to_networkx(rw_graph):
+    """
+    Convert a rustworkx graph (PyGraph or PyDiGraph) into a networkx graph.
+
+    Parameters:
+        rw_graph (rustworkx.PyGraph or rustworkx.PyDiGraph): The rustworkx graph.
+
+    Returns:
+        networkx.Graph or networkx.DiGraph: The equivalent networkx graph.
+    """
+    if isinstance(rw_graph, rx.PyDiGraph):
+        nx_graph = nx.DiGraph()
+    elif isinstance(rw_graph, rx.PyGraph):
+        nx_graph = nx.Graph()
+    else:
+        raise TypeError("Input must be a rustworkx.PyGraph or rustworkx.PyDiGraph")
+
+    # Add nodes with data
+    for index, data in enumerate(rw_graph.nodes()):
+        nx_graph.add_node(index, data=data)
+
+    # Add edges with data and weight
+    for edge in rw_graph.weighted_edge_list():
+        u, v, w = edge
+        edge_data = rw_graph.get_edge_data(u, v)
+        nx_graph.add_edge(u, v, data=edge_data, weight=w)
+
+    return nx_graph
+
+
+def networkx_to_rustworkx(nx_graph):
+    """
+    Convert a networkx Graph or DiGraph into a rustworkx PyGraph or PyDiGraph.
+
+    Parameters:
+        nx_graph (networkx.Graph or networkx.DiGraph): The input NetworkX graph.
+
+    Returns:
+        rustworkx.PyGraph or rustworkx.PyDiGraph: The converted rustworkx graph.
+    """
+    if isinstance(nx_graph, nx.DiGraph):
+        rw_graph = rx.PyDiGraph()
+    elif isinstance(nx_graph, nx.Graph):
+        rw_graph = rx.PyGraph()
+    else:
+        raise TypeError("Input must be a networkx.Graph or networkx.DiGraph")
+
+    # Map from networkx node to rustworkx node index
+    node_index_map = {}
+
+    # Add nodes
+    for node in nx_graph.nodes():
+        node_data = nx_graph.nodes[node].get("data", 1)
+        index = rw_graph.add_node(node_data)
+        node_index_map[node] = index
+
+    # Add edges
+    for u, v, attr in nx_graph.edges(data=True):
+        edge_data = attr.get("data", 1)
+        rw_graph.add_edge(node_index_map[u], node_index_map[v], edge_data)
+
+    return rw_graph

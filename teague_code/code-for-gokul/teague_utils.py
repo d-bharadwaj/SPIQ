@@ -1,9 +1,8 @@
-
-
-
-def convert_pubo_to_ising(hypergraph: dict,n_qubits: int) -> list[tuple[str, float]]: #TODO: put this in util file.
+def convert_pubo_to_ising(
+    hypergraph: dict, n_qubits: int
+) -> list[tuple[str, float]]:  # TODO: put this in util file.
     """Convert a hypergraph dictionary to a list of Pauli strings with weights."""
-    n = n_qubits # Number of qubits
+    n = n_qubits  # Number of qubits
     pauli_list = []
 
     for edge, weight in hypergraph.items():

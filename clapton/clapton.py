@@ -2,89 +2,83 @@ import numpy as np
 import pygad
 import multiprocessing as mp
 from clapton.clifford import ParametrizedCliffordCircuit
-from clapton.evaluation import transform_paulis, get_energy, weighted_relative_pauli_weight
+from clapton.evaluation import (
+    transform_paulis,
+    get_energy,
+    weighted_relative_pauli_weight,
+)
 from clapton.utils import n_to_dits
 from clapton.mp_helpers import SignalHandler
 import os
 
+
 ### Clapton
 def loss_func(
-        x: list[int], 
-        paulis: list[str], 
-        coeffs: list[float], 
-        vqe_pcirc: ParametrizedCliffordCircuit, 
-        trans_pcirc: ParametrizedCliffordCircuit | None = None, 
-        alpha: float | None = None, 
-        return_sublosses: bool = False,
-        **energy_kwargs
-    ):
+    x: list[int],
+    paulis: list[str],
+    coeffs: list[float],
+    vqe_pcirc: ParametrizedCliffordCircuit,
+    trans_pcirc: ParametrizedCliffordCircuit | None = None,
+    alpha: float | None = None,
+    return_sublosses: bool = False,
+    **energy_kwargs,
+):
     if trans_pcirc is None:
 
         if vqe_pcirc.pauli_twirl_list is not None:
             for circuit in vqe_pcirc.pauli_twirl_list:
                 circuit.assign(x)
 
-        vqe_pcirc.assign(x) 
+        vqe_pcirc.assign(x)
         vqe_pcirc.snapshot()
         vqe_pcirc.snapshot_noiseless()
 
         energy = get_energy(
-                    vqe_pcirc, 
-                    paulis, 
-                    coeffs, 
-                    **energy_kwargs,
-                    )
+            vqe_pcirc,
+            paulis,
+            coeffs,
+            **energy_kwargs,
+        )
         energy_noiseless = get_energy(
-                            vqe_pcirc, 
-                            paulis, 
-                            coeffs, 
-                            get_noiseless=True,
-                            **energy_kwargs
-                            )
-        pauli_weight_loss = 0.
+            vqe_pcirc, paulis, coeffs, get_noiseless=True, **energy_kwargs
+        )
+        pauli_weight_loss = 0.0
         loss = energy + energy_noiseless
-    
-    else: #NOTE: Currently, PT does not account for this case.
+
+    else:  # NOTE: Currently, PT does not account for this case.
         trans_circ = trans_pcirc.assign(x).stim_circuit()
         paulis_trans, signs = transform_paulis(trans_circ, paulis)
         coeffs_trans = np.multiply(signs, coeffs)
         # assume vqe_pcirc has stim circuit snapshot with all 0 parameters
-        energy = get_energy(
-                    vqe_pcirc, 
-                    paulis_trans, 
-                    coeffs_trans, 
-                    **energy_kwargs
-                    )
+        energy = get_energy(vqe_pcirc, paulis_trans, coeffs_trans, **energy_kwargs)
         energy_noiseless = get_energy(
-                            vqe_pcirc, 
-                            paulis_trans, 
-                            coeffs_trans, 
-                            get_noiseless=True,
-                            **energy_kwargs
-                            )
+            vqe_pcirc, paulis_trans, coeffs_trans, get_noiseless=True, **energy_kwargs
+        )
         if alpha is not None:
-            pauli_weight_loss = alpha * weighted_relative_pauli_weight(paulis_trans, np.abs(coeffs))
+            pauli_weight_loss = alpha * weighted_relative_pauli_weight(
+                paulis_trans, np.abs(coeffs)
+            )
         else:
-            pauli_weight_loss = 0.
+            pauli_weight_loss = 0.0
         loss = energy + energy_noiseless + pauli_weight_loss
     if return_sublosses:
         return loss, energy, energy_noiseless, pauli_weight_loss
     else:
         return loss
-    
+
 
 def eval_xs_terms(
-        xs: list[list[int]], 
-        paulis: list[str], 
-        coeffs: list[float],
-        vqe_pcirc: ParametrizedCliffordCircuit,
-        trans_pcirc: ParametrizedCliffordCircuit | None = None,
-        p_start_idx: int = 0, 
-        p_end_idx: int | None = None, 
-        result_queue = None,
-        result_id: int | None = None,
-        **loss_kwargs
-    ):
+    xs: list[list[int]],
+    paulis: list[str],
+    coeffs: list[float],
+    vqe_pcirc: ParametrizedCliffordCircuit,
+    trans_pcirc: ParametrizedCliffordCircuit | None = None,
+    p_start_idx: int = 0,
+    p_end_idx: int | None = None,
+    result_queue=None,
+    result_id: int | None = None,
+    **loss_kwargs,
+):
     S = len(xs)
     P = len(paulis)
     if p_end_idx is None:
@@ -92,25 +86,29 @@ def eval_xs_terms(
     idx1 = p_start_idx
     idx2 = P - 1
     partial_losses = []
-    for s in range(S-1):
-        partial_losses.append(loss_func(
-            xs[s], 
-            paulis[idx1:idx2+1], 
-            coeffs[idx1:idx2+1], 
+    for s in range(S - 1):
+        partial_losses.append(
+            loss_func(
+                xs[s],
+                paulis[idx1 : idx2 + 1],
+                coeffs[idx1 : idx2 + 1],
+                vqe_pcirc,
+                trans_pcirc,
+                **loss_kwargs,
+            )
+        )
+        idx1 = 0
+    idx2 = p_end_idx
+    partial_losses.append(
+        loss_func(
+            xs[S - 1],
+            paulis[idx1 : idx2 + 1],
+            coeffs[idx1 : idx2 + 1],
             vqe_pcirc,
             trans_pcirc,
             **loss_kwargs,
-            ))
-        idx1 = 0
-    idx2 = p_end_idx
-    partial_losses.append(loss_func(
-            xs[S-1], 
-            paulis[idx1:idx2+1], 
-            coeffs[idx1:idx2+1], 
-            vqe_pcirc,
-            trans_pcirc,
-            **loss_kwargs
-            ))
+        )
+    )
     if result_queue is None:
         return partial_losses
     else:
@@ -118,37 +116,38 @@ def eval_xs_terms(
 
 
 def handle_out_data(
-        x: list[int], 
-        losses: list[float], 
-        out_data: list | None = None, 
-        callback = None
-    ):
-        if out_data is not None:
-            out_data[0] += 1
-            out_data[1] = losses
-            out_data[2] = x
-            if callback is not None:
-                callback(out_data)
+    x: list[int], losses: list[float], out_data: list | None = None, callback=None
+):
+    if out_data is not None:
+        out_data[0] += 1
+        out_data[1] = losses
+        out_data[2] = x
+        if callback is not None:
+            callback(out_data)
 
 
 def eval_xs_terms_mp(
-        xs: list[list[int]], 
-        paulis: list[str], 
-        coeffs: list[float],
-        vqe_pcirc: ParametrizedCliffordCircuit,
-        trans_pcirc: ParametrizedCliffordCircuit | None = None,
-        n_proc: int = 1, 
-        out_data: list | None = None, 
-        callback = None, 
-        **loss_kwargs
-    ):
+    xs: list[list[int]],
+    paulis: list[str],
+    coeffs: list[float],
+    vqe_pcirc: ParametrizedCliffordCircuit,
+    trans_pcirc: ParametrizedCliffordCircuit | None = None,
+    n_proc: int = 1,
+    out_data: list | None = None,
+    callback=None,
+    **loss_kwargs,
+):
     S = len(xs)
     P = len(paulis)
     SP = S * P
     ntasks_per_P = int(np.ceil(SP / n_proc))
-    sp_start_idc = [n_to_dits(c*ntasks_per_P, [S, P]) for c in range(n_proc)] # c is process / core idx
-    sp_end_idc = [n_to_dits((c+1)*ntasks_per_P-1, [S, P]) for c in range(n_proc-1)]
-    sp_end_idc.append(np.array([S-1, P-1], dtype=int))
+    sp_start_idc = [
+        n_to_dits(c * ntasks_per_P, [S, P]) for c in range(n_proc)
+    ]  # c is process / core idx
+    sp_end_idc = [
+        n_to_dits((c + 1) * ntasks_per_P - 1, [S, P]) for c in range(n_proc - 1)
+    ]
+    sp_end_idc.append(np.array([S - 1, P - 1], dtype=int))
     processes = []
     result_queue = mp.Manager().Queue()
     loss_kwargs["return_sublosses"] = True
@@ -157,7 +156,7 @@ def eval_xs_terms_mp(
         process = mp.Process(
             target=eval_xs_terms,
             args=(
-                xs[sp_start_idc[i][0]:sp_end_idc[i][0]+1],
+                xs[sp_start_idc[i][0] : sp_end_idc[i][0] + 1],
                 paulis,
                 coeffs,
                 vqe_pcirc,
@@ -165,25 +164,25 @@ def eval_xs_terms_mp(
                 sp_start_idc[i][1],
                 sp_end_idc[i][1],
                 result_queue,
-                i
+                i,
             ),
-            kwargs=loss_kwargs
+            kwargs=loss_kwargs,
         )
         processes.append(process)
         process.start()
 
     partial_losses = eval_xs_terms(
-        xs[sp_start_idc[0][0]:sp_end_idc[0][0]+1],
+        xs[sp_start_idc[0][0] : sp_end_idc[0][0] + 1],
         paulis,
         coeffs,
         vqe_pcirc,
         trans_pcirc,
         sp_start_idc[0][1],
         sp_end_idc[0][1],
-        **loss_kwargs
+        **loss_kwargs,
     )
     losses = np.zeros((S, len(partial_losses[0])))
-    ss = range(sp_start_idc[0][0], sp_end_idc[0][0]+1)
+    ss = range(sp_start_idc[0][0], sp_end_idc[0][0] + 1)
     for s_idx, s in enumerate(ss):
         losses[s] += partial_losses[s_idx]
 
@@ -195,31 +194,31 @@ def eval_xs_terms_mp(
         item = result_queue.get()
         i = item[0]
         partial_losses = item[1]
-        ss = range(sp_start_idc[i][0], sp_end_idc[i][0]+1)
+        ss = range(sp_start_idc[i][0], sp_end_idc[i][0] + 1)
         for s_idx, s in enumerate(ss):
             losses[s] += partial_losses[s_idx]
-    best_idx = np.argmin(losses[:,0])
+    best_idx = np.argmin(losses[:, 0])
     handle_out_data(xs[best_idx], losses[best_idx], out_data, callback)
-    return losses[:,0]
+    return losses[:, 0]
 
 
 def claptonize(
-        paulis: list[str],
-        coeffs: list[float],
-        vqe_pcirc: ParametrizedCliffordCircuit,
-        trans_pcirc: ParametrizedCliffordCircuit | None = None,
-        n_proc: int = 10,
-        n_starts: int = 10,
-        n_rounds: int | None = None,
-        n_retry_rounds: int = 0,
-        return_n_rounds: bool = False,
-        mix_best_pop_frac: float = 0.2,
-        mutation_probability :tuple[float, float] = (0.25,0.01),
-        crossover_type : str =  "single_point",
-        keep_elitism : int = 5,
-        out_file : str = "",
-        **optimizer_and_loss_kwargs
-    ):
+    paulis: list[str],
+    coeffs: list[float],
+    vqe_pcirc: ParametrizedCliffordCircuit,
+    trans_pcirc: ParametrizedCliffordCircuit | None = None,
+    n_proc: int = 10,
+    n_starts: int = 10,
+    n_rounds: int | None = None,
+    n_retry_rounds: int = 0,
+    return_n_rounds: bool = False,
+    mix_best_pop_frac: float = 0.2,
+    mutation_probability: tuple[float, float] = (0.25, 0.01),
+    crossover_type: str = "single_point",
+    keep_elitism: int = 5,
+    out_file: str = "",
+    **optimizer_and_loss_kwargs,
+):
     sig_handler = SignalHandler()
 
     assert vqe_pcirc.num_physical_qubits == len(paulis[0])
@@ -228,12 +227,12 @@ def claptonize(
         # take snapshot for more efficient sim in cost function (is initialized to params all 0)
         vqe_pcirc.snapshot()
         vqe_pcirc.snapshot_noiseless()
-    
+
     n_proc = n_proc // n_starts
     if n_proc == 0:
         n_proc = 1
     initial_populations = [None] * n_starts
-    out_data = [-1, [np.inf]*3, None]
+    out_data = [-1, [np.inf] * 3, None]
     optimizer_and_loss_kwargs["n_proc"] = n_proc
     optimizer_and_loss_kwargs["return_best_pop_frac"] = mix_best_pop_frac
     optimizer_and_loss_kwargs["out_data"] = out_data
@@ -241,7 +240,7 @@ def claptonize(
     optimizer_and_loss_kwargs["mutation_probability"] = mutation_probability
     optimizer_and_loss_kwargs["crossover_type"] = crossover_type
     optimizer_and_loss_kwargs["keep_elitism"] = keep_elitism
-    
+
     r_idx = 0
     r_idx_last_change = 0
     last_best_energy_ideal = np.inf
@@ -254,28 +253,22 @@ def claptonize(
         for m in range(1, n_starts):
             optimizer_and_loss_kwargs["initial_population"] = initial_populations[m]
             master_process = mp.Process(
-                                target=genetic_algorithm, 
-                                args=(
-                                    paulis,
-                                    coeffs,
-                                    vqe_pcirc,
-                                    trans_pcirc,
-                                    master_queue,
-                                    m
-                                ),
-                                kwargs={**optimizer_and_loss_kwargs, "out_file": out_file})
+                target=genetic_algorithm,
+                args=(paulis, coeffs, vqe_pcirc, trans_pcirc, master_queue, m),
+                kwargs={**optimizer_and_loss_kwargs, "out_file": out_file},
+            )
             master_processes.append(master_process)
             master_process.start()
 
         # this is also a master process
         optimizer_and_loss_kwargs["initial_population"] = initial_populations[0]
-        xs, losses , best_solutions, best_fitness_vals= genetic_algorithm(
+        xs, losses, best_solutions, best_fitness_vals = genetic_algorithm(
             paulis,
             coeffs,
             vqe_pcirc,
             trans_pcirc,
-            out_file = out_file,
-            **optimizer_and_loss_kwargs
+            out_file=out_file,
+            **optimizer_and_loss_kwargs,
         )
         best_count = len(xs)
 
@@ -289,25 +282,25 @@ def claptonize(
             losses = np.concatenate((losses, item[2]))
         num_xs = xs.shape[0]
         assert num_xs == n_starts * best_count
-        
+
         # create new initial populations for next round
         rand_shuffled_idc = np.random.choice(range(num_xs), size=num_xs, replace=False)
         for i in range(n_starts):
-            idc = rand_shuffled_idc[i*best_count:(i+1)*best_count]
+            idc = rand_shuffled_idc[i * best_count : (i + 1) * best_count]
             initial_populations[i] = xs[idc]
 
         best_idx = np.argmin(losses)
         x_best = xs[best_idx]
 
         _, energy_noisy, energy_ideal, _ = loss_func(
-                                                x_best, 
-                                                paulis, 
-                                                coeffs, 
-                                                vqe_pcirc, 
-                                                trans_pcirc,
-                                                alpha=optimizer_and_loss_kwargs.get("alpha"),
-                                                return_sublosses=True,
-                                                )
+            x_best,
+            paulis,
+            coeffs,
+            vqe_pcirc,
+            trans_pcirc,
+            alpha=optimizer_and_loss_kwargs.get("alpha"),
+            return_sublosses=True,
+        )
 
         if n_rounds is None:
             if energy_ideal < last_best_energy_ideal:
@@ -325,41 +318,54 @@ def claptonize(
             r_idx += 1
             if r_idx == n_rounds:
                 break
-    
+
     sig_handler.restore_handlers()
     if return_n_rounds:
-        return list(x_best), energy_noisy, energy_ideal, r_idx, best_solutions, best_fitness_vals
+        return (
+            list(x_best),
+            energy_noisy,
+            energy_ideal,
+            r_idx,
+            best_solutions,
+            best_fitness_vals,
+        )
     else:
-        return list(x_best), energy_noisy, energy_ideal, best_solutions, best_fitness_vals
+        return (
+            list(x_best),
+            energy_noisy,
+            energy_ideal,
+            best_solutions,
+            best_fitness_vals,
+        )
 
 
 ### Solvers
 def genetic_algorithm(
-        paulis: list[str], 
-        coeffs: list[str],
-        vqe_pcirc: ParametrizedCliffordCircuit,
-        trans_pcirc: ParametrizedCliffordCircuit | None,
-        master_queue = None,
-        master_id: int | None = None,
-        n_proc: int = 1,
-        out_data: list | None = None,
-        callback = None,
-        budget: int = 100,
-        population_size: int = 100,
-        return_best_pop_frac: int = 0.2,
-        initial_population: np.ndarray = None,
-        init_no_2qb: bool = True,
-        keep_elitism: bool = None,
-        num_parents_mating: int = None,
-        parent_selection_type: str = "tournament", #"sss"
-        keep_parents: int = -1,
-        crossover_type: str = "single_point",
-        crossover_probability: float = 0.9,
-        mutation_type: str = "adaptive",
-        mutation_probability: tuple[float, float] =(0.25, 0.01), #(0.25, 0.05) 
-        out_file : str = "",
-        **loss_kwargs
-    ):
+    paulis: list[str],
+    coeffs: list[str],
+    vqe_pcirc: ParametrizedCliffordCircuit,
+    trans_pcirc: ParametrizedCliffordCircuit | None,
+    master_queue=None,
+    master_id: int | None = None,
+    n_proc: int = 1,
+    out_data: list | None = None,
+    callback=None,
+    budget: int = 100,
+    population_size: int = 100,
+    return_best_pop_frac: int = 0.2,
+    initial_population: np.ndarray = None,
+    init_no_2qb: bool = True,
+    keep_elitism: bool = None,
+    num_parents_mating: int = None,
+    parent_selection_type: str = "tournament",  # "sss"
+    keep_parents: int = -1,
+    crossover_type: str = "single_point",
+    crossover_probability: float = 0.9,
+    mutation_type: str = "adaptive",
+    mutation_probability: tuple[float, float] = (0.25, 0.01),  # (0.25, 0.05)
+    out_file: str = "",
+    **loss_kwargs,
+):
     print(f"started GA at id {master_id} with {n_proc} procs\n")
     if trans_pcirc is None:
         gene_space = vqe_pcirc.parameter_space()
@@ -377,18 +383,18 @@ def genetic_algorithm(
     best_count = int(population_size * return_best_pop_frac)
 
     def fitness_func(ga_instance, solutions, solutions_idc):
-        return  -eval_xs_terms_mp(
-            solutions, 
-            paulis, 
+        return -eval_xs_terms_mp(
+            solutions,
+            paulis,
             coeffs,
             vqe_pcirc,
             trans_pcirc,
             n_proc,
             out_data,
             callback,
-            **loss_kwargs
-            )
-    
+            **loss_kwargs,
+        )
+
     def print_on_generation(ga_instance):
         population = ga_instance.population
         fitnesses = ga_instance.last_generation_fitness  # already computed
@@ -400,7 +406,10 @@ def genetic_algorithm(
         best_fit = best_fitness / -2
 
         # Only print and log if best_fitness has changed since last generation
-        if not hasattr(print_on_generation, "last_best_fitness") or best_fitness != print_on_generation.last_best_fitness:
+        if (
+            not hasattr(print_on_generation, "last_best_fitness")
+            or best_fitness != print_on_generation.last_best_fitness
+        ):
             generation = ga_instance.generations_completed
             print(f"GENERATION {generation}: BEST FITNESS FOUND : {best_fit}")
             print_on_generation.last_best_fitness = best_fitness
@@ -424,60 +433,68 @@ def genetic_algorithm(
             #     np.save(out_file, log)
 
     ga_instance = pygad.GA(
-                    num_generations=num_generations,
-                    num_parents_mating=num_parents_mating,
-                    fitness_func=fitness_func,
-                    sol_per_pop=population_size,
-                    num_genes=num_genes,
-                    parent_selection_type=parent_selection_type,
-                    keep_parents=keep_parents,
-                    crossover_type=crossover_type,
-                    mutation_type=mutation_type,
-                    gene_space=gene_space,
-                    gene_type=[int]*num_params,
-                    crossover_probability=crossover_probability,
-                    mutation_probability=mutation_probability,
-                    keep_elitism=keep_elitism,
-                    fitness_batch_size=population_size,
-                    random_seed=0,
-                    save_best_solutions=True,
-                    on_generation=print_on_generation
-                    )
-    
-    print(f"GA parameters used for this experiment:\n"
-          f"  num_generations={num_generations}\n"
-          f"  num_parents_mating={num_parents_mating}\n"
-          f"  population_size={population_size}\n"
-          f"  num_genes={num_genes}\n"
-          f"  parent_selection_type={parent_selection_type}\n"
-          f"  keep_parents={keep_parents}\n"
-          f"  crossover_type={crossover_type}\n"
-          f"  mutation_type={mutation_type}\n"
-          f"  crossover_probability={crossover_probability}\n"
-          f"  mutation_probability={mutation_probability}\n"
-          f"  keep_elitism={keep_elitism}")
+        num_generations=num_generations,
+        num_parents_mating=num_parents_mating,
+        fitness_func=fitness_func,
+        sol_per_pop=population_size,
+        num_genes=num_genes,
+        parent_selection_type=parent_selection_type,
+        keep_parents=keep_parents,
+        crossover_type=crossover_type,
+        mutation_type=mutation_type,
+        gene_space=gene_space,
+        gene_type=[int] * num_params,
+        crossover_probability=crossover_probability,
+        mutation_probability=mutation_probability,
+        keep_elitism=keep_elitism,
+        fitness_batch_size=population_size,
+        random_seed=0,
+        save_best_solutions=True,
+        on_generation=print_on_generation,
+    )
+
+    print(
+        f"GA parameters used for this experiment:\n"
+        f"  num_generations={num_generations}\n"
+        f"  num_parents_mating={num_parents_mating}\n"
+        f"  population_size={population_size}\n"
+        f"  num_genes={num_genes}\n"
+        f"  parent_selection_type={parent_selection_type}\n"
+        f"  keep_parents={keep_parents}\n"
+        f"  crossover_type={crossover_type}\n"
+        f"  mutation_type={mutation_type}\n"
+        f"  crossover_probability={crossover_probability}\n"
+        f"  mutation_probability={mutation_probability}\n"
+        f"  keep_elitism={keep_elitism}"
+    )
 
     if initial_population is not None:
         initial_population = np.asarray(initial_population)
         assert len(initial_population.shape) == 2
         assert initial_population.shape[1] == num_params
         num_fixed_pops = initial_population.shape[0]
-        ga_instance.initial_population[:num_fixed_pops] = initial_population[:population_size]
-        ga_instance.population[:num_fixed_pops] = initial_population[:population_size].copy()
+        ga_instance.initial_population[:num_fixed_pops] = initial_population[
+            :population_size
+        ]
+        ga_instance.population[:num_fixed_pops] = initial_population[
+            :population_size
+        ].copy()
     else:
         if init_no_2qb:
-            ga_instance.initial_population[:,idc_param_2qb] = 0 
-            ga_instance.population[:,idc_param_2qb] = 0 
-    
+            ga_instance.initial_population[:, idc_param_2qb] = 0
+            ga_instance.population[:, idc_param_2qb] = 0
+
     ga_instance.run()
     last_losses = -ga_instance.last_generation_fitness
     best_idc = np.argsort(last_losses)[:best_count]
     best_losses = last_losses[best_idc]
-    best_xs = ga_instance.population[best_idc,:]
+    best_xs = ga_instance.population[best_idc, :]
     best_solutions = ga_instance.best_solutions
-    best_fitness_vals = [val/-2 for val in ga_instance.best_solutions_fitness]
+    best_fitness_vals = [val / -2 for val in ga_instance.best_solutions_fitness]
 
     if master_queue is None:
-        return best_xs, best_losses , best_solutions, best_fitness_vals
+        return best_xs, best_losses, best_solutions, best_fitness_vals
     else:
-        master_queue.put((master_id, best_xs, best_losses, best_solutions, best_fitness_vals))
+        master_queue.put(
+            (master_id, best_xs, best_losses, best_solutions, best_fitness_vals)
+        )
