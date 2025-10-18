@@ -1,1 +1,3 @@
-slurmstepd: error: *** JOB 38431148 ON nid005246 CANCELLED AT 2025-05-07T15:26:30 ***
+version https://git-lfs.github.com/spec/v1
+oid sha256:d47f88131d10dab9e0621afe4f0a19bcb9d83ca3c913789334b637850451a120
+size 86

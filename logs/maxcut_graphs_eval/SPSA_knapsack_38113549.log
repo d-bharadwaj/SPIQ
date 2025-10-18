@@ -1,7 +1,3 @@
-Command-line arguments: ['maxcut_qaoa.py', '9', '2', '', '1']
-Traceback (most recent call last):
-  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/maxcut_qaoa.py", line 28, in <module>
-    n_gens = int(sys.argv[3])        
-ValueError: invalid literal for int() with base 10: ''
-srun: error: nid004299: task 0: Exited with exit code 1
-srun: Terminating StepId=38113549.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:34f4ad89a871b351c72cb6bb52176ec9b1802b32ab586e1865e82ae3c365ed12
+size 382

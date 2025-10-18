@@ -1,7 +1,3 @@
-Current working directory: /global/u1/d/dhanvib/development/QAOA/testing_scripts
-Traceback (most recent call last):
-  File "/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py", line 27, in <module>
-    from testing_scripts.graphs_utils import generate_random_complete_graph,generate_k_regular_graph,compute_optimal_max_cut,build_max_cut_paulis
-ModuleNotFoundError: No module named 'testing_scripts'
-srun: error: nid004176: task 0: Exited with exit code 1
-srun: Terminating StepId=37494038.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:b63bbe888f62a1e7bb4f828772c17625903968570689e9be4937ef5297102f1a
+size 520

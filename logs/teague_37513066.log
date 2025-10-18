@@ -1,3 +1,3 @@
-slurmstepd: error: *** STEP 37513066.0 ON nid004160 CANCELLED AT 2025-04-06T19:04:54 ***
-slurmstepd: error: *** JOB 37513066 ON nid004160 CANCELLED AT 2025-04-06T19:04:54 ***
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+version https://git-lfs.github.com/spec/v1
+oid sha256:8964b50afa806589b33650e472752877b2311a638a332998d9c35a039c6a0bd0
+size 248

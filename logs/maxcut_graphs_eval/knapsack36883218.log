@@ -1,3 +1,3 @@
-slurmstepd: error: execve(): python: No such file or directory
-srun: error: nid005629: task 0: Exited with exit code 2
-srun: Terminating StepId=36883218.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:d1c8d68852774a4705ebcf1f2dcaae82a9fab8b6e6225a7ba57b042b825e0e53
+size 155

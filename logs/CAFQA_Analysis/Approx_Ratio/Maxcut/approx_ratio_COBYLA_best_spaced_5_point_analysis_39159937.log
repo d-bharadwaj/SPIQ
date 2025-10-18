@@ -1,11 +1,3 @@
-
-Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
-
-Traceback (most recent call last):
-  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_maxcut.py", line 170, in <module>
-    main()
-  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points_maxcut.py", line 117, in main
-    G = graph_utils.generate_random_complete_graph(num_vertices=n, weighted=True, seed_val=seed)
-TypeError: generate_random_complete_graph() got an unexpected keyword argument 'seed_val'
-srun: error: nid008424: task 0: Exited with exit code 1
-srun: Terminating StepId=39159937.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:e2f413a2e8720ff03d8a7f86f682bee6310b9c51a3eda9ab956c046ef36c72d0
+size 620

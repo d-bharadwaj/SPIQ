@@ -1,18 +1,3 @@
-
-Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
-
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '10', '0.25 0.01 ', '5', 'single_point', '1', '0']
-cafqa_data keys: ['best_cafqa_fitness_values', 'best_cafqa_parameters', 'CAFQA_initialization_energy']
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '10', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: task_2 for val : -1999.6072998046875
-Finished task: task_2
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '10', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: Vanilla_task for val : [np.float64(-7000.272423418989), np.float64(-1999.6295462846756), np.float64(-1999.6072998046875), np.float64(-1999.5556640625), np.float64(-1999.4971923828125)]
-Finished task: Vanilla_task
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '10', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: Random_MA-QAOA for val : [np.float64(-7000.272423418989), np.float64(-1999.6295462846756), np.float64(-1999.6072998046875), np.float64(-1999.5556640625), np.float64(-1999.4971923828125)]
-Finished task: Random_MA-QAOA
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '10', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: task_3 for val : -1999.5556640625
-Finished task: task_3
-Total Time : 146594.46619042096
+version https://git-lfs.github.com/spec/v1
+oid sha256:82de5545f0f31158233352f067d6fe3cf17e29869d8274cd26b0d8d2fd853391
+size 1726

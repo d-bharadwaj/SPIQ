@@ -1,2 +1,3 @@
-slurmstepd: error: *** STEP 38440753.0 ON nid004392 CANCELLED AT 2025-05-07T22:00:59 ***
-slurmstepd: error: *** JOB 38440753 ON nid004392 CANCELLED AT 2025-05-07T22:00:59 ***
+version https://git-lfs.github.com/spec/v1
+oid sha256:0f1e4d8fa752e7473009a6d7ad0d350eb2326abb9ed2408c2c33522d0a8fade8
+size 175

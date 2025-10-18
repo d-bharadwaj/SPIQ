@@ -1,3 +1,3 @@
-slurmstepd: error: execve(): /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/teague_qaoa.py: Permission denied
-srun: error: nid004176: task 0: Exited with exit code 13
-srun: Terminating StepId=37493927.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:2532b21fa986a5ceada5405c829a4f2110a963e443efe4cec60e14b076b634b2
+size 221

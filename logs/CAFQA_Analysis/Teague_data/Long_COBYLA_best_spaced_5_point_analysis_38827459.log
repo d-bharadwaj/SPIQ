@@ -1,11 +1,3 @@
-
-Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
-
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '5', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '5', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: task_0 for val : -1999.2489013671875
-Finished task: task_0
-Command-line arguments: ['/global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/cafqa_diff_points_teague.py', '20', '2', '5', '0.25 0.01 ', '5', 'single_point', '1', '0']
-Starting task: Vanilla_task for val : [np.float64(-1999.2489013671875)]
-Finished task: Vanilla_task
-Total Time : 27.511051088105887
+version https://git-lfs.github.com/spec/v1
+oid sha256:4366aeb441de668743400afa862114f722cdecd8a9bf2ff638f85a39fc460795
+size 823

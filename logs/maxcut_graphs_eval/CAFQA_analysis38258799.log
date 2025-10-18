@@ -1,3 +1,3 @@
-/global/homes/d/dhanvib/.conda/envs/qaoa_w_sage/bin/python: can't open file '/global/u1/d/dhanvib/development/QAOA/testing_scripts/cafqa_diff_points.py': [Errno 2] No such file or directory
-srun: error: nid004327: task 0: Exited with exit code 2
-srun: Terminating StepId=38258799.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:0de1a49de01cd619f88b5d68dfa0e7493c47b941c6ebea23274a8c6ba11ddad5
+size 282

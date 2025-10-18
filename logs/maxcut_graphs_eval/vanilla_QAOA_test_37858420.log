@@ -1,7 +1,3 @@
-Command-line arguments: ['maxcut_qaoa.py', '14', '2', '2000', '0.25 0.01 ', '5', 'single_point', '1']
-Traceback (most recent call last):
-  File "/global/u1/d/dhanvib/development/QAOA/testing_scripts/maxcut_qaoa.py", line 33, in <module>
-    noise = bool(int(sys.argv[8]))
-IndexError: list index out of range
-srun: error: nid004739: task 0: Exited with exit code 1
-srun: Terminating StepId=37858420.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:0184884b450cf630f33163fa1e1287ef7f4e9d6fc3223aaef4cc0bc1fe25502b
+size 400
