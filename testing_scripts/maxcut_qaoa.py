@@ -1,45 +1,44 @@
-import rustworkx as rx
-import numpy as np
-import warnings
 import os
 import sys
+import warnings
+
+import numpy as np
+import rustworkx as rx
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from qiskit.circuit import Parameter
-from qiskit.circuit.library import QAOAAnsatz
-from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit.quantum_info import SparsePauliOp
-from qiskit_aer import AerSimulator
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from scipy.optimize import minimize
 from timeit import default_timer as timer
 
+from qiskit.circuit import Parameter
+from qiskit.circuit.library import QAOAAnsatz
+from qiskit.quantum_info import SparsePauliOp
+from qiskit_aer import AerSimulator
+from qiskit_algorithms import NumPyMinimumEigensolver
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from scipy.optimize import minimize
 
 sys.path.append("../")
+from clapton.circuit_manipulation import (generate_qiskit_param_map,
+                                          modify_circuit,
+                                          multi_angle_qaoa_circuit,
+                                          qiskit_to_stim,
+                                          transform_to_allowed_gates)
 from clapton.clapton import claptonize
-from clapton.circuit_manipulation import (
-    transform_to_allowed_gates,
-    qiskit_to_stim,
-    modify_circuit,
-    multi_angle_qaoa_circuit,
-    generate_qiskit_param_map,
-)
-from testing_scripts.graphs_utils import (
-    generate_random_complete_graph,
-    generate_k_regular_graph,
-    build_max_cut_paulis,
-    compute_optimal_max_cut,
-)
-from testing_scripts.qaoa_utils import QAOASolver, evaluate_energy
+
 from maxcut_processing import evaluate_maxcut
+from testing_scripts.graphs_utils import (build_max_cut_paulis,
+                                          compute_optimal_max_cut,
+                                          generate_k_regular_graph,
+                                          generate_random_complete_graph)
+from testing_scripts.qaoa_utils import QAOASolver, evaluate_energy
 
 print("Command-line arguments:", sys.argv)
 
-import multiprocess as mp
-import traceback
 import os
+import traceback
+
+import multiprocess as mp
 import numpy as np
 
 

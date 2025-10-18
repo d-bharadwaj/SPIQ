@@ -1,4 +1,5 @@
 import random
+
 from qiskit_optimization.applications import Knapsack
 
 

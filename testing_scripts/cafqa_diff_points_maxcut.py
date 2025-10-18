@@ -1,25 +1,28 @@
-import rustworkx as rx
-import numpy as np
-import warnings
 import os
 import sys
+import warnings
+
+import numpy as np
+import rustworkx as rx
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from qiskit.circuit.library import QAOAAnsatz
-from qiskit.quantum_info import SparsePauliOp
 from timeit import default_timer as timer
 
+from qiskit.circuit.library import QAOAAnsatz
+from qiskit.quantum_info import SparsePauliOp
+
 sys.path.append("../")
-from clapton.circuit_manipulation import multi_angle_qaoa_circuit
-import testing_scripts.graphs_utils as graph_utils
-from testing_scripts.qaoa_utils import QAOASolver
+import os
+import traceback
 
 import multiprocess as mp
-import traceback
-import os
 import numpy as np
+from clapton.circuit_manipulation import multi_angle_qaoa_circuit
+
+import testing_scripts.graphs_utils as graph_utils
+from testing_scripts.qaoa_utils import QAOASolver
 
 
 def run_qaoa_task_pool(args):

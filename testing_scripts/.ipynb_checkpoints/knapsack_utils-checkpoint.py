@@ -1,8 +1,10 @@
-import random 
-from scipy.optimize import minimize
-from qiskit_optimization.applications import Knapsack
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
+import random
+
 from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from qiskit_optimization.applications import Knapsack
+from scipy.optimize import minimize
+
 
 def generate_knapsack_instance(num_items=10, value_range=(1, 20), weight_range=(1, 15), seed=None):
     if seed is not None:

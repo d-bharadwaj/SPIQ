@@ -1,34 +1,24 @@
-import numpy as np
 import os
 import warnings
-from scipy.optimize import minimize
-from skquant.opt import minimize as skquant_minimize
-from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit_algorithms.optimizers import SPSA
 
+import numpy as np
+from clapton.circuit_manipulation import (generate_qiskit_param_map,
+                                          modify_circuit, qiskit_to_stim,
+                                          relax_qaoa_parameters,
+                                          transform_to_allowed_gates)
+from clapton.clapton import claptonize
+from clapton.depolarization import GateGeneralDepolarizationModel
 # from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import NoiseModel
-from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
-from qiskit_aer.noise import (
-    NoiseModel,
-    QuantumError,
-    ReadoutError,
-    depolarizing_error,
-    pauli_error,
-    thermal_relaxation_error,
-)
+from qiskit_aer.noise import (NoiseModel, QuantumError, ReadoutError,
+                              depolarizing_error, pauli_error,
+                              thermal_relaxation_error)
 from qiskit_aer.primitives import EstimatorV2 as Estimator
-
-from clapton.clapton import claptonize
-from clapton.circuit_manipulation import (
-    transform_to_allowed_gates,
-    qiskit_to_stim,
-    modify_circuit,
-    relax_qaoa_parameters,
-    generate_qiskit_param_map,
-)
-from clapton.depolarization import GateGeneralDepolarizationModel
+from qiskit_algorithms import NumPyMinimumEigensolver
+from qiskit_algorithms.optimizers import SPSA
+from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
+from scipy.optimize import minimize
+from skquant.opt import minimize as skquant_minimize
 
 # Suppress warnings
 warnings.simplefilter("ignore", UserWarning)

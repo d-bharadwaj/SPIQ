@@ -1,33 +1,36 @@
-import rustworkx as rx
-import numpy as np
-import warnings
 import os
 import sys
+import warnings
+
+import numpy as np
+import rustworkx as rx
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import pickle
+import traceback
+from timeit import default_timer as timer
+
+import multiprocess as mp
 from qiskit.circuit import Parameter
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit_optimization.converters import QuadraticProgramToQubo
-from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
+from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from timeit import default_timer as timer
-import multiprocess as mp
-import traceback
-import pickle
+from qiskit_optimization.converters import QuadraticProgramToQubo
 
 sys.path.append("../")
-from testing_scripts.qaoa_utils import QAOASolver
 import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.knapsack_utils import generate_knapsack_instance
+from testing_scripts.qaoa_utils import QAOASolver
 
 print("Command-line arguments:", sys.argv)
 
-from qiskit.quantum_info import SparsePauliOp
 import os
+
+from qiskit.quantum_info import SparsePauliOp
 
 
 def main():

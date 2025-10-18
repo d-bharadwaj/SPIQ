@@ -1,18 +1,20 @@
-import sys
 import os
+import sys
 import warnings
+
 import numpy as np
 import scipy.stats
-from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit.library import QAOAAnsatz
+from qiskit.quantum_info import SparsePauliOp
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 sys.path.append("../")
+import red_qaoa.red_qaoa as red_qaoa
+
 import testing_scripts.graphs_utils as graphs_utils
 from testing_scripts.qaoa_utils import QAOASolver
-import red_qaoa.red_qaoa as red_qaoa
 
 
 def main():

@@ -1,18 +1,17 @@
-import numpy as np
-from scipy.stats import gmean
-
-from qiskit_optimization.converters import QuadraticProgramToQubo
 import sys
+
+import numpy as np
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
+from qiskit_optimization.converters import QuadraticProgramToQubo
+from scipy.stats import gmean
 
 sys.path.append("../")
-from testing_scripts.qaoa_utils import QAOASolver
+import warnings
+
 import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.knapsack_utils import generate_knapsack_instance
-
-
-import warnings
+from testing_scripts.qaoa_utils import QAOASolver
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 

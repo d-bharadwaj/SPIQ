@@ -1,13 +1,13 @@
-from scipy.optimize import minimize
-import numpy as np
 from typing import Sequence
-import rustworkx as rx
 
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
+import numpy as np
+import rustworkx as rx
 from qiskit_aer import AerSimulator
-from qiskit_ibm_runtime import SamplerV2 as Sampler
 from qiskit_aer.noise import NoiseModel
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from qiskit_ibm_runtime import SamplerV2 as Sampler
 from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
+from scipy.optimize import minimize
 
 
 def evaluate_maxcut(G, circuit, result, backend):

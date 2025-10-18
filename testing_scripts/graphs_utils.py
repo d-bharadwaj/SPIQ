@@ -1,10 +1,11 @@
-import rustworkx as rx
-import networkx as nx
 import random
-from sage.all import Graph
 from typing import Sequence
+
+import networkx as nx
 import numpy as np
+import rustworkx as rx
 from qiskit_ibm_runtime import SamplerV2 as Sampler
+from sage.all import Graph
 
 
 def generate_k_regular_graph(num_vertices, k, weighted=False, seed=None):
