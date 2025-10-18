@@ -51,13 +51,13 @@ def main():
     seed = task_id
 
     ## Maxcut Formulation
-    if graph == "k_reg": 
+    if graph == "k_reg":
         print("Selected graph type: k-regular")
         k = 3  # for k-regular graphs
         G = graph_utils.generate_k_regular_graph(
-            num_vertices=n_qubits, weighted=False, seed=seed+3, k=k
+            num_vertices=n_qubits, weighted=False, seed=seed + 3, k=k
         )
-    elif graph == "complete": #unweighted
+    elif graph == "complete":  # unweighted
         print("Selected graph type: complete")
         G = graph_utils.generate_random_complete_graph(
             num_vertices=n_qubits, weighted=False, seed=seed
