@@ -51,21 +51,21 @@ def main():
     seed = task_id
 
     ## Maxcut Formulation
-    if graph == "k_reg":
+    if graph == "k_reg": 
         print("Selected graph type: k-regular")
         k = 3  # for k-regular graphs
         G = graph_utils.generate_k_regular_graph(
-            num_vertices=n_qubits, weighted=True, seed=seed, k=k
+            num_vertices=n_qubits, weighted=False, seed=seed+3, k=k
         )
-    elif graph == "complete":
+    elif graph == "complete": #unweighted
         print("Selected graph type: complete")
         G = graph_utils.generate_random_complete_graph(
-            num_vertices=n_qubits, weighted=True, seed=seed
+            num_vertices=n_qubits, weighted=False, seed=seed
         )
     elif graph == "ego":
         print("Selected graph type: ego")
         G = graph_utils.generate_random_ego_graph(
-            num_nodes=n_qubits, weighted=True, seed=seed
+            num_nodes=n_qubits, weighted=False, seed=seed
         )
 
     else:
@@ -73,15 +73,15 @@ def main():
 
     # G = graph_utils.generate_random_erdos_renyi_graph(num_nodes=n_qubits,probability=0.4,weighted=True,seed=seed)
 
+    # CAFQA Workflow
     max_cut_paulis = graph_utils.build_max_cut_paulis(G)
     cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 
-    # CAFQA Workflow
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
     qaoa_obj = QAOASolver(cost_hamiltonian, circuit, sim_device="CPU")
 
     qaoa_obj.prepare_circuit()
-    results_dir = f"../np_data/Comprehensive_Proof/Maxcut/{graph}/{reps}_reps/{n_qubits}_qbs/2nd_attempt"
+    results_dir = f"../np_data/Comprehensive_Proof/Maxcut/Unweighted/{graph}/{reps}_reps/{n_qubits}_qbs"
     os.makedirs(results_dir, exist_ok=True)  # Creates folder if it doesn't exist
     results_file = os.path.join(
         results_dir, f"cafqa_result_{seed}"

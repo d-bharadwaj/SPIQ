@@ -107,13 +107,13 @@ def generate_random_complete_graph(
     return G
 
 
-def generate_random_ego_graph(num_nodes, weighted=False, seed=None):
+def generate_random_ego_graph(num_vertices, weighted=False, seed=None):
     """
     Generate a random ego network with the specified number of nodes.
 
     Parameters
     ----------
-    num_nodes : int
+    num_vertices : int
         Total number of nodes in the ego network (including the ego).
         Must be >= 2.
     weighted : bool, optional
@@ -132,16 +132,16 @@ def generate_random_ego_graph(num_nodes, weighted=False, seed=None):
     ValueError
         If num_nodes is less than 2.
     """
-    if num_nodes < 2:
+    if num_vertices < 2:
         raise ValueError("Ego network must have at least 2 nodes (1 ego + 1 neighbor)")
     if seed:
         random.seed(seed)
 
     graph = rx.PyGraph()
-    graph.add_nodes_from(range(num_nodes))
+    graph.add_nodes_from(range(num_vertices))
 
     ego = 0  # node 0 is the ego
-    neighbors = list(range(1, num_nodes))
+    neighbors = list(range(1, num_vertices))
 
     # Connect ego to all neighbors
     for n in neighbors:

@@ -1,5 +1,8 @@
 teague_code/code-for-gokul/teague_pickle_data/*.pkl
 __pycache__/
 *.pyc
-*.log
+testing_scripts/__pycache__/energy_utils.cpython-310.pyc
+logs/
+np_data/
 *.npy
+*.log

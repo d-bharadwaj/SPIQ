@@ -194,4 +194,6 @@ def quso_value(z, L):
     """
     # we could just return puso_value(z, L), but instead let's take
     # advantage of a maximum degree of 2 to not have to loop through keys
-    return sum(v * (z[k[0]] if k else 1) * (z[k[1]] if len(k) > 1 else 1) for k, v in L.items())
+    return sum(
+        v * (z[k[0]] if k else 1) * (z[k[1]] if len(k) > 1 else 1) for k, v in L.items()
+    )

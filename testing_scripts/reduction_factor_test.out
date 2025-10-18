@@ -1,0 +1,111 @@
+
+Lmod is automatically replacing "cudatoolkit/12.4" with "cuda/11.7".
+
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 32.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 76.11x
+Factor of improvement (CAFQA vs Random): 1023.88x
+Factor of improvement (CAFQA vs Random): 511.91x
+Factor of improvement (CAFQA vs Random): 4095.00x
+Factor of improvement (CAFQA vs Random): 511.88x
+Factor of improvement (CAFQA vs Random): 2047.50x
+Factor of improvement (CAFQA vs Random): 511.97x
+Factor of improvement (CAFQA vs Random): 127.96x
+Factor of improvement (CAFQA vs Random): 1023.88x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 789.46x
+Factor of improvement (CAFQA vs Random): 127.65x
+Factor of improvement (CAFQA vs Random): 15.96x
+Factor of improvement (CAFQA vs Random): 4085.03x
+Factor of improvement (CAFQA vs Random): 510.63x
+Factor of improvement (CAFQA vs Random): 255.37x
+Factor of improvement (CAFQA vs Random): 63.83x
+Factor of improvement (CAFQA vs Random): 31.91x
+Factor of improvement (CAFQA vs Random): 7.98x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 107.35x
+Factor of improvement (CAFQA vs Random): 30.71x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 7.68x
+Factor of improvement (CAFQA vs Random): 61.43x
+Factor of improvement (CAFQA vs Random): 15.36x
+Factor of improvement (CAFQA vs Random): 61.43x
+Factor of improvement (CAFQA vs Random): 15.36x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 12.91x
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 32.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 76.11x
+Factor of improvement (CAFQA vs Random): 1023.94x
+Factor of improvement (CAFQA vs Random): 511.91x
+Factor of improvement (CAFQA vs Random): 4095.25x
+Factor of improvement (CAFQA vs Random): 511.91x
+Factor of improvement (CAFQA vs Random): 2047.75x
+Factor of improvement (CAFQA vs Random): 511.94x
+Factor of improvement (CAFQA vs Random): 127.98x
+Factor of improvement (CAFQA vs Random): 1023.69x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 789.49x
+Factor of improvement (CAFQA vs Random): 127.65x
+Factor of improvement (CAFQA vs Random): 15.96x
+Factor of improvement (CAFQA vs Random): 4085.00x
+Factor of improvement (CAFQA vs Random): 510.64x
+Factor of improvement (CAFQA vs Random): 255.30x
+Factor of improvement (CAFQA vs Random): 63.82x
+Factor of improvement (CAFQA vs Random): 31.92x
+Factor of improvement (CAFQA vs Random): 7.98x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 107.35x
+Factor of improvement (CAFQA vs Random): 30.72x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 7.68x
+Factor of improvement (CAFQA vs Random): 61.42x
+Factor of improvement (CAFQA vs Random): 15.36x
+Factor of improvement (CAFQA vs Random): 61.43x
+Factor of improvement (CAFQA vs Random): 15.36x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 12.91x
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 32.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Factor of improvement (CAFQA vs Random): 64.00x
+Factor of improvement (CAFQA vs Random): 128.00x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 76.11x
+Factor of improvement (CAFQA vs Random): 1023.75x
+Factor of improvement (CAFQA vs Random): 511.97x
+Factor of improvement (CAFQA vs Random): 4094.75x
+Factor of improvement (CAFQA vs Random): 511.91x
+Factor of improvement (CAFQA vs Random): 2047.62x
+Factor of improvement (CAFQA vs Random): 511.91x
+Factor of improvement (CAFQA vs Random): 127.98x
+Factor of improvement (CAFQA vs Random): 1023.81x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 789.47x
+Factor of improvement (CAFQA vs Random): 127.67x
+Factor of improvement (CAFQA vs Random): 15.96x
+Factor of improvement (CAFQA vs Random): 4084.44x
+Factor of improvement (CAFQA vs Random): 510.57x
+Factor of improvement (CAFQA vs Random): 255.37x
+Factor of improvement (CAFQA vs Random): 63.82x
+Factor of improvement (CAFQA vs Random): 31.91x
+Factor of improvement (CAFQA vs Random): 7.98x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 107.34x
+Factor of improvement (CAFQA vs Random): 30.71x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 1.92x
+Factor of improvement (CAFQA vs Random): 7.68x
+Factor of improvement (CAFQA vs Random): 61.43x
+Factor of improvement (CAFQA vs Random): 15.36x
+Factor of improvement (CAFQA vs Random): 61.43x
+Factor of improvement (CAFQA vs Random): 15.35x
+Geometric mean factor of improvement (CAFQA vs Random) over 8 seeds: 12.91x

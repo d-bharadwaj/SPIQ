@@ -172,7 +172,9 @@ def _solve_bruteforce(D, all_solutions, valid, spin, value, ncpus=1, chunk_size=
         # Account for situtation where for loop exits with a partially full chunk
         if len(cur_chunk) > 0:
             if len(cur_chunk) < ncpus:
-                cur_v, cur_x = process_mini_chunk((cur_chunk, list(D.items()), value, spin))
+                cur_v, cur_x = process_mini_chunk(
+                    (cur_chunk, list(D.items()), value, spin)
+                )
                 if cur_v < best[0]:
                     best = cur_v, cur_x
             else:
@@ -201,7 +203,9 @@ def _solve_bruteforce(D, all_solutions, valid, spin, value, ncpus=1, chunk_size=
     return best
 
 
-def solve_pubo_bruteforce(P, all_solutions=False, valid=lambda x: True, ncpus=1, chunk_size=1000):
+def solve_pubo_bruteforce(
+    P, all_solutions=False, valid=lambda x: True, ncpus=1, chunk_size=1000
+):
     """solve_pubo_bruteforce.
 
     Iterate through all the possible solutions to a PUBO formulated problem
@@ -264,7 +268,13 @@ def solve_pubo_bruteforce(P, all_solutions=False, valid=lambda x: True, ncpus=1,
 
     """
     return _solve_bruteforce(
-        P, all_solutions, valid, False, pubo_value_safe, ncpus=ncpus, chunk_size=chunk_size
+        P,
+        all_solutions,
+        valid,
+        False,
+        pubo_value_safe,
+        ncpus=ncpus,
+        chunk_size=chunk_size,
     )
 
 
@@ -338,7 +348,9 @@ def solve_qubo_bruteforce(Q, all_solutions=False, valid=lambda x: True):
     return _solve_bruteforce(Q, all_solutions, valid, False, qubo_value)
 
 
-def solve_puso_bruteforce(H, all_solutions=False, valid=lambda x: True, ncpus=1, chunk_size=1000):
+def solve_puso_bruteforce(
+    H, all_solutions=False, valid=lambda x: True, ncpus=1, chunk_size=1000
+):
     """solve_puso_bruteforce.
 
     Iterate through all the possible solutions to an PUSO formulated problem

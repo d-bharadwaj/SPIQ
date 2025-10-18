@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # for num_gens in 500 1000 1500 2000; do
-#     sbatch --qos=premium --output=../logs/ga_sweep/Gen_Sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=$num_gens,MUTATION_PROB="0.25 0.01",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point" sweep_run.sh
+    # sbatch --qos=premium --output=../logs/ga_sweep/Gen_Sweep_%j.log --export=ALL,N_QUBITS=15,N_REPS=1,NUM_GENERATIONS=$num_gens,MUTATION_PROB="0.25 0.01",KEEP_ELITISM=5,CROSSOVER_TYPE="single_point" sweep_run.sh
 # done
 
 # for mutation_prob in "0.25 0.01" "0.25 0.02" "0.25 0.03" "0.25 0.04"; do
@@ -70,22 +70,30 @@
 ## Comprehensive 
 
 # Long Gen Runs for CAFQA - Knapsack
-for num_qubits in 16; do
-    for seed in {1..1}; do
-        sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=100000,SEED=$seed,NOISE=0 sweep_run.sh
-    done
-done
-
-## Long Gen Runs for CAFQA - Maxcut
-# for num_qubits in 12; do
+# for num_qubits in 16; do
 #     for seed in {1..1}; do
-#         sbatch --output=../logs/Comprehensive_Proof/Maxcut/K_Regular_Graphs/2_reps/$num_qubits/cafqa_result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,SEED=$seed,NOISE=0,GRAPH_TYPE="k_reg" sweep_run.sh
+#         sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=100000,SEED=$seed,NOISE=0 sweep_run.sh
+#     done
+# done
+
+# Long Gen Runs for CAFQA - Maxcut
+# for num_qubits in 16 20; do
+#     for seed in {0..4}; do
+#         sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=40000,SEED=$seed,NOISE=0,GRAPH_TYPE="complete" sweep_run.sh
 #     done
 # done
 
 ## Long Gen Runs for CAFQA - Teague
-# for num_qubits in 12 14; do
+# for num_qubits in 8; do
 #     for seed in {1..1}; do
-#         sbatch --output=../logs/Comprehensive_Proof/Teague/2_reps/$num_qubits/cafqa_result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=50000,SEED=$seed,NOISE=0 sweep_run.sh
+#         sbatch --output=../logs/Comprehensive_Proof/Teague/noisy/2_reps/$num_qubits/cafqa_result_$seed_%j.log --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=1000,SEED=$seed,NOISE=1 sweep_run.sh
 #     done
 # done
+
+# Statevector Reduction
+# sbatch --output=../logs/Comprehensive_Proof/Statevector_Reduction/statevec_reduction_k_reg_%j.log sweep_run.sh
+
+# Red_qaoa
+sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="k_reg" sweep_run.sh
+sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="ego" sweep_run.sh
+# sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="complete" sweep_run.sh

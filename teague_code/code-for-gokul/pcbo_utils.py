@@ -70,7 +70,13 @@ def create_three_body_cubo(
     third_order_terms = {}
     for feature1, feature2, feature3 in combinations(feature_list, 3):
         idxs = list(
-            sorted([feature_to_idx[feature1], feature_to_idx[feature2], feature_to_idx[feature3]])
+            sorted(
+                [
+                    feature_to_idx[feature1],
+                    feature_to_idx[feature2],
+                    feature_to_idx[feature3],
+                ]
+            )
         )
         third_order_terms[(feature1, feature2, feature3)] = (
             third_order_weight * third_corr_arr[idxs[0]][idxs[1]][idxs[2]]
