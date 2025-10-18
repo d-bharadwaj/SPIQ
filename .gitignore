@@ -6,3 +6,4 @@ logs/
 np_data/
 *.npy
 *.log
+.vscode/
