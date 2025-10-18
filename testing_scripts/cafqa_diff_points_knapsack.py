@@ -1,24 +1,21 @@
 import os
 import sys
+import traceback
 import warnings
+from timeit import default_timer as timer
 
 import numpy as np
-import rustworkx as rx
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from timeit import default_timer as timer
 
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_optimization.converters import QuadraticProgramToQubo
 
 sys.path.append("../")
-import os
-import traceback
 
 import multiprocess as mp
-import numpy as np
 
 from testing_scripts.knapsack_utils import generate_knapsack_instance
 from testing_scripts.qaoa_utils import QAOASolver
@@ -77,7 +74,7 @@ def execute_qaoa_tasks(
     ]
 
     # Prepare task for Vanilla QAOA
-    random_vanilla_angles = np.random.random(
+    random_vanilla_angles = np.random.uniform(
         0, 2 * np.pi, vanilla_qaoa_object.circuit.num_parameters
     )
     vanilla_args = [
@@ -149,7 +146,7 @@ def main():
     knapsack_qaoa.evaluate_exact_energy()
 
     # Run CAFQA process
-    knapsack_qaoa.run_CAFQA(n_gens=n_gens)
+    knapsack_qaoa.run_cafqa(n_gens=n_gens)
     print(f"{op.num_qubits} Qubits and {reps} reps")
     print(
         f"Minimum Energy found with CAFQA initialization: {knapsack_qaoa.energy_best}"

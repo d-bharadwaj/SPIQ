@@ -1,4 +1,3 @@
-import os
 import warnings
 
 import numpy as np
@@ -10,9 +9,7 @@ from clapton.clapton import claptonize
 from clapton.depolarization import GateGeneralDepolarizationModel
 # from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import (NoiseModel, QuantumError, ReadoutError,
-                              depolarizing_error, pauli_error,
-                              thermal_relaxation_error)
+from qiskit_aer.noise import NoiseModel, depolarizing_error
 from qiskit_aer.primitives import EstimatorV2 as Estimator
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_algorithms.optimizers import SPSA
@@ -96,6 +93,11 @@ class QAOASolver:
         self.sim_device = sim_device
         assert self.sim_device, "sim_device must be provided as either 'cpu' or 'gpu'"
 
+        # Attributes for Genetic Algorithm
+        self.best_cafqa_gen_params = None
+        self.best_cafqa_gen_fitness = None
+        self.noisy_energy_best = None
+
     def prepare_circuit(self):
         """
         Prepare the QAOA circuit and relax its parameters.
@@ -110,7 +112,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_CAFQA(self, n_gens, out_file=None):
+    def run_cafqa(self, n_gens, out_file=None):
         """
         Run the CAFQA initialization.
 
@@ -122,9 +124,6 @@ class QAOASolver:
             self.cost_hamiltonian.coeffs.real,
         )
         reversed_paulis = [p[::-1] for p in paulis]
-
-        self.best_cafqa_gen_params = None
-        self.best_cafqa_gen_fitness = None
 
         if self.err:
             # let's add a noise model where we specify global 1q and 2q gate errors
@@ -286,7 +285,7 @@ class QAOASolver:
             bounds = np.array([[0, 2 * np.pi]] * len(initial_params), dtype=float)
 
             # method can be ImFil, SnobFit, Orbit, NOMAD, or Bobyqa
-            result, history = skquant_minimize(
+            result, _ = skquant_minimize(
                 _cost_function_with_vals,
                 x0=initial_params,
                 bounds=bounds,

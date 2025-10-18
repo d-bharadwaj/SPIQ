@@ -1,36 +1,17 @@
 import os
-import random
 import sys
 import warnings
 
 import numpy as np
-
-warnings.simplefilter("ignore", UserWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-import sys
-
-from qiskit import transpile
-from qiskit.circuit import Parameter, ParameterExpression
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
-from qiskit_ibm_runtime import Session
-from qiskit_optimization.applications import Knapsack
 from qiskit_optimization.converters import QuadraticProgramToQubo
 
 sys.path.append("../")
-from clapton.circuit_manipulation import (generate_qiskit_param_map,
-                                          modify_circuit,
-                                          multi_angle_qaoa_circuit,
-                                          qiskit_to_stim,
-                                          relax_qaoa_parameters,
-                                          transform_to_allowed_gates)
-from clapton.clapton import claptonize
-
 from testing_scripts.knapsack_utils import generate_knapsack_instance
 from testing_scripts.qaoa_utils import QAOASolver, evaluate_energy
+
+warnings.simplefilter("ignore", UserWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 n_items = int(sys.argv[1])
 reps = int(sys.argv[2])
@@ -61,7 +42,7 @@ knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit)
 knapsack_qaoa.prepare_circuit()
 
 # Run CAFQA Process
-knapsack_qaoa.run_CAFQA(n_gens=2000)
+knapsack_qaoa.run_cafqa(n_gens=2000)
 
 # Solve with classical Eigensolver for comparison
 exact_solution = knapsack_qaoa.evaluate_exact_energy()
@@ -81,21 +62,23 @@ print(f"Minimum Energy found with Random initialization over 100 runs: {min_ener
 cafqa_params = [param * np.pi / 2 for param in knapsack_qaoa.ks_best]
 
 # Evaluate Knapsack
-max_iters = 3000
+MAX_ITERS = 3000
 random_result, random_obj_values = knapsack_qaoa.run_qaoa(
-    random_angles, max_iters=max_iters, opt="COBYQA"
+    random_angles, max_iters=MAX_ITERS, opt="COBYQA"
 )
 cafqa_result, cafqa_obj_values = knapsack_qaoa.run_qaoa(
-    cafqa_params, max_iters=max_iters, opt="COBYQA"
+    cafqa_params, max_iters=MAX_ITERS, opt="COBYQA"
 )
 
 # # Vanilla QAOA
-# circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-# vanilla_teague = QAOASolver(cost_hamiltonian,circuit.decompose().decompose())
-# vanilla_teague.vanilla = True
-# vanilla_random_angles = np.random.random(circuit.num_parameters)
-# vanilla_res,vanilla_obj_vals=vanilla_teague.run_qaoa(vanilla_random_angles, max_iters=max_iters)
-# vanilla_qaoa_energy = vanilla_res.fun
+circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
+vanilla_teague = QAOASolver(cost_hamiltonian, circuit.decompose().decompose())
+vanilla_teague.vanilla = True
+vanilla_random_angles = np.random.random(circuit.num_parameters)
+vanilla_res, vanilla_obj_vals = vanilla_teague.run_qaoa(
+    vanilla_random_angles, max_iters=MAX_ITERS
+)
+vanilla_qaoa_energy = vanilla_res.fun
 
 # Save energies to a dictionary
 energies_dict = {
@@ -110,6 +93,6 @@ energies_dict = {
     # "Vanilla_QAOA_objective_values" : vanilla_obj_vals,
 }
 
-output_dir = f"../np_data/knapsack/rep_sweep/COBYQA_test/{op.num_qubits}_qubits"
-os.makedirs(output_dir, exist_ok=True)
-np.save(os.path.join(output_dir, f"COBYQA_results_single_{seed}.npy"), energies_dict)
+OUTPUT_DIR = f"../np_data/knapsack/rep_sweep/COBYQA_test/{op.num_qubits}_qubits"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+np.save(os.path.join(OUTPUT_DIR, f"COBYQA_results_single_{seed}.npy"), energies_dict)

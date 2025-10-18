@@ -102,7 +102,7 @@ teague_qaoa = QAOASolver(cost_hamiltonian, circuit)
 teague_qaoa.prepare_circuit()
 
 # run CAFQA
-teague_qaoa.run_CAFQA(n_gens=1000)
+teague_qaoa.run_cafqa(n_gens=1000)
 
 # Solve with classical Eigensolver for comparison
 exact_solution = teague_qaoa.evaluate_exact_energy()

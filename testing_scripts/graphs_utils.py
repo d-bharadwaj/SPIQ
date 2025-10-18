@@ -95,8 +95,8 @@ def generate_random_complete_graph(
     G : rustworkx.PyGraph
         The generated complete graph.
     """
-    G = rx.PyGraph()
-    G.add_nodes_from(range(num_vertices))
+    g = rx.PyGraph()
+    g.add_nodes_from(range(num_vertices))
 
     if seed:
         random.seed(seed)
@@ -104,8 +104,8 @@ def generate_random_complete_graph(
     for i in range(num_vertices):
         for j in range(i + 1, num_vertices):
             weight = random.randint(1, 10) if weighted else 1
-            G.add_edge(i, j, weight)
-    return G
+            g.add_edge(i, j, weight)
+    return g
 
 
 def generate_random_ego_graph(num_vertices, weighted=False, seed=None):
@@ -178,9 +178,9 @@ def generate_random_erdos_renyi_graph(
         graph.add_edge(u, v, weight)
 
     largest_cc = max(rx.connected_components(graph), key=len)
-    G_sub = graph.subgraph(list(largest_cc)).copy()
+    g_sub = graph.subgraph(list(largest_cc)).copy()
 
-    return G_sub
+    return g_sub
 
 
 def compute_optimal_max_cut(graph: rx.PyGraph) -> int:

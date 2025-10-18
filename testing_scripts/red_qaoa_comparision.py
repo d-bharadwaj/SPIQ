@@ -109,7 +109,7 @@ def main():
             try:
                 qaoa_obj = QAOASolver(cost, circ, sim_device="CPU")
                 qaoa_obj.prepare_circuit()
-                qaoa_obj.run_CAFQA(
+                qaoa_obj.run_cafqa(
                     n_gens=5, out_file=None
                 )  # TODO: increase gens when needed
                 cafqa_energy = qaoa_obj.energy_best

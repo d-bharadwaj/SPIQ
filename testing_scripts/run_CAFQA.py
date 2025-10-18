@@ -3,34 +3,19 @@ import sys
 import warnings
 
 import numpy as np
-import rustworkx as rx
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-import pickle
-import traceback
-from timeit import default_timer as timer
-
 import multiprocess as mp
-from qiskit.circuit import Parameter
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit.quantum_info import SparsePauliOp
-from qiskit_aer import AerSimulator
-from qiskit_algorithms import NumPyMinimumEigensolver
-from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_optimization.converters import QuadraticProgramToQubo
 
 sys.path.append("../")
-import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.knapsack_utils import generate_knapsack_instance
 from testing_scripts.qaoa_utils import QAOASolver
 
 print("Command-line arguments:", sys.argv)
-
-import os
-
-from qiskit.quantum_info import SparsePauliOp
 
 
 def main():
@@ -79,7 +64,7 @@ def main():
     )  # This is a file path, not a directory
 
     # Run CAFQA process
-    qaoa_obj.run_CAFQA(n_gens=n_gens, out_file=results_file)
+    qaoa_obj.run_cafqa(n_gens=n_gens, out_file=results_file)
 
     best_cafqa_params = qaoa_obj.best_cafqa_gen_params[::-1]
     best_cafqa_fitness_values = qaoa_obj.best_cafqa_gen_fitness[::-1]
