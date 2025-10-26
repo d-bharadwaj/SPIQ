@@ -22,13 +22,15 @@ A full implementation of multi-start can be found in `testing_scripts/cafqa_diff
 
 # For Gradient Norm Select Point, use this command to run
 
+```bash
 python enhanced_cafqa_analysis.py 10 3 100 "0.1 0.2" 5 uniform 42 0
-1                                 │  │  │   │        │ │       │  │
-2                                 │  │  │   │        │ │       │  └─ noise (0/1)
-3                                 │  │  │   │        │ │       └──── seed
-4                                 │  │  │   │        │ └──────────── crossover_type
-5                                 │  │  │   │        └────────────── elitism
-6                                 │  │  │   └─────────────────────── mutation_prob
-7                                 │  │  └─────────────────────────── n_gens
-8                                 │  └────────────────────────────── reps
-9                                 └───────────────────────────────── n_qubits
+```
+
+  * `10` ────────────────────────────────── `n_qubits`
+  * `3` ────────────────────────────── `reps`
+  * `100` ─────────────────────────── `n_gens`
+  * `"0.1 0.2"` ─────────────────────── `mutation_prob`
+  * `5` ────────────────────────── `elitism`
+  * `uniform` ──────────────────── `crossover_type`
+  * `42` ─────────────────────── `seed`
+  * `0` ─────────────────────── `noise (0/1)`
