@@ -19,18 +19,3 @@ pip install -r requirements.txt
 For relevant code on choosing n-best cafqa points, search for `best_cafqa_gen_params`, `best_cafqa_gen_fitness` in `qaoa_utils` module.
 
 A full implementation of multi-start can be found in `testing_scripts/cafqa_diff_points_maxcut.py` 
-
-# For Gradient Norm Select Point, use this command to run
-
-```bash
-python enhanced_cafqa_analysis.py 10 3 100 "0.1 0.2" 5 uniform 42 0
-```
-
-  * `10` ────────────────────────────────── `n_qubits`
-  * `3` ────────────────────────────── `reps`
-  * `100` ─────────────────────────── `n_gens`
-  * `"0.1 0.2"` ─────────────────────── `mutation_prob`
-  * `5` ────────────────────────── `elitism`
-  * `uniform` ──────────────────── `crossover_type`
-  * `42` ─────────────────────── `seed`
-  * `0` ─────────────────────── `noise (0/1)`
