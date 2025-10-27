@@ -1,0 +1,305 @@
+Exact Energy from Eigensolver: -150.0000000000003
+STARTING ROUND 0
+
+
+started GA at id 1 with 8 procs
+
+started GA at id 2 with 8 procs
+
+started GA at id None with 8 procs
+
+started GA at id 3 with 8 procs
+
+GA parameters used for this experiment:
+  num_generations=50
+  num_parents_mating=20
+  population_size=100
+  num_genes=272
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+GA parameters used for this experiment:
+  num_generations=50
+  num_parents_mating=20
+  population_size=100
+  num_genes=272
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+GA parameters used for this experiment:
+  num_generations=50
+  num_parents_mating=20
+  population_size=100
+  num_genes=272
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+GA parameters used for this experiment:
+  num_generations=50
+  num_parents_mating=20
+  population_size=100
+  num_genes=272
+  parent_selection_type=tournament
+  keep_parents=-1
+  crossover_type=single_point
+  mutation_type=adaptive
+  crossover_probability=0.9
+  mutation_probability=(0.25, 0.01)
+  keep_elitism=5
+GENERATION 1: BEST FITNESS FOUND : 0.0
+GENERATION 1: BEST FITNESS FOUND : 0.0
+GENERATION 1: BEST FITNESS FOUND : 0.0
+GENERATION 1: BEST FITNESS FOUND : 0.0
+GENERATION 22: BEST FITNESS FOUND : -9.0
+GENERATION 22: BEST FITNESS FOUND : -9.0
+GENERATION 22: BEST FITNESS FOUND : -9.0
+GENERATION 22: BEST FITNESS FOUND : -9.0
+Minimum Energy found with CAFQA initialization: -9.0
+CAFQA optimization time: 396.7488479530002 seconds
+16 Qubits and 2 reps
+Minimum Energy found with CAFQA initialization: -9.0
+
+============================================================
+Strategy 1: Spaced-out selection (Original)
+============================================================
+Selected 1 spaced-out parameters with energies:
+
+Spaced 1: Energy=-9.000000
+
+    Spaced 1 parameters:
+      Shape: (272,)
+      Mean: 1.382353
+      Std: 1.121703
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 1 0 2 0]
+      Last 5 values (CAFQA): [3 0 0 1 3]
+      First 5 values (rad): [1.57079633 1.57079633 0.         3.14159265 0.        ]
+      Last 5 values (rad): [4.71238898 0.         0.         1.57079633 4.71238898]
+
+============================================================
+Strategy 2: Gradient-aware (With Deduplication)
+============================================================
+
+======================================================================
+GRADIENT-AWARE SELECTION (With Parameter Deduplication)
+======================================================================
+  Total points: 51
+  Target: 5 unique points with non-zero gradients
+  Gradient computation: Using stabilizer simulator
+  Strategy: Prioritize low energy, test ALL unique points at each level
+
+======================================================================
+Searching through energy levels (with deduplication):
+======================================================================
+
+Energy level 1:
+  Energy: -9.000000
+  Total points at this level: 29
+  ⚠ Found 11 duplicate parameter sets
+  → 18 UNIQUE parameter set(s) remain
+  Testing gradients for 18 unique point(s)...
+    Unique point 1: GradNorm≈0 (local minimum, skipped)
+    Unique point 2: GradNorm≈0 (local minimum, skipped)
+    Unique point 3: GradNorm≈0 (local minimum, skipped)
+    Unique point 4: GradNorm≈0 (local minimum, skipped)
+    Unique point 5: GradNorm≈0 (local minimum, skipped)
+    Unique point 6: GradNorm≈0 (local minimum, skipped)
+    Unique point 7: GradNorm≈0 (local minimum, skipped)
+    Unique point 8: GradNorm≈0 (local minimum, skipped)
+    Unique point 9: GradNorm≈0 (local minimum, skipped)
+    Unique point 10: GradNorm≈0 (local minimum, skipped)
+    Unique point 11: GradNorm≈0 (local minimum, skipped)
+    Unique point 12: GradNorm≈0 (local minimum, skipped)
+    Unique point 13: GradNorm≈0 (local minimum, skipped)
+    Unique point 14: GradNorm≈0 (local minimum, skipped)
+    Unique point 15: GradNorm=3.000000 ✓
+
+    Point 15 parameters:
+      Shape: (272,)
+      Mean: 1.481618
+      Std: 1.104649
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 1 0 2 2]
+      Last 5 values (CAFQA): [3 0 0 3 2]
+      First 5 values (rad): [1.57079633 1.57079633 0.         3.14159265 3.14159265]
+      Last 5 values (rad): [4.71238898 0.         0.         4.71238898 3.14159265]
+    Unique point 16: GradNorm≈0 (local minimum, skipped)
+    Unique point 17: GradNorm≈0 (local minimum, skipped)
+    Unique point 18: GradNorm≈0 (local minimum, skipped)
+  → Found 1 valid unique point(s) at this level
+  → Total collected so far: 1 point(s)
+
+Energy level 2:
+  Energy: 0.000000
+  Total points at this level: 22
+  ✓ All 22 parameter set(s) are unique
+  Testing gradients for 22 unique point(s)...
+    Unique point 1: GradNorm=8.062258 ✓
+
+    Point 1 parameters:
+      Shape: (272,)
+      Mean: 1.573529
+      Std: 1.099013
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 1 0 2 2]
+      Last 5 values (CAFQA): [3 0 0 3 2]
+      First 5 values (rad): [1.57079633 1.57079633 0.         3.14159265 3.14159265]
+      Last 5 values (rad): [4.71238898 0.         0.         4.71238898 3.14159265]
+    Unique point 2: GradNorm≈0 (local minimum, skipped)
+    Unique point 3: GradNorm≈0 (local minimum, skipped)
+    Unique point 4: GradNorm≈0 (local minimum, skipped)
+    Unique point 5: GradNorm≈0 (local minimum, skipped)
+    Unique point 6: GradNorm≈0 (local minimum, skipped)
+    Unique point 7: GradNorm≈0 (local minimum, skipped)
+    Unique point 8: GradNorm≈0 (local minimum, skipped)
+    Unique point 9: GradNorm≈0 (local minimum, skipped)
+    Unique point 10: GradNorm≈0 (local minimum, skipped)
+    Unique point 11: GradNorm≈0 (local minimum, skipped)
+    Unique point 12: GradNorm≈0 (local minimum, skipped)
+    Unique point 13: GradNorm≈0 (local minimum, skipped)
+    Unique point 14: GradNorm≈0 (local minimum, skipped)
+    Unique point 15: GradNorm≈0 (local minimum, skipped)
+    Unique point 16: GradNorm≈0 (local minimum, skipped)
+    Unique point 17: GradNorm≈0 (local minimum, skipped)
+    Unique point 18: GradNorm=10.000000 ✓
+
+    Point 18 parameters:
+      Shape: (272,)
+      Mean: 1.496324
+      Std: 1.111432
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 0 3 1 0]
+      Last 5 values (CAFQA): [2 1 1 3 1]
+      First 5 values (rad): [1.57079633 0.         4.71238898 1.57079633 0.        ]
+      Last 5 values (rad): [3.14159265 1.57079633 1.57079633 4.71238898 1.57079633]
+    Unique point 19: GradNorm≈0 (local minimum, skipped)
+    Unique point 20: GradNorm=5.000000 ✓
+
+    Point 20 parameters:
+      Shape: (272,)
+      Mean: 1.470588
+      Std: 1.094379
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 0 0 1 0]
+      Last 5 values (CAFQA): [2 2 1 3 1]
+      First 5 values (rad): [1.57079633 0.         0.         1.57079633 0.        ]
+      Last 5 values (rad): [3.14159265 3.14159265 1.57079633 4.71238898 1.57079633]
+    Unique point 21: GradNorm≈0 (local minimum, skipped)
+    Unique point 22: GradNorm≈0 (local minimum, skipped)
+  → Found 3 valid unique point(s) at this level
+  → Total collected so far: 4 point(s)
+
+======================================================================
+
+Candidate statistics:
+  Total unique candidates: 4
+  Energy range: [-9.000000, 0.000000]
+  Gradient norm range: [3.000000, 10.000000]
+
+Selection strategy:
+  1. Sort by energy (ascending, lower is better)
+  2. For same energy, sort by gradient norm (descending, higher is better)
+  → Selecting top 4 points
+
+======================================================================
+FINAL SELECTION: 4 unique parameters
+======================================================================
+Sorted by: Energy (ascending) → Gradient Norm (descending)
+
+Point 1:
+  Energy: -9.000000
+  Gradient Norm: 3.000000
+
+    Selected parameters:
+      Shape: (272,)
+      Mean: 1.481618
+      Std: 1.104649
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 1 0 2 2]
+      Last 5 values (CAFQA): [3 0 0 3 2]
+      First 5 values (rad): [1.57079633 1.57079633 0.         3.14159265 3.14159265]
+      Last 5 values (rad): [4.71238898 0.         0.         4.71238898 3.14159265]
+
+Point 2:
+  Energy: 0.000000
+  Gradient Norm: 10.000000
+
+    Selected parameters:
+      Shape: (272,)
+      Mean: 1.496324
+      Std: 1.111432
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 0 3 1 0]
+      Last 5 values (CAFQA): [2 1 1 3 1]
+      First 5 values (rad): [1.57079633 0.         4.71238898 1.57079633 0.        ]
+      Last 5 values (rad): [3.14159265 1.57079633 1.57079633 4.71238898 1.57079633]
+
+Point 3:
+  Energy: 0.000000
+  Gradient Norm: 8.062258
+
+    Selected parameters:
+      Shape: (272,)
+      Mean: 1.573529
+      Std: 1.099013
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 1 0 2 2]
+      Last 5 values (CAFQA): [3 0 0 3 2]
+      First 5 values (rad): [1.57079633 1.57079633 0.         3.14159265 3.14159265]
+      Last 5 values (rad): [4.71238898 0.         0.         4.71238898 3.14159265]
+
+Point 4:
+  Energy: 0.000000
+  Gradient Norm: 5.000000
+
+    Selected parameters:
+      Shape: (272,)
+      Mean: 1.470588
+      Std: 1.094379
+      Min: 0.000000
+      Max: 3.000000
+      First 5 values (CAFQA): [1 0 0 1 0]
+      Last 5 values (CAFQA): [2 2 1 3 1]
+      First 5 values (rad): [1.57079633 0.         0.         1.57079633 0.        ]
+      Last 5 values (rad): [3.14159265 3.14159265 1.57079633 4.71238898 1.57079633]
+
+======================================================================
+
+
+============================================================
+Starting parallel QAOA optimization tasks
+============================================================
+
+Executing 7 parallel tasks:
+  - CAFQA Spaced: 1
+  - CAFQA Gradient-aware: 4
+  - Random MA-QAOA: 1
+  - Vanilla QAOA: 1
+Starting task: CAFQA_Spaced_0 for val : -9.0
+Starting task: CAFQA_Gradient_0 for val : -9.0
+Starting task: CAFQA_Gradient_1 for val : 0.0
+Starting task: CAFQA_Gradient_2 for val : 0.0
+Starting task: CAFQA_Gradient_3 for val : 0.0
+Starting task: Random_MA-QAOA for val : [np.float64(-9.0)]
+Starting task: Vanilla_task for val : [np.float64(-9.0)]
+Finished task: Vanilla_task
