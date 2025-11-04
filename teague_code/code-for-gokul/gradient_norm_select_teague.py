@@ -691,7 +691,7 @@ def main():
     results["Clustering_selected_parameters"] = selected_clustering_parameters.tolist()
 
     # Save results
-    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/{n_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Teague/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f"result_{seed}_clustering_k_means.npy")
     np.save(output_file, results)
