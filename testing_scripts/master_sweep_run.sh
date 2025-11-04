@@ -77,9 +77,9 @@
 # done
 
 # Long Gen Runs for CAFQA - Maxcut
-# for num_qubits in 16 20; do
-#     for seed in {0..4}; do
-#         sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=40000,SEED=$seed,NOISE=0,GRAPH_TYPE="complete" sweep_run.sh
+# for num_qubits in  8 12 16 20; do
+#     for seed in {0..0}; do
+#         sbatch --export=ALL,N_QUBITS=$num_qubits,N_REPS=2,NUM_GENERATIONS=40000,SEED=$seed,NOISE=0,GRAPH_TYPE="ego" sweep_run.sh
 #     done
 # done
 
@@ -94,6 +94,9 @@
 # sbatch --output=../logs/Comprehensive_Proof/Statevector_Reduction/statevec_reduction_k_reg_%j.log sweep_run.sh
 
 # Red_qaoa
-sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="k_reg" sweep_run.sh
-sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="ego" sweep_run.sh
-# sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/red_qaoa_%j.log --export=ALL,GRAPH="complete" sweep_run.sh
+# sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/weighted_restart_red_qaoa_%j.log --export=ALL,GRAPH="k_reg" sweep_run.sh
+# sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/weighted_restart_red_qaoa_restart_red_qaoa_%j.log --export=ALL,GRAPH="ego" sweep_run.sh
+# sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/weighted_restart_red_qaoa_restart_red_qaoa_%j.log --export=ALL,GRAPH="complete" sweep_run.sh
+
+#Gradient Norm w k-means
+sbatch --qos=regular --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm.log --export=ALL,N_QUBITS=14,N_REPS=2,NUM_GENERATIONS=1000,SEED=41,NOISE=0 sweep_run.sh

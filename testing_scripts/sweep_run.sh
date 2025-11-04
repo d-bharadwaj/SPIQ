@@ -4,11 +4,11 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu ## NOTE: Changed to CPU
 #SBATCH -q regular
-#SBATCH -t 00:10:00
+#SBATCH -t 30:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=24
 #SBATCH --mail-type=BEGIN,END,FAIL
 ## change the job name to your script name
 ## SBATCH --output=../logs/%x_%j.log
@@ -51,11 +51,16 @@ export PYTHONWARNINGS="ignore"
 # CAFQA Long Gen Runs
 # srun --cpu-bind=cores python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/run_CAFQA_teague.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
 
-# ## Multi-Task attempt
-# mkdir -p ../logs/Comprehensive_Proof/Maxcut/Unweighted/k-reg/$N_QUBITS
-# srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Maxcut/Unweighted/k-reg/$N_QUBITS/cafqa_result_task_%t_%j.log python run_CAFQA_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE $GRAPH_TYPE
+## Multi-Task attempt
+# mkdir -p ../logs/Comprehensive_Proof/Maxcut/Unweighted/ego/$N_QUBITS
+# srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Maxcut/Unweighted/ego/$N_QUBITS/cafqa_result_task_%t_%j.log python run_CAFQA_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE $GRAPH_TYPE
 
 #Statevector Reduction 
 # srun --cpu-bind=cores python statevec_reduction.py
 
-srun --cpu-bind=cores python red_qaoa_comparision.py $GRAPH
+# srun --cpu-bind=cores python red_qaoa_comparision.py $GRAPH
+
+#Gradient Norm w k-means clustering 
+srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm/Teague/$N_QUBITS/task_%t_%j.log python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/gradient_norm_select.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
+
+

@@ -68,7 +68,7 @@ def main():
     elif graph == "ego":
         print("Selected graph type: ego")
         G = graph_utils.generate_random_ego_graph(
-            num_nodes=n_qubits, weighted=False, seed=seed
+            num_vertices=n_qubits, weighted=False, seed=seed
         )
 
     else:
