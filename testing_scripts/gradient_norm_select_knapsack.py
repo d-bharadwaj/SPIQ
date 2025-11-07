@@ -22,15 +22,15 @@ import traceback
 import multiprocess as mp
 import numpy as np
 
+# Import sklearn for clustering
+from sklearn.cluster import KMeans
+import math
+
 sys.path.append("../")
 from testing_scripts.knapsack_utils import generate_knapsack_instance
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
 import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.qaoa_utils import QAOASolver
-
-# Import sklearn for clustering
-from sklearn.cluster import KMeans
-import math
 
 
 def compute_gradient_norm(qaoa_object, parameters, verbose=False):
