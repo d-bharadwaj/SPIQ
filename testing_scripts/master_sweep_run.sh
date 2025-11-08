@@ -99,4 +99,18 @@
 # sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/weighted_restart_red_qaoa_restart_red_qaoa_%j.log --export=ALL,GRAPH="complete" sweep_run.sh
 
 #Gradient Norm w k-means
-sbatch --qos=regular --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm.log --export=ALL,N_QUBITS=14,N_REPS=2,NUM_GENERATIONS=1000,SEED=41,NOISE=0 sweep_run.sh
+# Maxcut qubit sweep
+
+for N_QUBITS in 8 12; do
+    sbatch --qos=premium --output=../logs/loops/Maxcut/maxcut_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=1000,SEED=3,NOISE=0 sweep_run.sh
+done
+
+# # Knapsack qubit sweep
+# for N_QUBITS in 9 12; do
+#     sbatch --qos=premium --output=../logs/loops/Knapsack/knapsack_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=500,SEED=3,NOISE=0 sweep_run.sh
+# done
+
+# # Teague qubit sweep
+# for N_QUBITS in 8 10 12; do
+#     sbatch --qos=premium --output=../logs/loops/Teague/teague_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=1000,SEED=3,NOISE=0 sweep_run.sh
+# done

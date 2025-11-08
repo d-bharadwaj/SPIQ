@@ -4,7 +4,7 @@
 ## specify cpu or gpu node at next line
 #SBATCH -C cpu ## NOTE: Changed to CPU
 #SBATCH -q regular
-#SBATCH -t 30:00:00
+#SBATCH -t 48:00:00
 ## node numbers
 #SBATCH -N 1
 #SBATCH --ntasks=1
@@ -61,6 +61,8 @@ export PYTHONWARNINGS="ignore"
 # srun --cpu-bind=cores python red_qaoa_comparision.py $GRAPH
 
 #Gradient Norm w k-means clustering 
-srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm/Teague/$N_QUBITS/task_%t_%j.log python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/gradient_norm_select.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
+srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm/Maxcut/$N_QUBITS/task_%t_%j.log python gradient_norm_select_maxcut.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
+# srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm/Knapsack/$N_QUBITS/task_%t_%j.log python gradient_norm_select_knapsack.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
+# srun --cpu-bind=cores --output=../logs/Comprehensive_Proof/Multi-Start/Gradient_Norm/Teague/$N_QUBITS/task_%t_%j.log python /global/u1/d/dhanvib/development/QAOA/teague_code/code-for-gokul/gradient_norm_select.py $N_QUBITS $N_REPS $NUM_GENERATIONS $SEED $NOISE 
 
 
