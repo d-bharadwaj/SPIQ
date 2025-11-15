@@ -396,7 +396,7 @@ def select_clustering_stratified_parameters(
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 2 *1e4
+    max_iters = 1*1e4
     task_id, maxcut_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
@@ -652,10 +652,23 @@ def main():
     results["Clustering_fitness_values"] = selected_clustering_fitness_vals.tolist()
     results["Clustering_selected_parameters"] = selected_clustering_parameters.tolist()
 
-    # Save results
+    # Save results without overwriting existing file
     output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Knapsack/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, f"result_{seed}_clustering_k_means.npy")
+
+    base_name = f"result_{seed}_clustering_k_means.npy"
+    output_file = os.path.join(output_dir, base_name)
+
+    if os.path.exists(output_file):
+        stem, ext = os.path.splitext(base_name)
+        idx = 1
+        while True:
+            candidate = os.path.join(output_dir, f"{stem}_{idx}{ext}")
+            if not os.path.exists(candidate):
+                output_file = candidate
+                break
+            idx += 1
+
     np.save(output_file, results)
     print(f"\nResults saved to: {output_file}")
     

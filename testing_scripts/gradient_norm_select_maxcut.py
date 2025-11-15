@@ -22,6 +22,7 @@ import multiprocess as mp
 import numpy as np
 
 sys.path.append("../")
+import red_qaoa.red_qaoa as red_qaoa
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
 import testing_scripts.graphs_utils as graph_utils
 from testing_scripts.qaoa_utils import QAOASolver
@@ -394,7 +395,7 @@ def select_clustering_stratified_parameters(
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 2 *1e4
+    max_iters = 1 *1e3
     task_id, maxcut_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
@@ -428,6 +429,7 @@ def run_qaoa_task_pool(args):
 def execute_qaoa_tasks(
     ma_qaoa_object,
     vanilla_qaoa_object,
+    red_qaoa_object,
     selected_cafqa_parameters,
     selected_spaced_fitness_vals,
     selected_clustering_parameters,
@@ -484,14 +486,33 @@ def execute_qaoa_tasks(
         )
     ]
 
+    #Prepare Red-QAOA 
+
+    x0 =  np.random.uniform(
+        0, 2 * np.pi, red_qaoa_object.circuit.num_parameters
+    )
+    res, _ = red_qaoa_object.run_qaoa(x0)
+    red_qaoa_angles = res.x / (np.pi / 2)
+
+    red_qaoa_args = [
+        (
+            "Red_qaoa_task",
+            vanilla_qaoa_object,
+            red_qaoa_angles,
+            selected_spaced_fitness_vals,
+        )
+    ]
+
+
     # Combine all tasks
-    all_args = cafqa_args + clustering_cafqa_args + random_args + vanilla_args
+    all_args = cafqa_args + clustering_cafqa_args + random_args + vanilla_args + red_qaoa_args
 
     print(f"\nExecuting {len(all_args)} parallel tasks:")
     print(f"  - CAFQA Spaced: {len(cafqa_args)}")
     print(f"  - CAFQA Clustering (with gradient filtering): {len(clustering_cafqa_args)}")
     print(f"  - Random MA-QAOA: {len(random_args)}")
     print(f"  - Vanilla QAOA: {len(vanilla_args)}")
+    print(f"  - Red QAOA: {len(red_qaoa_args)}")
 
     with mp.Pool(processes=len(all_args)) as pool:
         results_list = pool.map(run_qaoa_task_pool, all_args)
@@ -519,7 +540,7 @@ def main():
     reps = int(sys.argv[2])
     n_gens = int(sys.argv[3])
     seed = int(sys.argv[4])
-    noise = bool(int(sys.argv[5]))
+    noise = float(sys.argv[5])
 
     n = n_qubits
     # k = 3
@@ -538,7 +559,6 @@ def main():
 
 
     # Create the QAOA circuit
-    # circuit = multi_angle_qaoa_circuit(n, G, reps)
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
 
     # Create QAOA object
@@ -621,15 +641,51 @@ def main():
         cost_hamiltonian, circuit.decompose().decompose(), sim_device="CPU"
     )
     vanilla_maxcut.vanilla = True
+    vanilla_maxcut.err = noise
+
 
     print("\n" + "="*60)
     print("Starting parallel QAOA optimization tasks")
     print("="*60)
+
+
+    #Red-QAOA Initialized Points
+
+    # reduced graph (may raise)
+    nx_orig = graph_utils.rustworkx_to_networkx(G)
+    nx_reduced = red_qaoa.red_qaoa_exe(nx_orig)
+
+    reduced_G = graph_utils.networkx_to_rustworkx(nx_reduced)
+
+    # build cost operators and circuits for reduced and original graphs
+    reduced_paulis = graph_utils.build_max_cut_paulis(reduced_G)
+    reduced_cost = SparsePauliOp.from_list(reduced_paulis)
+    reduced_circ = QAOAAnsatz(cost_operator=reduced_cost, reps=reps)
+    red_qaoa_solver = QAOASolver(
+        reduced_cost, reduced_circ.decompose().decompose(), sim_device="CPU"
+    )
+    red_qaoa_solver.vanilla = True
+    red_qaoa_solver.err = noise
+
+
+    # orig_paulis = graph_utils.build_max_cut_paulis(G)
+    # orig_cost = SparsePauliOp.from_list(orig_paulis)
+    # orig_circ = QAOAAnsatz(cost_operator=orig_cost, reps=reps)
+    # eval_solver = QAOASolver(
+    #     orig_cost, orig_circ.decompose().decompose(), sim_device="CPU"
+    # )
+    # eval_solver.vanilla = True
+
+    # x0 = np.random.rand(reps * 2) * np.pi
+    # res, _ = red_qaoa_solver.run_qaoa(x0)
+    # best_red_angles = res.x
+
     
     start = timer()
     results = execute_qaoa_tasks(
         maxcut_qaoa,
         vanilla_maxcut,
+        red_qaoa_solver,
         selected_cafqa_parameters,
         selected_spaced_fitness_vals,
         selected_clustering_parameters,
@@ -648,11 +704,25 @@ def main():
     results["Clustering_selected_parameters"] = selected_clustering_parameters.tolist()
 
     # Save results
-    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Maxcut/{n_qubits}_qbs"
+    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Maxcut/noisy/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, f"result_{seed}_clustering_k_means.npy")
+    
+    base_name = f"result_{seed}_clustering_k_means.npy"
+    output_file = os.path.join(output_dir, base_name)
+
+    if os.path.exists(output_file):
+        stem, ext = os.path.splitext(base_name)
+        idx = 1
+        while True:
+            candidate = os.path.join(output_dir, f"{stem}_{idx}{ext}")
+            if not os.path.exists(candidate):
+                output_file = candidate
+                break
+            idx += 1
+
     np.save(output_file, results)
     print(f"\nResults saved to: {output_file}")
+    
     
     # Print summary
     print("\n" + "="*60)

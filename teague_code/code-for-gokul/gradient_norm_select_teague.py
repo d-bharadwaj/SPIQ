@@ -397,7 +397,7 @@ def select_clustering_stratified_parameters(
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 5 *1e4
+    max_iters = 1 *1e4
     task_id, maxcut_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
