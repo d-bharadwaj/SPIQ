@@ -550,7 +550,7 @@ def main():
 
     # Generate the graph
     G = graph_utils.generate_k_regular_graph(
-        num_vertices=n, k=3, weighted=True, seed=seed
+        num_vertices=n, k=3, weighted=False, seed=seed
     )
 
     # Build the cost Hamiltonian

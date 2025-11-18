@@ -91,7 +91,7 @@
 # done
 
 # Statevector Reduction
-# sbatch --qos=premium --output=../logs/Comprehensive_Proof/Statevector_Reduction/statevec_reduction_knapsack_%j.log sweep_run.sh
+# sbatch --output=../logs/Comprehensive_Proof/Statevector_Reduction/statevec_reduction_k_reg_%j.log sweep_run.sh
 
 # Red_qaoa
 # sbatch --qos=regular --output=../logs/Comprehensive_Proof/Red_QAOA/weighted_restart_red_qaoa_%j.log --export=ALL,GRAPH="k_reg" sweep_run.sh
@@ -100,16 +100,17 @@
 
 #Gradient Norm w k-means
 # Maxcut qubit sweep
-for N_QUBITS in 8; do
-    sbatch --qos=premium --output=../logs/loops/Maxcut/maxcut_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=40,SEED=3,NOISE=1e-4 sweep_run.sh
+
+for N_QUBITS in 10; do
+    sbatch --qos=premium --output=../logs/loops/Maxcut/maxcut_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=50,SEED=3,NOISE=1e-4 sweep_run.sh
 done
 
-# Knapsack qubit sweep
-# for N_QUBITS in 10 11; do
-#     sbatch --qos=premium --output=../logs/loops/Knapsack/knapsack_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=200,SEED=3,NOISE=0 sweep_run.sh
+# # Knapsack qubit sweep
+# for N_QUBITS in 9 12; do
+#     sbatch --qos=premium --output=../logs/loops/Knapsack/knapsack_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=500,SEED=3,NOISE=0 sweep_run.sh
 # done
 
 # # Teague qubit sweep
-# for N_QUBITS in 10; do
-#     sbatch --qos=premium --output=../logs/loops/Teague/teague_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=400,SEED=3,NOISE=0 sweep_run.sh
+# for N_QUBITS in 8 10 12; do
+#     sbatch --qos=premium --output=../logs/loops/Teague/teague_${N_QUBITS}_seed_${SEED}_%j.log --export=ALL,N_QUBITS=$N_QUBITS,N_REPS=2,NUM_GENERATIONS=1000,SEED=3,NOISE=0 sweep_run.sh
 # done
