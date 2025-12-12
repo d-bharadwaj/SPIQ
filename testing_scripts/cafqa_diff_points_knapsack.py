@@ -146,7 +146,7 @@ def main():
     knapsack_qaoa.evaluate_exact_energy()
 
     # Run CAFQA process
-    knapsack_qaoa.run_cafqa(n_gens=n_gens)
+    knapsack_qaoa.run_spiq(n_gens=n_gens)
     print(f"{op.num_qubits} Qubits and {reps} reps")
     print(
         f"Minimum Energy found with CAFQA initialization: {knapsack_qaoa.energy_best}"

@@ -61,7 +61,7 @@ maxcut_qaoa = QAOASolver(cost_hamiltonian, circuit)
 maxcut_qaoa.prepare_circuit()
 
 # CAFQA Process
-maxcut_qaoa.run_cafqa(n_gens=n_gens)
+maxcut_qaoa.run_spiq(n_gens=n_gens)
 print(f"{n} Qubits and {reps} reps")
 
 # CAFQA Initialization

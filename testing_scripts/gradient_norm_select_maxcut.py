@@ -574,7 +574,7 @@ def main():
 
     # Run CAFQA process
     start_cafqa = timer()
-    maxcut_qaoa.run_cafqa(n_gens=n_gens)
+    maxcut_qaoa.run_spiq(n_gens=n_gens)
     end_cafqa = timer()
     print(f"CAFQA optimization time: {end_cafqa - start_cafqa} seconds")
     print(f"{n} Qubits and {reps} reps")

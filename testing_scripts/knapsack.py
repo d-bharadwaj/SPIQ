@@ -42,7 +42,7 @@ knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit)
 knapsack_qaoa.prepare_circuit()
 
 # Run CAFQA Process
-knapsack_qaoa.run_cafqa(n_gens=2000)
+knapsack_qaoa.run_spiq(n_gens=2000)
 
 # Solve with classical Eigensolver for comparison
 exact_solution = knapsack_qaoa.evaluate_exact_energy()

@@ -112,7 +112,7 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_cafqa(self, n_gens, out_file=None):
+    def run_spiq(self, n_gens, out_file=None):
         """
         Run the CAFQA initialization.
 

@@ -1,4 +1,4 @@
-# CAFQA + QAOA 
+# SPIQ
  
 Making CAFQA work for QAOA problems with ma-QAOA anstaz.
 

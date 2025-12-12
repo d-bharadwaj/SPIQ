@@ -139,7 +139,7 @@ def main():
                 try:
                     cafqa_solver = QAOASolver(orig_cost, orig_circ, sim_device="CPU")
                     cafqa_solver.prepare_circuit()
-                    cafqa_solver.run_cafqa(n_gens=1, out_file=None)
+                    cafqa_solver.run_spiq(n_gens=1, out_file=None)
                     cafqa_energy = cafqa_solver.energy_best
                     if cafqa_solver.evaluate_exact_energy() != 0:
                         cafqa_per_run.append(abs(cafqa_energy / cafqa_solver.evaluate_exact_energy()))

@@ -90,7 +90,7 @@ def main():
     exact_energy = qaoa_obj.evaluate_exact_energy()
 
     # Run CAFQA process
-    qaoa_obj.run_cafqa(n_gens=n_gens)
+    qaoa_obj.run_spiq(n_gens=n_gens)
 
     best_cafqa_params = qaoa_obj.best_cafqa_gen_params[::-1]
     best_cafqa_fitness_values = qaoa_obj.best_cafqa_gen_fitness[::-1]

@@ -157,7 +157,7 @@ def main():
     maxcut_qaoa.prepare_circuit()
 
     # Run CAFQA process
-    maxcut_qaoa.run_cafqa(n_gens=n_gens)
+    maxcut_qaoa.run_spiq(n_gens=n_gens)
     print(f"{n} Qubits and {reps} reps")
     print(f"Minimum Energy found with CAFQA initialization: {maxcut_qaoa.energy_best}")
 

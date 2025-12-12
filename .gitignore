@@ -7,3 +7,4 @@ np_data/
 *.npy
 *.log
 .vscode/
+magic/
