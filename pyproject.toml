@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spiq"
+version = "0.1.0"
+description = "Clifford-based QAOA initialization with multi-start point selection"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["clapton*", "spiq*", "testing_scripts*", "biomarker_data*"]

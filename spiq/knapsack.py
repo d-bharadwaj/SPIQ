@@ -1,0 +1,1 @@
+from testing_scripts.knapsack_utils import generate_knapsack_instance

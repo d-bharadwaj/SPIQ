@@ -1,0 +1,1 @@
+from testing_scripts.maxcut_processing import evaluate_maxcut

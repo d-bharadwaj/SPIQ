@@ -5,7 +5,11 @@ import networkx as nx
 import numpy as np
 import rustworkx as rx
 from qiskit_ibm_runtime import SamplerV2 as Sampler
-from sage.all import Graph
+
+try:
+    from sage.all import Graph
+except ImportError:  # optional; only needed for exact MaxCut via Sage
+    Graph = None
 
 
 def generate_k_regular_graph(num_vertices, k, weighted=False, seed=None):
@@ -197,6 +201,11 @@ def compute_optimal_max_cut(graph: rx.PyGraph) -> int:
     int
         The weight of the optimal Max-Cut.
     """
+    if Graph is None:
+        raise ImportError(
+            "SageMath is required for compute_optimal_max_cut. "
+            "Install sage or use NumPyMinimumEigensolver via QAOASolver."
+        )
     sage_graph = Graph()
     for u, v, weight in graph.weighted_edge_list():
         sage_graph.add_edge(u, v, weight)

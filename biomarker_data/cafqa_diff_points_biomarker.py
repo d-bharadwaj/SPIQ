@@ -1,35 +1,56 @@
+import rustworkx as rx
+import numpy as np
+import warnings
 import os
 import sys
-import traceback
-import warnings
-from timeit import default_timer as timer
-
-import numpy as np
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
+from qiskit.circuit import Parameter
 from qiskit.circuit.library import QAOAAnsatz
-from qiskit_optimization.converters import QuadraticProgramToQubo
-
+from qiskit_algorithms import NumPyMinimumEigensolver
+from qiskit.quantum_info import SparsePauliOp
+from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from timeit import default_timer as timer
 import multiprocess as mp
+import traceback
 
-from spiq.knapsack import generate_knapsack_instance
-from spiq.qaoa import QAOASolver
+from clapton.clapton import claptonize
+from clapton.circuit_manipulation import (
+    transform_to_allowed_gates,
+    qiskit_to_stim,
+    modify_circuit,
+    multi_angle_qaoa_circuit,
+    generate_qiskit_param_map,
+)
+from spiq.graphs import (
+    generate_random_complete_graph,
+    generate_k_regular_graph,
+    build_max_cut_paulis,
+    compute_optimal_max_cut,
+)
+from spiq.qaoa import QAOASolver, evaluate_energy
+from biomarker_data import pcbo_utils
+from biomarker_data.biomarker_utils import convert_pubo_to_ising
+from biomarker_data.paths import biomarker_pickle_dir, sample_data_dir
+from qiskit.quantum_info import SparsePauliOp
+import os
+import pickle
 
 
 def run_qaoa_task_pool(args):
 
     max_iters = 10 * 1e3
-    task_id, knapsack_qaoa, initial_params, fitness_val = args
+    task_id, biomarker_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
     cafqa_params = [param * (np.pi / 2) for param in initial_params]
 
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
-        result, obj_values = knapsack_qaoa.run_qaoa(
+        result, obj_values = biomarker_qaoa.run_qaoa(
             initial_params=cafqa_params, max_iters=max_iters, opt="COBYLA"
         )
         print(f"Finished task: {task_id}")
@@ -66,7 +87,7 @@ def execute_qaoa_tasks(
     ]
 
     # Random Init. Params for MA-QAOA
-    random_angles = np.random.random(0, 2 * np.pi, ma_qaoa_object.pcirc.num_parameters)
+    random_angles = np.random.uniform(0, 2 * np.pi, ma_qaoa_object.pcirc.num_parameters)
     random_args = [
         ("Random_MA-QAOA", ma_qaoa_object, random_angles, selected_fitness_vals)
     ]
@@ -100,7 +121,6 @@ def execute_qaoa_tasks(
     # Return results
     return {
         "CAFQA_initialization_energy": ma_qaoa_object.energy_best,
-        "Exact_Ground_State_Energy": ma_qaoa_object.exact_energy,
         "Task_results": results,
         "Task_objective_values": task_objective_values,
     }
@@ -109,54 +129,64 @@ def execute_qaoa_tasks(
 # Main function to set up and execute the script
 def main():
     # Initialize variables (replace with your actual initialization logic)
-    n_items = int(sys.argv[1])
+    n_qubits = int(sys.argv[1])
     reps = int(sys.argv[2])
     n_gens = int(sys.argv[3])
-    mutation_prob = tuple(map(float, sys.argv[4].split()))
-    elitism = int(sys.argv[5])
-    crossover_type = str(sys.argv[6])
-    seed = int(sys.argv[7])
-    noise = bool(int(sys.argv[8]))
+    seed = int(sys.argv[4])
+    noise = bool(int(sys.argv[5]))
 
-    # Knapsack Formulation
-    prob = generate_knapsack_instance(num_items=n_items, seed=seed)
+    n = n_qubits
 
-    qp = prob.to_quadratic_program()
-    print(qp.prettyprint())
-
-    # intermediate QUBO form of the optimization problem
-    conv = QuadraticProgramToQubo()
-    qubo = conv.convert(qp)
-
-    # qubit Hamiltonian and offset
-    op, offset = qubo.to_ising()
-    print(f"num qubits: {op.num_qubits}, offset: {offset}\n")
-
-    cost_hamiltonian = op
-    # Transform qiskit circ. to stim.
-    circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-
-    knapsack_qaoa = QAOASolver(cost_hamiltonian, circuit, sim_device="GPU")
-    knapsack_qaoa.prepare_circuit()
-    knapsack_qaoa.err = noise
-
-    # Evaluate Exact Ground State Energy
-    knapsack_qaoa.evaluate_exact_energy()
-
-    # Run CAFQA process
-    knapsack_qaoa.run_spiq(n_gens=n_gens)
-    print(f"{op.num_qubits} Qubits and {reps} reps")
-    print(
-        f"Minimum Energy found with CAFQA initialization: {knapsack_qaoa.energy_best}"
+    # Generate the graph
+    feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = (
+        pcbo_utils.load_features_and_corr_files(
+            str(sample_data_dir(n_qubits, use_copy=False))
+        )
     )
 
-    # Best Solutions
-    best_cafqa_fitness_values = knapsack_qaoa.best_cafqa_gen_fitness[::-1]
-    best_cafqa_parameters = knapsack_qaoa.best_cafqa_gen_params[::-1]
+    pcbo_obj = pcbo_utils.create_three_body_cubo(
+        feature_set,
+        first_corr_arr,
+        second_corr_arr,
+        third_corr_arr,
+        feature_to_idx,
+        select_n_features=4,
+    )
+
+    pubo = {key: float(value) for key, value in pcbo_obj.to_pubo().items()}
+
+    max_cut_paulis = convert_pubo_to_ising(pubo, n_qubits)
+    cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
+
+    reps = 2
+    circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
+    biomarker_qaoa = QAOASolver(cost_hamiltonian, circuit, sim_device="GPU")
+
+    biomarker_qaoa.prepare_circuit()
+
+    # # Run CAFQA process
+    # biomarker_qaoa.run_CAFQA(n_gens=n_gens,err=noise)
+    # print(f"{n} Qubits and {reps} reps")
+    # print(f"Minimum Energy found with CAFQA initialization: {biomarker_qaoa.energy_best}")
+
+    # # Best Solutions
+    # best_cafqa_fitness_values = biomarker_qaoa.best_cafqa_gen_fitness
+    # best_cafqa_parameters = biomarker_qaoa.best_cafqa_gen_params
+
+    # Importing from seperate file
+    with open(
+        biomarker_pickle_dir() / f"{n}_qb_biomarker_cafqa_results.pkl",
+        "rb",
+    ) as f:
+        cafqa_data = pickle.load(f)
+    best_cafqa_fitness_values = cafqa_data["best_cafqa_fitness_values"]
+    best_cafqa_parameters = cafqa_data["best_cafqa_parameters"]
+    print("cafqa_data keys:", list(cafqa_data.keys()))
+    biomarker_qaoa.energy_best = cafqa_data["CAFQA_initialization_energy"]
 
     unique_fitness_values = np.unique(best_cafqa_fitness_values)
 
-    # # When choosing best out of unique energies
+    # When choosing best out of unique energies
     selected_fitness_vals = list(
         unique_fitness_values[::3][:5]
     )  # Select 5 of the best unique spaced-out solutions.
@@ -169,33 +199,32 @@ def main():
         selected_fitness_indices
     ]
 
-    # #When choosing just best 5 (can be same energies)
+    # # # # #When choosing just best 5 (can be same energies)
     # selected_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
     # selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
 
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
-    vanilla_knapsack = QAOASolver(
+    vanilla_biomarker = QAOASolver(
         cost_hamiltonian, circuit.decompose().decompose(), sim_device="GPU"
     )
-    vanilla_knapsack.vanilla = True
+    vanilla_biomarker.vanilla = True
+
+    if noise:
+        vanilla_biomarker.err = 1e-4
+        biomarker_qaoa.err = 1e-4
 
     start = timer()
     results = execute_qaoa_tasks(
-        knapsack_qaoa,
-        vanilla_knapsack,
-        selected_cafqa_parameters,
-        selected_fitness_vals,
+        biomarker_qaoa, vanilla_biomarker, selected_cafqa_parameters, selected_fitness_vals
     )
     end = timer()
     print(f"Total Time : {end - start}")
 
     # Save results
-    output_dir = (
-        f"../np_data/Final_Data_Collection/Knapsack/Long_Gens/{op.num_qubits}_qbs"
-    )
+    output_dir = f"../np_data/Comprehensive_Proof/Teague/noisy/8"
     os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, f"result_{seed}.npy"), results)
+    np.save(os.path.join(output_dir, f"full_run_result_{seed}.npy"), results)
 
 
 # Entry point

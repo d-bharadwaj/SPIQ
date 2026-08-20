@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: spiq
+Version: 0.1.0
+Summary: Clifford-based QAOA initialization with multi-start point selection
+Requires-Python: >=3.10

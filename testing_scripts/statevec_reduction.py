@@ -1,4 +1,3 @@
-import sys
 
 import numpy as np
 from qiskit.circuit.library import QAOAAnsatz
@@ -6,12 +5,11 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from scipy.stats import gmean
 
-sys.path.append("../")
 import warnings
 
-import testing_scripts.graphs_utils as graph_utils
-from testing_scripts.knapsack_utils import generate_knapsack_instance
-from testing_scripts.qaoa_utils import QAOASolver
+import spiq.graphs as graph_utils
+from spiq.knapsack import generate_knapsack_instance
+from spiq.qaoa import QAOASolver
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 

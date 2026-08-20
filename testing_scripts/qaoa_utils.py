@@ -7,17 +7,18 @@ from clapton.circuit_manipulation import (generate_qiskit_param_map,
                                           transform_to_allowed_gates)
 from clapton.clapton import claptonize
 from clapton.depolarization import GateGeneralDepolarizationModel
-# from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 from qiskit_aer.primitives import EstimatorV2 as Estimator
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_algorithms.optimizers import SPSA
-from qiskit_ibm_runtime.fake_provider import FakeMumbaiV2
 from scipy.optimize import minimize
-from skquant.opt import minimize as skquant_minimize
 
-# Suppress warnings
+try:
+    from skquant.opt import minimize as skquant_minimize
+except ImportError:
+    skquant_minimize = None
+
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -112,12 +113,16 @@ class QAOASolver:
         self.param_map = generate_qiskit_param_map(self.pcirc)
         self.stim_circ.define_parameter_map(self.param_map)
 
-    def run_spiq(self, n_gens, out_file=None):
+    def run_spiq(self, n_gens, out_file=None, n_proc=32, n_starts=4, n_rounds=1):
         """
-        Run the CAFQA initialization.
+        Run SPIQ (CAFQA) initialization.
 
         Args:
             n_gens: Number of generations for the genetic algorithm.
+            out_file: Optional output file path for optimizer logs.
+            n_proc: Number of worker processes for claptonize.
+            n_starts: Number of independent genetic-algorithm starts.
+            n_rounds: Number of claptonize rounds.
         """
         paulis, coeffs = (
             self.cost_hamiltonian.paulis.to_labels(),
@@ -126,7 +131,6 @@ class QAOASolver:
         reversed_paulis = [p[::-1] for p in paulis]
 
         if self.err:
-            # let's add a noise model where we specify global 1q and 2q gate errors
             nm = GateGeneralDepolarizationModel(p1=self.err, p2=10 * self.err)
             self.stim_circ.add_depolarization_model(nm)
 
@@ -140,11 +144,11 @@ class QAOASolver:
             reversed_paulis,
             coeffs,
             self.stim_circ,
-            n_proc=32,
-            n_starts=4,
-            n_rounds=1,
-            callback=None,  # NOTE: usually print
-            budget=n_gens // 2,
+            n_proc=n_proc,
+            n_starts=n_starts,
+            n_rounds=n_rounds,
+            callback=None,
+            budget=max(1, n_gens // 2),
             out_file=out_file,
         )
 
@@ -189,14 +193,11 @@ class QAOASolver:
 
         noise_model = None
 
-        # NOTE: This is not used anywhere
         self.backend = AerSimulator(method="statevector", device=self.sim_device)
         if self.err:
             noise_model = self._create_noise_model()
-            # noise_model = NoiseModel.from_backend(FakeMumbaiV2())
             self.backend.set_options(noise_model=noise_model)
 
-        # Change to use density matrix simulator for noisy sims.
         self.estimator = Estimator(
             options={
                 "backend_options": {
@@ -282,9 +283,12 @@ class QAOASolver:
             )
 
         elif opt in ["imfil", "snobfit", "orbit", "nomad", "bobyqa"]:
+            if skquant_minimize is None:
+                raise ImportError(
+                    "scikit-quant is required for optimizer "
+                    f"'{opt}'. Install with: pip install scikit-quant"
+                )
             bounds = np.array([[0, 2 * np.pi]] * len(initial_params), dtype=float)
-
-            # method can be ImFil, SnobFit, Orbit, NOMAD, or Bobyqa
             result, _ = skquant_minimize(
                 _cost_function_with_vals,
                 x0=initial_params,

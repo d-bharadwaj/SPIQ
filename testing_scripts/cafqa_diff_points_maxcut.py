@@ -13,7 +13,6 @@ from timeit import default_timer as timer
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
 
-sys.path.append("../")
 import os
 import traceback
 
@@ -21,8 +20,8 @@ import multiprocess as mp
 import numpy as np
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
 
-import testing_scripts.graphs_utils as graph_utils
-from testing_scripts.qaoa_utils import QAOASolver
+import spiq.graphs as graph_utils
+from spiq.qaoa import QAOASolver
 
 
 def run_qaoa_task_pool(args):

@@ -10,11 +10,10 @@ from qiskit.quantum_info import SparsePauliOp
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-sys.path.append("../")
 import red_qaoa.red_qaoa as red_qaoa
 
-import testing_scripts.graphs_utils as graphs_utils
-from testing_scripts.qaoa_utils import QAOASolver
+import spiq.graphs as graphs_utils
+from spiq.qaoa import QAOASolver
 import pickle
 
 def main():

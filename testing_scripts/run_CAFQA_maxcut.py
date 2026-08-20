@@ -21,10 +21,9 @@ from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from qiskit_optimization.converters import QuadraticProgramToQubo
 
-sys.path.append("../")
-import testing_scripts.graphs_utils as graph_utils
-from testing_scripts.knapsack_utils import generate_knapsack_instance
-from testing_scripts.qaoa_utils import QAOASolver
+import spiq.graphs as graph_utils
+from spiq.knapsack import generate_knapsack_instance
+from spiq.qaoa import QAOASolver
 
 print("Command-line arguments:", sys.argv)
 

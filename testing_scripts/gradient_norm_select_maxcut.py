@@ -21,11 +21,10 @@ import traceback
 import multiprocess as mp
 import numpy as np
 
-sys.path.append("../")
 import red_qaoa.red_qaoa as red_qaoa
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
-import testing_scripts.graphs_utils as graph_utils
-from testing_scripts.qaoa_utils import QAOASolver
+import spiq.graphs as graph_utils
+from spiq.qaoa import QAOASolver
 
 # Import sklearn for clustering
 from sklearn.cluster import KMeans

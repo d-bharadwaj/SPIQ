@@ -18,7 +18,6 @@ from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from scipy.optimize import minimize
 
-sys.path.append("../")
 from clapton.circuit_manipulation import (generate_qiskit_param_map,
                                           modify_circuit,
                                           multi_angle_qaoa_circuit,
@@ -27,11 +26,11 @@ from clapton.circuit_manipulation import (generate_qiskit_param_map,
 from clapton.clapton import claptonize
 
 from maxcut_processing import evaluate_maxcut
-from testing_scripts.graphs_utils import (build_max_cut_paulis,
+from spiq.graphs import (build_max_cut_paulis,
                                           compute_optimal_max_cut,
                                           generate_k_regular_graph,
                                           generate_random_complete_graph)
-from testing_scripts.qaoa_utils import QAOASolver, evaluate_energy
+from spiq.qaoa import QAOASolver, evaluate_energy
 
 print("Command-line arguments:", sys.argv)
 

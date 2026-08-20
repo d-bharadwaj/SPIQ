@@ -15,7 +15,6 @@ from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
 from scipy.optimize import minimize
 
-sys.path.append("../")
 import multiprocessing
 
 from clapton.circuit_manipulation import (generate_qiskit_param_map,
@@ -25,11 +24,11 @@ from clapton.circuit_manipulation import (generate_qiskit_param_map,
                                           transform_to_allowed_gates)
 from clapton.clapton import claptonize
 
-from testing_scripts.graphs_utils import (build_max_cut_paulis,
+from spiq.graphs import (build_max_cut_paulis,
                                           compute_optimal_max_cut,
                                           generate_k_regular_graph,
                                           generate_random_complete_graph)
-from testing_scripts.qaoa_utils import QAOASolver
+from spiq.qaoa import QAOASolver
 
 # Get arguments from command line
 n_qubits = int(sys.argv[1])

@@ -13,8 +13,6 @@ from timeit import default_timer as timer
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer.primitives import EstimatorV2 as Estimator
-from qiskit.quantum_info import SparsePauliOp
-from qiskit_optimization.converters import QuadraticProgramToQubo
 
 import os
 import traceback
@@ -22,14 +20,16 @@ import traceback
 import multiprocess as mp
 import numpy as np
 
-# Import sklearn for clustering
-from sklearn.cluster import KMeans
-import math
-
-from spiq.knapsack import generate_knapsack_instance
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
 import spiq.graphs as graph_utils
 from spiq.qaoa import QAOASolver
+from biomarker_data import pcbo_utils
+from biomarker_data.biomarker_utils import convert_pubo_to_ising
+from biomarker_data.paths import sample_data_dir
+
+# Import sklearn for clustering
+from sklearn.cluster import KMeans
+import math
 
 
 def compute_gradient_norm(qaoa_object, parameters, verbose=False):
@@ -395,7 +395,7 @@ def select_clustering_stratified_parameters(
 
 def run_qaoa_task_pool(args):
 
-    max_iters = 1*1e4
+    max_iters = 1 *1e4
     task_id, maxcut_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
@@ -528,18 +528,34 @@ def main():
     # Set random seed for reproducibility
     np.random.seed(seed)
 
-    ## Knapsack Formulation
-    n_items = n_qubits
-    prob = generate_knapsack_instance(num_items=n_items, seed=seed)
-    qp = prob.to_quadratic_program()
-    print(qp.prettyprint())
-    # intermediate QUBO form of the optimization problem
-    conv = QuadraticProgramToQubo()
-    qubo = conv.convert(qp)
-    # qubit Hamiltonian and offset
-    op, offset = qubo.to_ising()
-    print(f"num qubits: {op.num_qubits}, offset: {offset}\n")
-    cost_hamiltonian = op
+    # # Generate the graph
+    # G = graph_utils.generate_random_complete_graph(
+    #     num_vertices=n, weighted=True, seed=seed
+    # )
+
+    # # Build the cost Hamiltonian
+    # max_cut_paulis = graph_utils.build_max_cut_paulis(G)
+    # cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
+
+    # Biomarker feature-selection data
+    feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = (
+        pcbo_utils.load_features_and_corr_files(str(sample_data_dir(n_qubits)))
+    )
+
+    pcbo_obj = pcbo_utils.create_three_body_cubo(
+        feature_set,
+        first_corr_arr,
+        second_corr_arr,
+        third_corr_arr,
+        feature_to_idx,
+        select_n_features=4,
+    )
+
+    pubo = {key: float(value) for key, value in pcbo_obj.to_pubo().items()}
+    biomarker_paulis = convert_pubo_to_ising(pubo, n_qubits)
+
+    cost_hamiltonian = SparsePauliOp.from_list(biomarker_paulis)
+
 
     # Create the QAOA circuit
     # circuit = multi_angle_qaoa_circuit(n, G, reps)
@@ -651,23 +667,10 @@ def main():
     results["Clustering_fitness_values"] = selected_clustering_fitness_vals.tolist()
     results["Clustering_selected_parameters"] = selected_clustering_parameters.tolist()
 
-    # Save results without overwriting existing file
-    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Knapsack/{n_qubits}_qbs"
+    # Save results
+    output_dir = f"../np_data/Final_Data_Collection/Multi-Start/Gradient_Norm/Biomarker/{n_qubits}_qbs"
     os.makedirs(output_dir, exist_ok=True)
-
-    base_name = f"result_{seed}_clustering_k_means.npy"
-    output_file = os.path.join(output_dir, base_name)
-
-    if os.path.exists(output_file):
-        stem, ext = os.path.splitext(base_name)
-        idx = 1
-        while True:
-            candidate = os.path.join(output_dir, f"{stem}_{idx}{ext}")
-            if not os.path.exists(candidate):
-                output_file = candidate
-                break
-            idx += 1
-
+    output_file = os.path.join(output_dir, f"result_{seed}_clustering_k_means.npy")
     np.save(output_file, results)
     print(f"\nResults saved to: {output_file}")
     
