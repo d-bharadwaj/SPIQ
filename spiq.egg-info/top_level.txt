@@ -1,4 +1,0 @@
-biomarker_data
-clapton
-red_qaoa
-spiq
