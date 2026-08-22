@@ -38,7 +38,7 @@ def compute_gradient_norm(qaoa_object, parameters):
 
 
 def deduplicate_parameters(parameters, fitness_values, tolerance=1e-10):
-    """Remove duplicate CAFQA parameter sets."""
+    """Remove duplicate SPIQ parameter sets."""
     parameters = np.asarray(parameters)
     fitness_values = np.asarray(fitness_values)
 
@@ -57,25 +57,25 @@ def deduplicate_parameters(parameters, fitness_values, tolerance=1e-10):
 
 
 def fixed_interval_selection(
-    best_cafqa_parameters,
-    best_cafqa_fitness_values,
+    best_spiq_parameters,
+    best_spiq_fitness_values,
     num_select=3,
     stride=3,
 ):
     """Fixed-interval energy selection over unique fitness values."""
-    fitness_list = list(best_cafqa_fitness_values)
+    fitness_list = list(best_spiq_fitness_values)
     unique_fitness = np.unique(fitness_list)
     selected_fitness = list(unique_fitness[::stride][:num_select])
 
     selected_indices = [fitness_list.index(value) for value in selected_fitness]
-    selected_parameters = np.asarray(best_cafqa_parameters)[selected_indices]
+    selected_parameters = np.asarray(best_spiq_parameters)[selected_indices]
 
     return selected_parameters, np.asarray(selected_fitness)
 
 
 def k_gaps_selection(
-    best_cafqa_parameters,
-    best_cafqa_fitness_values,
+    best_spiq_parameters,
+    best_spiq_fitness_values,
     qaoa_object,
     num_select=3,
     rng=None,
@@ -85,10 +85,10 @@ def k_gaps_selection(
         rng = np.random.default_rng(0)
 
     unique_params, unique_fitness, _ = deduplicate_parameters(
-        best_cafqa_parameters, best_cafqa_fitness_values
+        best_spiq_parameters, best_spiq_fitness_values
     )
     if len(unique_params) == 0:
-        raise ValueError("No CAFQA points available for clustering selection.")
+        raise ValueError("No SPIQ points available for clustering selection.")
 
     n_clusters = max(1, min(math.ceil(len(unique_params) / 10), len(unique_params)))
     x_periodic = np.column_stack(

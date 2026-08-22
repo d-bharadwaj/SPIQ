@@ -1,3 +1,6 @@
+#Implementation taken from https://github.com/meng-ubc/Red-QAOA.git.
+
+
 from itertools import combinations
 import networkx as nx
 import random

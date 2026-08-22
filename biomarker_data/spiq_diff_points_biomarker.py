@@ -46,12 +46,12 @@ def run_qaoa_task_pool(args):
     task_id, biomarker_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
-    cafqa_params = [param * (np.pi / 2) for param in initial_params]
+    spiq_params = [param * (np.pi / 2) for param in initial_params]
 
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
         result, obj_values = biomarker_qaoa.run_qaoa(
-            initial_params=cafqa_params, max_iters=max_iters, opt="COBYLA"
+            initial_params=spiq_params, max_iters=max_iters, opt="COBYLA"
         )
         print(f"Finished task: {task_id}")
         return {
@@ -75,14 +75,14 @@ def run_qaoa_task_pool(args):
 def execute_qaoa_tasks(
     ma_qaoa_object,
     vanilla_qaoa_object,
-    selected_cafqa_parameters,
+    selected_spiq_parameters,
     selected_fitness_vals,
 ):
 
-    cafqa_args = [
+    spiq_args = [
         (f"task_{i}", ma_qaoa_object, params, fitness)
         for i, (params, fitness) in enumerate(
-            zip(selected_cafqa_parameters, selected_fitness_vals)
+            zip(selected_spiq_parameters, selected_fitness_vals)
         )
     ]
 
@@ -106,7 +106,7 @@ def execute_qaoa_tasks(
     ]
 
     # Combine all tasks
-    all_args = cafqa_args + random_args + vanilla_args
+    all_args = spiq_args + random_args + vanilla_args
 
     with mp.Pool(processes=len(all_args)) as pool:
         results_list = pool.map(run_qaoa_task_pool, all_args)
@@ -120,7 +120,7 @@ def execute_qaoa_tasks(
 
     # Return results
     return {
-        "CAFQA_initialization_energy": ma_qaoa_object.energy_best,
+        "SPIQ_initialization_energy": ma_qaoa_object.energy_best,
         "Task_results": results,
         "Task_objective_values": task_objective_values,
     }
@@ -140,7 +140,7 @@ def main():
     # Generate the graph
     feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = (
         pcbo_utils.load_features_and_corr_files(
-            str(sample_data_dir(n_qubits, use_copy=False))
+            str(sample_data_dir(n_qubits))
         )
     )
 
@@ -164,27 +164,27 @@ def main():
 
     biomarker_qaoa.prepare_circuit()
 
-    # # Run CAFQA process
-    # biomarker_qaoa.run_CAFQA(n_gens=n_gens,err=noise)
+    # # Run SPIQ process
+    # biomarker_qaoa.run_spiq(n_gens=n_gens,err=noise)
     # print(f"{n} Qubits and {reps} reps")
-    # print(f"Minimum Energy found with CAFQA initialization: {biomarker_qaoa.energy_best}")
+    # print(f"Minimum Energy found with SPIQ initialization: {biomarker_qaoa.energy_best}")
 
     # # Best Solutions
-    # best_cafqa_fitness_values = biomarker_qaoa.best_cafqa_gen_fitness
-    # best_cafqa_parameters = biomarker_qaoa.best_cafqa_gen_params
+    # best_spiq_fitness_values = biomarker_qaoa.best_spiq_gen_fitness
+    # best_spiq_parameters = biomarker_qaoa.best_spiq_gen_params
 
     # Importing from seperate file
     with open(
-        biomarker_pickle_dir() / f"{n}_qb_biomarker_cafqa_results.pkl",
+        biomarker_pickle_dir() / f"{n}_qb_biomarker_spiq_results.pkl",
         "rb",
     ) as f:
-        cafqa_data = pickle.load(f)
-    best_cafqa_fitness_values = cafqa_data["best_cafqa_fitness_values"]
-    best_cafqa_parameters = cafqa_data["best_cafqa_parameters"]
-    print("cafqa_data keys:", list(cafqa_data.keys()))
-    biomarker_qaoa.energy_best = cafqa_data["CAFQA_initialization_energy"]
+        spiq_data = pickle.load(f)
+    best_spiq_fitness_values = spiq_data["best_spiq_fitness_values"]
+    best_spiq_parameters = spiq_data["best_spiq_parameters"]
+    print("spiq_data keys:", list(spiq_data.keys()))
+    biomarker_qaoa.energy_best = spiq_data["SPIQ_initialization_energy"]
 
-    unique_fitness_values = np.unique(best_cafqa_fitness_values)
+    unique_fitness_values = np.unique(best_spiq_fitness_values)
 
     # When choosing best out of unique energies
     selected_fitness_vals = list(
@@ -193,15 +193,15 @@ def main():
     # selected_fitness_vals = list(unique_fitness_values[:5]) #Select 5 of the best unique solutions.
 
     selected_fitness_indices = [
-        best_cafqa_fitness_values.index(value) for value in selected_fitness_vals
+        best_spiq_fitness_values.index(value) for value in selected_fitness_vals
     ]
-    selected_cafqa_parameters = np.array(best_cafqa_parameters)[
+    selected_spiq_parameters = np.array(best_spiq_parameters)[
         selected_fitness_indices
     ]
 
     # # # # #When choosing just best 5 (can be same energies)
-    # selected_fitness_vals = list(best_cafqa_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
-    # selected_cafqa_parameters = np.array(best_cafqa_parameters)[:5]
+    # selected_fitness_vals = list(best_spiq_fitness_values)[:5] #Select 5 of the best solutions (can be repeated).
+    # selected_spiq_parameters = np.array(best_spiq_parameters)[:5]
 
     # Vanilla QAOA
     circuit = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=reps)
@@ -216,7 +216,7 @@ def main():
 
     start = timer()
     results = execute_qaoa_tasks(
-        biomarker_qaoa, vanilla_biomarker, selected_cafqa_parameters, selected_fitness_vals
+        biomarker_qaoa, vanilla_biomarker, selected_spiq_parameters, selected_fitness_vals
     )
     end = timer()
     print(f"Total Time : {end - start}")

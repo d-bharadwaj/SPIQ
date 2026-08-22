@@ -189,7 +189,6 @@ def qiskit_to_stim(circuit):
     # for i in range(circuit.num_qubits):
     #     stim_circ.append("I", [i])
 
-    # NOTE : You can optimize this code very easily
     for instruction in circuit:
         gate_lbl = instruction.operation.name.upper()
         if gate_lbl == "BARRIER" or gate_lbl == "MEASURE":

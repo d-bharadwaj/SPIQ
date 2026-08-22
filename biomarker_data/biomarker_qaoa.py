@@ -51,7 +51,7 @@ from biomarker_data.paths import sample_data_dir
 
 n_qubits = 14
 feature_set, feature_to_idx, first_corr_arr, second_corr_arr, third_corr_arr = (
-    pcbo_utils.load_features_and_corr_files(str(sample_data_dir(n_qubits, use_copy=False)))
+    pcbo_utils.load_features_and_corr_files(str(sample_data_dir(n_qubits)))
 )
 
 pcbo_obj = pcbo_utils.create_three_body_cubo(
@@ -79,20 +79,20 @@ biomarker_qaoa.run_spiq(n_gens=1000)
 
 exact_solution = biomarker_qaoa.evaluate_exact_energy()
 
-cafqa_angles = [param * np.pi / 2 for param in biomarker_qaoa.ks_best]
+spiq_angles = [param * np.pi / 2 for param in biomarker_qaoa.ks_best]
 random_angles = np.random.random(len(biomarker_qaoa.ks_best))
 
 max_iters = 1000
-cafqa_result, cafqa_iteration_vals = biomarker_qaoa.run_qaoa(
-    initial_params=cafqa_angles, max_iters=max_iters, opt="SPSA"
+spiq_result, spiq_iteration_vals = biomarker_qaoa.run_qaoa(
+    initial_params=spiq_angles, max_iters=max_iters, opt="SPSA"
 )
 random_result, random_iteration_vals = biomarker_qaoa.run_qaoa(
     initial_params=random_angles, max_iters=max_iters, opt="SPSA"
 )
 
 results_dict = {
-    "cafqa_fin_energy": cafqa_result.fun,
-    "cafqa_iteration_vals": cafqa_iteration_vals,
+    "spiq_fin_energy": spiq_result.fun,
+    "spiq_iteration_vals": spiq_iteration_vals,
     "random_result_energy": random_result.fun,
     "random_iteration_vals": random_iteration_vals,
 }

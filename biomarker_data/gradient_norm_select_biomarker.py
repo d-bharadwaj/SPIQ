@@ -21,8 +21,11 @@ import multiprocess as mp
 import numpy as np
 
 from clapton.circuit_manipulation import multi_angle_qaoa_circuit
-import spiq.graphs as graph_utils
 from spiq.qaoa import QAOASolver
+from spiq.graphs import (
+    generate_random_complete_graph,
+    build_max_cut_paulis,
+)
 from biomarker_data import pcbo_utils
 from biomarker_data.biomarker_utils import convert_pubo_to_ising
 from biomarker_data.paths import sample_data_dir
@@ -112,14 +115,14 @@ def print_parameter_details(params, label="Parameters", show_all=False):
     
     if show_all or len(params) <= 20:
         # Print all values if requested or if small
-        print(f"      Values (CAFQA space): {params}")
+        print(f"      Values (SPIQ space): {params}")
         # Also show in angle space
         angles = params * (np.pi / 2)
         print(f"      Values (radians): {angles}")
     else:
         # Print first and last few values
-        print(f"      First 5 values (CAFQA): {params[:5]}")
-        print(f"      Last 5 values (CAFQA): {params[-5:]}")
+        print(f"      First 5 values (SPIQ): {params[:5]}")
+        print(f"      Last 5 values (SPIQ): {params[-5:]}")
         angles_first = params[:5] * (np.pi / 2)
         angles_last = params[-5:] * (np.pi / 2)
         print(f"      First 5 values (rad): {angles_first}")
@@ -164,8 +167,8 @@ def deduplicate_parameters(parameters, fitness_values, tolerance=1e-10):
 
 
 def select_clustering_stratified_parameters(
-    best_cafqa_parameters,
-    best_cafqa_fitness_values,
+    best_spiq_parameters,
+    best_spiq_fitness_values,
     qaoa_object,
     num_select=5,
     verbose=True
@@ -183,8 +186,8 @@ def select_clustering_stratified_parameters(
     7. Select 2 lowest energy points + randomly sample 3 from remaining
     
     Args:
-        best_cafqa_parameters: List of parameter arrays from CAFQA
-        best_cafqa_fitness_values: Corresponding fitness (energy) values
+        best_spiq_parameters: List of parameter arrays from SPIQ
+        best_spiq_fitness_values: Corresponding fitness (energy) values
         qaoa_object: QAOASolver object for gradient computation
         num_select: Final number of points to select (default 5)
         verbose: if True, print detailed information
@@ -192,8 +195,8 @@ def select_clustering_stratified_parameters(
     Returns:
         tuple: (selected_parameters, selected_fitness_values, selected_gradnorms)
     """
-    parameters_array = np.array(best_cafqa_parameters)
-    fitness_array = np.array(best_cafqa_fitness_values)
+    parameters_array = np.array(best_spiq_parameters)
+    fitness_array = np.array(best_spiq_fitness_values)
     
     print(f"\n{'='*70}")
     print(f"CLUSTERING-BASED STRATIFIED SELECTION WITH GRADIENT FILTERING")
@@ -217,7 +220,7 @@ def select_clustering_stratified_parameters(
     print(f"\nStep 2: K-means clustering...")
     print(f"  n_clusters = ceil({len(unique_params)} / 10) = {n_clusters}")
     
-    # Handle periodicity: map CAFQA params {0,1,2,3} to unit circle
+    # Handle periodicity: map SPIQ params {0,1,2,3} to unit circle
     X_periodic = np.column_stack([
         np.cos(unique_params * np.pi / 2),
         np.sin(unique_params * np.pi / 2)
@@ -327,8 +330,8 @@ def select_clustering_stratified_parameters(
     
     valid_candidates = []
     for i, candidate in enumerate(sampled_candidates):
-        cafqa_params = candidate['params'] * (np.pi / 2)
-        grad_norm = compute_gradient_norm(qaoa_object, cafqa_params, verbose=False)
+        spiq_params = candidate['params'] * (np.pi / 2)
+        grad_norm = compute_gradient_norm(qaoa_object, spiq_params, verbose=False)
         
         if grad_norm > 1e-10:
             candidate['grad_norm'] = grad_norm
@@ -399,12 +402,12 @@ def run_qaoa_task_pool(args):
     task_id, maxcut_qaoa, initial_params, fitness_val = args
 
     # QAOA Optimization
-    cafqa_params = [param * (np.pi / 2) for param in initial_params]
+    spiq_params = [param * (np.pi / 2) for param in initial_params]
 
     try:
         print(f"Starting task: {task_id} for val : {fitness_val}")
         result, obj_values = maxcut_qaoa.run_qaoa(
-            initial_params=cafqa_params, max_iters=max_iters, opt="COBYLA"
+            initial_params=spiq_params, max_iters=max_iters, opt="COBYLA"
         )
         print(f"Finished task: {task_id}")
 
@@ -429,23 +432,23 @@ def run_qaoa_task_pool(args):
 def execute_qaoa_tasks(
     ma_qaoa_object,
     vanilla_qaoa_object,
-    selected_cafqa_parameters,
+    selected_spiq_parameters,
     selected_spaced_fitness_vals,
     selected_clustering_parameters,
     selected_clustering_fitness_vals,
 ):
 
-    # Original CAFQA initialization (spaced-out selection)
-    cafqa_args = [
-        (f"CAFQA_Spaced_{i}", ma_qaoa_object, params, fitness)
+    # Original SPIQ initialization (spaced-out selection)
+    spiq_args = [
+        (f"SPIQ_Spaced_{i}", ma_qaoa_object, params, fitness)
         for i, (params, fitness) in enumerate(
-            zip(selected_cafqa_parameters, selected_spaced_fitness_vals)
+            zip(selected_spiq_parameters, selected_spaced_fitness_vals)
         )
     ]
 
     # Clustering-based stratified selection with gradient filtering
-    clustering_cafqa_args = [
-        (f"CAFQA_Clustering_{i}", ma_qaoa_object, params, fitness)
+    clustering_spiq_args = [
+        (f"SPIQ_Clustering_{i}", ma_qaoa_object, params, fitness)
         for i, (params, fitness) in enumerate(
             zip(selected_clustering_parameters, selected_clustering_fitness_vals)
         )
@@ -486,11 +489,11 @@ def execute_qaoa_tasks(
     ]
 
     # Combine all tasks
-    all_args = cafqa_args + clustering_cafqa_args + random_args + vanilla_args
+    all_args = spiq_args + clustering_spiq_args + random_args + vanilla_args
 
     print(f"\nExecuting {len(all_args)} parallel tasks:")
-    print(f"  - CAFQA Spaced: {len(cafqa_args)}")
-    print(f"  - CAFQA Clustering (with gradient filtering): {len(clustering_cafqa_args)}")
+    print(f"  - SPIQ Spaced: {len(spiq_args)}")
+    print(f"  - SPIQ Clustering (with gradient filtering): {len(clustering_spiq_args)}")
     print(f"  - Random MA-QAOA: {len(random_args)}")
     print(f"  - Vanilla QAOA: {len(vanilla_args)}")
 
@@ -506,7 +509,7 @@ def execute_qaoa_tasks(
 
     # Return results
     return {
-        "CAFQA_initialization_energy": ma_qaoa_object.energy_best,
+        "SPIQ_initialization_energy": ma_qaoa_object.energy_best,
         "Exact_Ground_State_Energy": ma_qaoa_object.exact_energy,
         "Task_results": results,
         "Task_objective_values": task_objective_values,
@@ -529,12 +532,12 @@ def main():
     np.random.seed(seed)
 
     # # Generate the graph
-    # G = graph_utils.generate_random_complete_graph(
+    # G = generate_random_complete_graph(
     #     num_vertices=n, weighted=True, seed=seed
     # )
 
     # # Build the cost Hamiltonian
-    # max_cut_paulis = graph_utils.build_max_cut_paulis(G)
+    # max_cut_paulis = build_max_cut_paulis(G)
     # cost_hamiltonian = SparsePauliOp.from_list(max_cut_paulis)
 
     # Biomarker feature-selection data
@@ -572,19 +575,19 @@ def main():
     maxcut_qaoa.exact_energy = exact_energy
     print(f"\nExact Ground State Energy: {exact_energy:.6f}")
 
-    # Run CAFQA process
-    start_cafqa = timer()
+    # Run SPIQ process
+    start_spiq = timer()
     maxcut_qaoa.run_spiq(n_gens=n_gens)
-    end_cafqa = timer()
-    print(f"CAFQA optimization time: {end_cafqa - start_cafqa} seconds")
+    end_spiq = timer()
+    print(f"SPIQ optimization time: {end_spiq - start_spiq} seconds")
     print(f"{n} Qubits and {reps} reps")
-    print(f"Minimum Energy found with CAFQA initialization: {maxcut_qaoa.energy_best}")
+    print(f"Minimum Energy found with SPIQ initialization: {maxcut_qaoa.energy_best}")
 
     # Best Solutions
-    best_cafqa_fitness_values = maxcut_qaoa.best_cafqa_gen_fitness[::-1]
-    best_cafqa_parameters = maxcut_qaoa.best_cafqa_gen_params[::-1]
+    best_spiq_fitness_values = maxcut_qaoa.best_spiq_gen_fitness[::-1]
+    best_spiq_parameters = maxcut_qaoa.best_spiq_gen_params[::-1]
 
-    unique_fitness_values = np.unique(best_cafqa_fitness_values)
+    unique_fitness_values = np.unique(best_spiq_fitness_values)
 
     # ============================================================
     # Strategy 1: Original spaced-out selection WITH GRADIENT COMPUTATION
@@ -598,9 +601,9 @@ def main():
     )
 
     selected_fitness_indices = [
-        best_cafqa_fitness_values.index(value) for value in selected_spaced_fitness_vals
+        best_spiq_fitness_values.index(value) for value in selected_spaced_fitness_vals
     ]
-    selected_cafqa_parameters = np.array(best_cafqa_parameters)[
+    selected_spiq_parameters = np.array(best_spiq_parameters)[
         selected_fitness_indices
     ]
     
@@ -608,12 +611,12 @@ def main():
     
     # Compute gradient norms for spaced selection
     spaced_gradient_norms = []
-    for i, (params, fitness) in enumerate(zip(selected_cafqa_parameters, selected_spaced_fitness_vals)):
+    for i, (params, fitness) in enumerate(zip(selected_spiq_parameters, selected_spaced_fitness_vals)):
         print(f"\nSpaced {i+1}: Energy={fitness:.6f}")
         
         # Compute gradient norm
-        cafqa_params = params * (np.pi / 2)
-        grad_norm = compute_gradient_norm(maxcut_qaoa, cafqa_params, verbose=False)
+        spiq_params = params * (np.pi / 2)
+        grad_norm = compute_gradient_norm(maxcut_qaoa, spiq_params, verbose=False)
         spaced_gradient_norms.append(grad_norm)
         
         print(f"  Gradient Norm: {grad_norm:.6f}")
@@ -628,8 +631,8 @@ def main():
     
     selected_clustering_parameters, selected_clustering_fitness_vals, clustering_gradient_norms = \
         select_clustering_stratified_parameters(
-            best_cafqa_parameters,
-            best_cafqa_fitness_values,
+            best_spiq_parameters,
+            best_spiq_fitness_values,
             maxcut_qaoa,
             num_select=5,
             verbose=True
@@ -650,7 +653,7 @@ def main():
     results = execute_qaoa_tasks(
         maxcut_qaoa,
         vanilla_maxcut,
-        selected_cafqa_parameters,
+        selected_spiq_parameters,
         selected_spaced_fitness_vals,
         selected_clustering_parameters,
         selected_clustering_fitness_vals,
@@ -661,7 +664,7 @@ def main():
     # Add all gradient information to results
     results["Spaced_gradient_norms"] = [float(g) for g in spaced_gradient_norms]
     results["Spaced_fitness_values"] = selected_spaced_fitness_vals
-    results["Spaced_selected_parameters"] = selected_cafqa_parameters.tolist()
+    results["Spaced_selected_parameters"] = selected_spiq_parameters.tolist()
     
     results["Clustering_gradient_norms"] = clustering_gradient_norms.tolist()
     results["Clustering_fitness_values"] = selected_clustering_fitness_vals.tolist()
@@ -680,7 +683,7 @@ def main():
     print("="*60)
     
     print(f"\nExact Ground State Energy: {results['Exact_Ground_State_Energy']:.6f}")
-    print(f"CAFQA Best Energy: {results['CAFQA_initialization_energy']:.6f}")
+    print(f"SPIQ Best Energy: {results['SPIQ_initialization_energy']:.6f}")
     
     print("\nInitial gradient norms by strategy:")
     print(f"\n  Spaced strategy:")

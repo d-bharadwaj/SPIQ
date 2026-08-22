@@ -10,4 +10,7 @@ requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["clapton*", "spiq*", "testing_scripts*", "biomarker_data*"]
+include = ["clapton*", "spiq*", "biomarker_data*", "red_qaoa*"]
+
+[tool.setuptools.package-data]
+biomarker_data = ["samples/**/*"]
