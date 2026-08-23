@@ -50,3 +50,16 @@ These are command-line versions of the notebook workflows, plus the heavier eval
 - `red_qaoa/` — Graph reduction used by `experiments/full_opt_maxcut.py`
 - `experiments/` — Reproducible evaluation scripts from the paper
 
+## Citation
+
+If you find our work useful, please cite our paper:
+
+```bibtex
+@article{bharadwaj2026scalable,
+  title={Scalable Clifford-Based Classical Initialization for the Quantum Approximate Optimization Algorithm},
+  author={Bharadwaj, Dhanvi and Hou, Yuewen and Li, Guang-Yi and Ravi, Gokul Subramanian},
+  journal={arXiv preprint arXiv:2602.14327},
+  year={2026}
+}
+```
+
